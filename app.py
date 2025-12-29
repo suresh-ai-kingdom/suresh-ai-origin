@@ -91,9 +91,9 @@ function pay() {{
 def create_order():
     try:
         order = client.order.create({
-            "amount": 4900,   # ₹49
+            "amount": 100,   # ✅ ₹1 TEST (100 paise)
             "currency": "INR",
-            "payment_capture": 1
+            "payment_capture": 1 # ₹1 test
         })
         return jsonify(order)
     except Exception as e:
