@@ -1,15 +1,21 @@
-from flask import Flask, jsonify, render_template_string
-import razorpay
 import os
+import razorpay
+from flask import Flask, jsonify, request
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
 # Razorpay client
-client = razorpay.Client(auth=(
-    os.environ.get("rzp_live_RxW5W1elhj941G"),
-    os.environ.get("bevX9WICL6IdQLGq7dZahBGD")
-))
+client = razorpay.Client(
+    auth=(
+        os.environ.get("RAZORPAY_KEY_ID"),
+        os.environ.get("RAZORPAY_KEY_SECRET")
+    )
+)
 
+# ---------------- HOME ----------------
 @app.route("/")
 def home():
     return """
@@ -19,7 +25,7 @@ def home():
     <a href="/buy">Buy Now</a>
     """
 
-
+# ---------------- BUY PAGE ----------------
 @app.route("/buy")
 def buy():
     key_id = os.environ.get("RAZORPAY_KEY_ID")
@@ -33,7 +39,7 @@ def buy():
 </head>
 <body>
 
-<h1>Checkout</h1>
+<h2>Checkout</h2>
 <p>Product: Suresh AI Origin – Starter Pack</p>
 <p>Price: ₹49</p>
 
@@ -45,13 +51,13 @@ function pay() {{
     .then(res => res.json())
     .then(order => {{
         var options = {{
-            "key": "{key_id}",
-            "amount": order.amount,
-            "currency": "INR",
-            "name": "Suresh AI Origin",
-            "description": "Starter Pack",
-            "order_id": order.id,
-            "handler": function (response) {{
+            key: "{key_id}",
+            amount: order.amount,
+            currency: "INR",
+            name: "Suresh AI Origin",
+            description: "Starter Pack",
+            order_id: order.id,
+            handler: function (response) {{
                 fetch("/verify-payment", {{
                     method: "POST",
                     headers: {{
@@ -72,21 +78,20 @@ function pay() {{
         var rzp = new Razorpay(options);
         rzp.open();
     }})
-    .catch(err => alert("Order failed"));
+    .catch(() => alert("Order failed"));
 }}
 </script>
 
 </body>
 </html>
 """
--
 
-
+# ---------------- CREATE ORDER ----------------
 @app.route("/create-order")
 def create_order():
     try:
         order = client.order.create({
-            "amount": 4900,
+            "amount": 4900,   # ₹49
             "currency": "INR",
             "payment_capture": 1
         })
@@ -94,11 +99,25 @@ def create_order():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# ---------------- VERIFY PAYMENT ----------------
+@app.route("/verify-payment", methods=["POST"])
+def verify_payment():
+    data = request.json
+    try:
+        client.utility.verify_payment_signature(data)
+        return jsonify({"status": "success"})
+    except:
+        return jsonify({"status": "failed"})
 
-@app.route("/success")
-def success():
-    return "<h2>Payment Successful ✅</h2><p>Thank you!</p>"
+# ---------------- DOWNLOAD ----------------
+@app.route("/download")
+def download():
+    return """
+    <h2>Payment Successful ✅</h2>
+    <p>Thank you for your purchase!</p>
+    <a href="/static/starter-pack.zip">Download your product</a>
+    """
 
-
+# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run()
