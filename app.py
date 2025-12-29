@@ -1,74 +1,63 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template_string
 import razorpay
 import os
 
 app = Flask(__name__)
 
-# Razorpay client (SECRET from Render ENV)
-client = razorpay.Client(auth=(
-    os.getenv("rzp_live_RxSvKRp2SAfKv4"),
-    os.getenv("HXf6IHjG7d7lAZRrLV0yxsIl")
-))
+client = razorpay.Client(
+    auth=(
+        os.getenv("rzp_live_RxW5W1elhj941G"),
+        os.getenv("bevX9WICL6IdQLGq7dZahBGD")
+    )
+)
 
-# ---------------- HOME ----------------
 @app.route("/")
 def home():
-    return """
-    <h1>SURESH AI ORIGIN</h1>
-    <p>Digital Product – Starter Pack</p>
-    <p><b>Price:</b> ₹49</p>
-    <a href="/buy"><button>Buy Now</button></a>
-    """
+    return '<a href="/buy">Buy Now</a>'
 
-# ---------------- BUY PAGE ----------------
 @app.route("/buy")
 def buy():
-    return """
+    return render_template_string("""
     <h1>Checkout</h1>
-    <p><b>Product:</b> Suresh AI Origin – Starter Pack</p>
-    <p><b>Price:</b> ₹49</p>
-
-    <button id="pay-btn">Pay ₹49</button>
+    <p>Product: Suresh AI Origin – Starter Pack</p>
+    <p>Price: ₹49</p>
+    <button onclick="pay()">Pay ₹49</button>
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-    document.getElementById("pay-btn").onclick = function () {
-        fetch("/create-order")
-        .then(res => res.json())
-        .then(order => {
-            var options = {
-                "key": "rzp_live_XXXXXXXXXX",   // 🔥 PUT YOUR LIVE KEY ID HERE
-                "amount": order.amount,
-                "currency": "INR",
-                "order_id": order.id,
-                "name": "Suresh AI Origin",
-                "description": "Digital Product",
-                "handler": function (response) {
-                    window.location.href = "/success";
-                }
-            };
-            var rzp = new Razorpay(options);
-            rzp.open();
-        });
-    };
-    </script>
-    """
+    async function pay() {
+        const res = await fetch("/create-order");
+        const order = await res.json();
 
-# ---------------- CREATE ORDER ----------------
+        var options = {
+            "key": "{{ key }}",
+            "amount": order.amount,
+            "currency": "INR",
+            "name": "Suresh AI Origin",
+            "description": "Starter Pack",
+            "order_id": order.id,
+            "handler": function (response){
+                window.location.href = "/success";
+            }
+        };
+        var rzp = new Razorpay(options);
+        rzp.open();
+    }
+    </script>
+    """, key=os.getenv("RAZORPAY_KEY_ID"))
+
 @app.route("/create-order")
 def create_order():
     order = client.order.create({
-        "amount": 4900,  # ₹49
+        "amount": 4900,
         "currency": "INR",
         "payment_capture": 1
     })
     return jsonify(order)
 
-# ---------------- SUCCESS ----------------
 @app.route("/success")
 def success():
-    return "<h2>Payment Successful ✅</h2><p>Thank you!</p>"
+    return "<h2>Payment Successful ✅</h2>"
 
-# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run()
