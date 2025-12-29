@@ -1,0 +1,4 @@
+flask
+razorpay
+python-dotenv
+gunicorn
