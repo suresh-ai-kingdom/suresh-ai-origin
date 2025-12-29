@@ -32,6 +32,7 @@ def buy():
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
+
 <h1>Checkout</h1>
 <p>Product: Suresh AI Origin – Starter Pack</p>
 <p>Price: ₹49</p>
@@ -44,28 +45,41 @@ function pay() {{
     .then(res => res.json())
     .then(order => {{
         var options = {{
-            key: "{key_id}",   // ✅ REAL KEY injected here
-            amount: order.amount,
-            currency: "INR",
-            name: "Suresh AI Origin",
-            description: "Starter Pack",
-            order_id: order.id,
-            handler: function (response) {{
-                window.location.href = "/success";
+            "key": "{key_id}",
+            "amount": order.amount,
+            "currency": "INR",
+            "name": "Suresh AI Origin",
+            "description": "Starter Pack",
+            "order_id": order.id,
+            "handler": function (response) {{
+                fetch("/verify-payment", {{
+                    method: "POST",
+                    headers: {{
+                        "Content-Type": "application/json"
+                    }},
+                    body: JSON.stringify(response)
+                }})
+                .then(res => res.json())
+                .then(data => {{
+                    if (data.status === "success") {{
+                        window.location.href = "/download";
+                    }} else {{
+                        alert("Payment verification failed");
+                    }}
+                }});
             }}
         }};
         var rzp = new Razorpay(options);
         rzp.open();
     }})
-    .catch(err => {{
-        alert("Order failed");
-        console.error(err);
-    }});
+    .catch(err => alert("Order failed"));
 }}
 </script>
+
 </body>
 </html>
 """
+-
 
 
 @app.route("/create-order")
