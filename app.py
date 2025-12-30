@@ -1,9 +1,6 @@
-import os
+from flask import Flask, send_from_directory
 import razorpay
-from flask import Flask, jsonify, request
-from dotenv import load_dotenv
-
-load_dotenv()
+import os
 
 app = Flask(__name__)
 
@@ -21,103 +18,62 @@ def home():
     return """
     <h1>SURESH AI ORIGIN</h1>
     <p>Digital Product – Starter Pack</p>
-    <p>Price: ₹49</p>
+    <p><b>Intro Price: ₹1 (Limited Time)</b></p>
+    <p>Instant Download After Payment</p>
     <a href="/buy">Buy Now</a>
     """
 
 # ---------------- BUY PAGE ----------------
 @app.route("/buy")
 def buy():
-    key_id = os.environ.get("RAZORPAY_KEY_ID")
-
     return f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Checkout</title>
+    <h2>Checkout</h2>
+    <p>Product: Suresh AI Origin – Starter Pack</p>
+    <p>Price: ₹1</p>
+
+    <button id="pay">Pay ₹1</button>
+
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-</head>
-<body>
-
-<h2>Checkout</h2>
-<p>Product: Suresh AI Origin – Starter Pack</p>
-<p>Price: ₹49</p>
-
-<button onclick="pay()">Pay ₹49</button>
-
-<script>
-function pay() {{
-    fetch("/create-order")
-    .then(res => res.json())
-    .then(order => {{
-        var options = {{
-            key: "{key_id}",
-            amount: order.amount,
-            currency: "INR",
-            name: "Suresh AI Origin",
-            description: "Starter Pack",
-            order_id: order.id,
-            handler: function (response) {{
-                fetch("/verify-payment", {{
-                    method: "POST",
-                    headers: {{
-                        "Content-Type": "application/json"
-                    }},
-                    body: JSON.stringify(response)
-                }})
-                .then(res => res.json())
-                .then(data => {{
-                    if (data.status === "success") {{
-                        window.location.href = "/download";
-                    }} else {{
-                        alert("Payment verification failed");
-                    }}
-                }});
-            }}
-        }};
-        var rzp = new Razorpay(options);
+    <script>
+    var options = {{
+        "key": "{os.environ.get('RAZORPAY_KEY_ID')}",
+        "amount": 100,
+        "currency": "INR",
+        "name": "Suresh AI Origin",
+        "description": "Starter Pack",
+        "handler": function (response){{
+            window.location.href = "/success";
+        }},
+        "theme": {{
+            "color": "#3399cc"
+        }}
+    }};
+    var rzp = new Razorpay(options);
+    document.getElementById('pay').onclick = function(e){{
         rzp.open();
-    }})
-    .catch(() => alert("Order failed"));
-}}
-</script>
+        e.preventDefault();
+    }}
+    </script>
+    """
 
-</body>
-</html>
-"""
-
-# ---------------- CREATE ORDER ----------------
-@app.route("/create-order")
-def create_order():
-    try:
-        order = client.order.create({
-            "amount": 100,   # ✅ ₹1 TEST (100 paise)
-            "currency": "INR",
-            "payment_capture": 1 # ₹1 test
-        })
-        return jsonify(order)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ---------------- VERIFY PAYMENT ----------------
-@app.route("/verify-payment", methods=["POST"])
-def verify_payment():
-    data = request.json
-    try:
-        client.utility.verify_payment_signature(data)
-        return jsonify({"status": "success"})
-    except:
-        return jsonify({"status": "failed"})
+# ---------------- PAYMENT SUCCESS ----------------
+@app.route("/success")
+def success():
+    return """
+    <h2>✅ Payment Successful</h2>
+    <p>Thank you for your purchase.</p>
+    <a href="/download/starter_pack">👉 Download Your Starter Pack</a>
+    """
 
 # ---------------- DOWNLOAD ----------------
-@app.route("/download")
+@app.route("/download/starter_pack")
 def download():
-    return """
-    <h2>Payment Successful ✅</h2>
-    <p>Thank you for your purchase!</p>
-    <a href="/static/starter-pack.zip">Download your product</a>
-    """
+    return send_from_directory(
+        directory="downloads",
+        path="starter_pack.zip",
+        as_attachment=True
+    )
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
