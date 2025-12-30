@@ -1,12 +1,15 @@
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, send_from_directory, session
 import razorpay
 import os
 from dotenv import load_dotenv
 
-# Load .env locally (Render ignores this, uses dashboard ENV)
+# Load env locally
 load_dotenv()
 
 app = Flask(__name__)
+
+# 🔐 REQUIRED FOR SESSION (VERY IMPORTANT)
+app.secret_key = "suresh-ai-origin-super-secure-key"
 
 # Razorpay client
 client = razorpay.Client(auth=(
@@ -79,6 +82,7 @@ def buy():
 @app.route("/verify", methods=["POST"])
 def verify():
     data = request.get_json()
+
     try:
         client.utility.verify_payment_signature({
             "razorpay_order_id": data["razorpay_order_id"],
@@ -86,18 +90,29 @@ def verify():
             "razorpay_signature": data["razorpay_signature"]
         })
 
+        # 🔒 PAYMENT SUCCESS → SESSION UNLOCK
+        session["paid"] = True
+
         return """
         <h2>✅ Payment Successful</h2>
         <p>Thank you for your purchase.</p>
         <a href="/download">👉 Download Starter Pack</a>
         """
 
-    except Exception as e:
-        return f"<h2>❌ Payment Verification Failed</h2><pre>{e}</pre>"
+    except Exception:
+        return "<h2>❌ Payment Verification Failed</h2>"
 
-# ---------------- DOWNLOAD ----------------
+# ---------------- DOWNLOAD (SECURED) ----------------
 @app.route("/download")
 def download():
+    # ❌ BLOCK DIRECT ACCESS
+    if not session.get("paid"):
+        return """
+        <h3>❌ Access Denied</h3>
+        <p>Please complete payment first.</p>
+        <a href="/buy">Go to Checkout</a>
+        """
+
     return send_from_directory(
         "downloads",
         "starter_pack.zip",
