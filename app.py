@@ -1,14 +1,12 @@
-from flask import Flask, request, send_from_directory, session
+from flask import Flask, render_template, request, send_from_directory, session
 import razorpay
 import os
 from dotenv import load_dotenv
 
-# Load env locally
+# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
-
-# 🔐 REQUIRED FOR SESSION (VERY IMPORTANT)
 app.secret_key = "suresh-ai-origin-super-secure-key"
 
 # Razorpay client
@@ -17,68 +15,28 @@ client = razorpay.Client(auth=(
     os.environ.get("RAZORPAY_KEY_SECRET")
 ))
 
-# ---------------- HOME ----------------
+# ---------------- HOME (LANDING PAGE) ----------------
 @app.route("/")
 def home():
-    return """
-    <h1>SURESH AI ORIGIN</h1>
-    <p>Digital Product – Starter Pack</p>
-    <p><b>Price: ₹49</b></p>
-    <p>Instant Download After Payment</p>
-    <a href="/buy">Buy Now</a>
-    """
+    return render_template("index.html")
 
-# ---------------- BUY ----------------
+# ---------------- BUY / CHECKOUT ----------------
 @app.route("/buy")
 def buy():
-    # ₹49 = 4900 paise
     order = client.order.create({
-        "amount": 4900,
+        "amount": 4900,  # ₹49
         "currency": "INR",
         "payment_capture": 1
     })
 
-    key_id = os.environ.get("RAZORPAY_KEY_ID")
+    return render_template(
+        "buy.html",
+        key_id=os.environ.get("RAZORPAY_KEY_ID"),
+        amount=order["amount"],
+        order_id=order["id"]
+    )
 
-    return f"""
-    <h2>Checkout</h2>
-    <p>Product: Suresh AI Origin – Starter Pack</p>
-    <p>Price: ₹49</p>
-
-    <button id="pay">Pay ₹49</button>
-
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script>
-    var options = {{
-        "key": "{key_id}",
-        "amount": 4900,
-        "currency": "INR",
-        "name": "Suresh AI Origin",
-        "description": "Starter Pack",
-        "order_id": "{order['id']}",
-        "handler": function (response){{
-            fetch("/verify", {{
-                method: "POST",
-                headers: {{
-                    "Content-Type": "application/json"
-                }},
-                body: JSON.stringify(response)
-            }})
-            .then(res => res.text())
-            .then(html => {{
-                document.body.innerHTML = html;
-            }});
-        }}
-    }};
-    var rzp = new Razorpay(options);
-    document.getElementById("pay").onclick = function(e){{
-        rzp.open();
-        e.preventDefault();
-    }}
-    </script>
-    """
-
-# ---------------- VERIFY ----------------
+# ---------------- VERIFY PAYMENT ----------------
 @app.route("/verify", methods=["POST"])
 def verify():
     data = request.get_json()
@@ -90,7 +48,7 @@ def verify():
             "razorpay_signature": data["razorpay_signature"]
         })
 
-        # 🔒 PAYMENT SUCCESS → SESSION UNLOCK
+        # Payment success → unlock download
         session["paid"] = True
 
         return """
@@ -99,13 +57,12 @@ def verify():
         <a href="/download">👉 Download Starter Pack</a>
         """
 
-    except Exception:
+    except:
         return "<h2>❌ Payment Verification Failed</h2>"
 
 # ---------------- DOWNLOAD (SECURED) ----------------
 @app.route("/download")
 def download():
-    # ❌ BLOCK DIRECT ACCESS
     if not session.get("paid"):
         return """
         <h3>❌ Access Denied</h3>
@@ -121,4 +78,4 @@ def download():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

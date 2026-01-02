@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SURESH AI ORIGIN</title>
+
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-glow: radial-gradient(circle at top, #1a1f36, #0b0f19 70%);
+      --accent: #6cf2c2;
+      --accent-hover: #52d9ab;
+      --text-main: #ffffff;
+      --text-muted: #b5b9c9;
+      --card-glow: rgba(108, 242, 194, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .hero {
+      background: var(--bg-glow);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .hero-container {
+      max-width: 1100px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .brand {
+      font-size: 0.85rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+    }
+
+    .headline {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+
+    .subheadline {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+    }
+
+    .cta-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .cta-button {
+      background: linear-gradient(135deg, var(--accent), #9ff5d8);
+      color: #0b0f19;
+      padding: 0.9rem 2.2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 0 40px var(--card-glow);
+      transition: all 0.3s ease;
+    }
+
+    .cta-button:hover {
+      background: linear-gradient(135deg, var(--accent-hover), #b7ffe6);
+      transform: translateY(-2px);
+      box-shadow: 0 0 60px rgba(108, 242, 194, 0.35);
+    }
+
+    .trust-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      opacity: 0.9;
+    }
+
+    @media (max-width: 600px) {
+      .headline {
+        font-size: 2rem;
+      }
+
+      .subheadline {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="hero-container">
+      <div class="brand">SURESH AI ORIGIN</div>
+
+      <h1 class="headline">
+        Start Your AI & Automation Journey Today
+      </h1>
+
+      <p class="subheadline">
+        Build real AI workflows, automation ideas, and a strong foundation — no confusion, no overload.
+      </p>
+
+      <div class="cta-wrapper">
+        <a href="/buy" class="cta-button">
+          Get Instant Access @ ₹49
+        </a>
+        <div class="trust-text">
+          Instant Download • Beginner Friendly • Future Updates Included
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout – SURESH AI ORIGIN</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b1020;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .box {
+      background: #111831;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      width: 320px;
+    }
+    button {
+      background: #5fffd7;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>SURESH AI ORIGIN</h2>
+  <p>Starter Pack</p>
+  <p><strong>Price: ₹49</strong></p>
+  <button id="pay">Pay ₹49</button>
+</div>
+
+<script>
+var options = {
+  "key": "{{ key_id }}",
+  "amount": "{{ amount }}",
+  "currency": "INR",
+  "name": "SURESH AI ORIGIN",
+  "description": "Starter Pack",
+  "order_id": "{{ order_id }}",
+  "handler": function (response) {
+    fetch("/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(response)
+    })
+    .then(res => res.text())
+    .then(html => document.body.innerHTML = html);
+  }
+};
+
+document.getElementById("pay").onclick = function(e) {
+  var rzp = new Razorpay(options);
+  rzp.open();
+  e.preventDefault();
+}
+</script>
+
+</body>
+</html>
