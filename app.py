@@ -1,81 +1,86 @@
-from flask import Flask, render_template, request, send_from_directory, session
+from flask import Flask, render_template, request, jsonify, session, send_from_directory
 import razorpay
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# ---------------- LOAD ENV ----------------
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "suresh-ai-origin-super-secure-key"
+app.secret_key = "suresh-ai-origin-secret"
 
-# Razorpay client
+# ---------------- RAZORPAY CLIENT ----------------
 client = razorpay.Client(auth=(
-    os.environ.get("RAZORPAY_KEY_ID"),
-    os.environ.get("RAZORPAY_KEY_SECRET")
+    os.getenv("RAZORPAY_KEY_ID"),
+    os.getenv("RAZORPAY_KEY_SECRET")
 ))
 
-# ---------------- HOME (LANDING PAGE) ----------------
+# ---------------- HOME ----------------
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# ---------------- BUY / CHECKOUT ----------------
+# ---------------- BUY PAGE ----------------
 @app.route("/buy")
 def buy():
+    return render_template(
+        "buy.html",
+        key_id=os.getenv("RAZORPAY_KEY_ID")
+    )
+
+# ---------------- CREATE ORDER ----------------
+@app.route("/create-order", methods=["POST"])
+def create_order():
     order = client.order.create({
-        "amount": 4900,  # ₹49
+        "amount": 4900,   # ₹49
         "currency": "INR",
         "payment_capture": 1
     })
-
-    return render_template(
-        "buy.html",
-        key_id=os.environ.get("RAZORPAY_KEY_ID"),
-        amount=order["amount"],
-        order_id=order["id"]
-    )
+    session["order_id"] = order["id"]
+    return jsonify(order)
 
 # ---------------- VERIFY PAYMENT ----------------
 @app.route("/verify", methods=["POST"])
 def verify():
-    data = request.get_json()
-
+    data = request.json
     try:
         client.utility.verify_payment_signature({
             "razorpay_order_id": data["razorpay_order_id"],
             "razorpay_payment_id": data["razorpay_payment_id"],
             "razorpay_signature": data["razorpay_signature"]
         })
-
-        # Payment success → unlock download
         session["paid"] = True
-
-        return """
-        <h2>✅ Payment Successful</h2>
-        <p>Thank you for your purchase.</p>
-        <a href="/download">👉 Download Starter Pack</a>
-        """
-
+        return jsonify({"status": "success"})
     except:
-        return "<h2>❌ Payment Verification Failed</h2>"
+        return jsonify({"status": "failed"}), 400
 
-# ---------------- DOWNLOAD (SECURED) ----------------
-@app.route("/download")
-def download():
+# ---------------- SUCCESS ----------------
+@app.route("/success")
+def success():
     if not session.get("paid"):
-        return """
-        <h3>❌ Access Denied</h3>
-        <p>Please complete payment first.</p>
-        <a href="/buy">Go to Checkout</a>
-        """
+        return "Access Denied"
+    return """
+    <h2>✅ Payment Successful</h2>
+    <p>Downloads unlocked:</p>
+    <ul>
+        <li><a href="/download/starter">Download Starter Pack</a></li>
+        <li><a href="/download/quick">Download Quick Wins Pack</a></li>
+    </ul>
+    """
 
-    return send_from_directory(
-        "downloads",
-        "starter_pack.zip",
-        as_attachment=True
-    )
+# ---------------- DOWNLOADS ----------------
+@app.route("/download/starter")
+def download_starter():
+    if not session.get("paid"):
+        return "Access Denied"
+    return send_from_directory("downloads", "starter_pack.zip", as_attachment=True)
+
+@app.route("/download/quick")
+def download_quick():
+    if not session.get("paid"):
+        return "Access Denied"
+    return send_from_directory("downloads", "quick_wins_pack.zip", as_attachment=True)
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
