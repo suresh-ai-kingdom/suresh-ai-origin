@@ -1,51 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Checkout – SURESH AI ORIGIN</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <meta charset="UTF-8" />
+  <title>Checkout – SURESH AI ORIGIN</title>
+
+  <!-- Razorpay -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<div class="card">
+  <div class="card">
     <h2>SURESH AI ORIGIN</h2>
     <p>Starter Pack</p>
     <h1>₹49</h1>
 
-    <button class="btn" id="payBtn">Pay ₹49</button>
+    <button id="payBtn" class="btn">Pay ₹49</button>
+
     <p class="trust">Secure payment powered by Razorpay</p>
-</div>
+  </div>
 
 <script>
-document.getElementById("payBtn").onclick = function () {
-    fetch("/create-order")
-    .then(res => res.json())
-    .then(data => {
-        var options = {
-            "key": "{{ key_id }}",
-            "amount": data.amount,
-            "currency": "INR",
-            "name": "SURESH AI ORIGIN",
-            "description": "Starter Pack",
-            "order_id": data.order_id,
-            "handler": function (response){
-                fetch("/verify", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify(response)
-                })
-                .then(res => res.text())
-                .then(html => {
-                    document.body.innerHTML = html;
-                });
-            },
-            "theme": {
-                "color": "#00f5c4"
-            }
-        };
-        var rzp = new Razorpay(options);
-        rzp.open();
-    });
+document.getElementById("payBtn").onclick = async function () {
+
+  // STEP 1: Create order from backend
+  const res = await fetch("/create-order");
+  const data = await res.json();
+
+  // STEP 2: Razorpay options
+  var options = {
+    key: "{{ key_id }}", // Razorpay Key ID from backend
+    amount: data.amount,
+    currency: "INR",
+    name: "SURESH AI ORIGIN",
+    description: "Starter Pack",
+    order_id: data.id,
+
+    handler: function (response) {
+      // STEP 3: Verify payment
+      fetch("/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(response)
+      })
+      .then(() => window.location.href = "/success");
+    }
+  };
+
+  var rzp = new Razorpay(options);
+  rzp.open();
 };
 </script>
 

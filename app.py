@@ -29,7 +29,7 @@ def buy():
     )
 
 # ---------------- CREATE ORDER ----------------
-@app.route("/create-order", methods=["POST"])
+@app.route("/create-order", methods=["GET"])
 def create_order():
     order = client.order.create({
         "amount": 4900,   # ₹49
