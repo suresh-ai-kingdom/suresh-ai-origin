@@ -1,86 +1,120 @@
-from flask import Flask, render_template, request, jsonify, session, send_from_directory
+from flask import Flask, render_template, request, jsonify
 import razorpay
 import os
-from dotenv import load_dotenv
+import hmac
+import hashlib
 
-# ---------------- LOAD ENV ----------------
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "suresh-ai-origin-secret"
 
-# ---------------- RAZORPAY CLIENT ----------------
-client = razorpay.Client(auth=(
-    os.getenv("RAZORPAY_KEY_ID"),
-    os.getenv("RAZORPAY_KEY_SECRET")
-))
+# Razorpay
+client = razorpay.Client(
+    auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
+)
 
-# ---------------- HOME ----------------
+DOWNLOAD_FOLDER = "downloads"
+
+# ------------------ PAGES ------------------
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# ---------------- BUY PAGE ----------------
 @app.route("/buy")
 def buy():
-    return render_template(
-        "buy.html",
-        key_id=os.getenv("RAZORPAY_KEY_ID")
-    )
+    return render_template("buy.html")
 
-# ---------------- CREATE ORDER ----------------
-@app.route("/create-order", methods=["GET"])
+@app.route("/success")
+def success():
+    return render_template("success.html")
+
+# ------------------ PAYMENT ------------------
+
+@app.route("/create-order", methods=["POST"])
 def create_order():
     order = client.order.create({
-        "amount": 4900,   # ₹49
+        "amount": 49 * 100,
         "currency": "INR",
         "payment_capture": 1
     })
-    session["order_id"] = order["id"]
-    return jsonify(order)
 
-# ---------------- VERIFY PAYMENT ----------------
-@app.route("/verify", methods=["POST"])
-def verify():
+    return jsonify({
+        "order_id": order["id"],
+        "amount": order["amount"],
+        "currency": order["currency"],
+        "key": os.getenv("RAZORPAY_KEY_ID")
+    })
+
+# ------------------ WEBHOOK ------------------
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    payload = request.data
+    signature = request.headers.get("X-Razorpay-Signature")
+    secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+
+    generated = hmac.new(
+        bytes(secret, "utf-8"),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+
+    if generated != signature:
+        return "Invalid signature", 400
+
     data = request.json
-    try:
-        client.utility.verify_payment_signature({
-            "razorpay_order_id": data["razorpay_order_id"],
-            "razorpay_payment_id": data["razorpay_payment_id"],
-            "razorpay_signature": data["razorpay_signature"]
-        })
-        session["paid"] = True
-        return jsonify({"status": "success"})
-    except:
-        return jsonify({"status": "failed"}), 400
+    event = data.get("event")
 
-# ---------------- SUCCESS ----------------
-@app.route("/success")
-def success():
-    if not session.get("paid"):
-        return "Access Denied"
-    return """
-    <h2>✅ Payment Successful</h2>
-    <p>Downloads unlocked:</p>
-    <ul>
-        <li><a href="/download/starter">Download Starter Pack</a></li>
-        <li><a href="/download/quick">Download Quick Wins Pack</a></li>
-    </ul>
-    """
+    if event == "payment.captured":
+        email = data["payload"]["payment"]["entity"].get("email")
+        send_email(email)
 
-# ---------------- DOWNLOADS ----------------
-@app.route("/download/starter")
-def download_starter():
-    if not session.get("paid"):
-        return "Access Denied"
-    return send_from_directory("downloads", "starter_pack.zip", as_attachment=True)
+    return "OK", 200
 
-@app.route("/download/quick")
-def download_quick():
-    if not session.get("paid"):
-        return "Access Denied"
-    return send_from_directory("downloads", "quick_wins_pack.zip", as_attachment=True)
+# ------------------ EMAIL ------------------
 
-# ---------------- RUN ----------------
+def send_email(to_email):
+    if not to_email:
+        return
+
+    msg = EmailMessage()
+    msg["Subject"] = "✅ Your SURESH AI ORIGIN Access"
+    msg["From"] = os.getenv("EMAIL_USER")
+    msg["To"] = to_email
+
+    msg.set_content(f"""
+Thank you for your purchase 🎉
+
+Your download links:
+Starter Pack:
+https://suresh-ai-origin.onrender.com/download/starter_pack.zip
+
+Quick Wins Pack:
+https://suresh-ai-origin.onrender.com/download/quick_wins_pack.zip
+
+— SURESH AI ORIGIN
+""")
+
+    with smtplib.SMTP("smtp.office365.com", 587) as server:
+        server.starttls()
+        server.login(
+            os.getenv("EMAIL_USER"),
+            os.getenv("EMAIL_PASS")
+        )
+        server.send_message(msg)
+
+# ------------------ DOWNLOAD ------------------
+
+@app.route("/download/<filename>")
+def download(filename):
+    return send_from_directory(
+        DOWNLOAD_FOLDER,
+        filename,
+        as_attachment=True
+    )
+
+# ------------------ RUN ------------------
+
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
