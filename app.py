@@ -1,20 +1,20 @@
-from flask import Flask, render_template, request, jsonify
-import razorpay
 import os
 import hmac
 import hashlib
-from dotenv import load_dotenv 
+import razorpay
+from flask import Flask, render_template, request, jsonify
+from dotenv import load_dotenv
 
+# Load env
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
-# Razorpay
+# Razorpay client
 client = razorpay.Client(
     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
 )
-
-DOWNLOAD_FOLDER = "downloads"
 
 # ------------------ PAGES ------------------
 
@@ -24,13 +24,13 @@ def home():
 
 @app.route("/buy")
 def buy():
-    return render_template("buy.html")
+    return render_template("buy.html", key=os.getenv("RAZORPAY_KEY_ID"))
 
 @app.route("/success")
 def success():
     return render_template("success.html")
 
-# ------------------ PAYMENT ------------------
+# ------------------ CREATE ORDER ------------------
 
 @app.route("/create-order", methods=["POST"])
 def create_order():
@@ -39,13 +39,31 @@ def create_order():
         "currency": "INR",
         "payment_capture": 1
     })
+    return jsonify(order)
 
-    return jsonify({
-        "order_id": order["id"],
-        "amount": order["amount"],
-        "currency": order["currency"],
-        "key": os.getenv("RAZORPAY_KEY_ID")
-    })
+# ------------------ VERIFY PAYMENT ------------------
+
+@app.route("/verify-payment", methods=["POST"])
+def verify_payment():
+    data = request.json
+
+    razorpay_order_id = data["razorpay_order_id"]
+    razorpay_payment_id = data["razorpay_payment_id"]
+    razorpay_signature = data["razorpay_signature"]
+
+    secret = os.getenv("RAZORPAY_KEY_SECRET")
+    message = f"{razorpay_order_id}|{razorpay_payment_id}"
+
+    generated_signature = hmac.new(
+        bytes(secret, "utf-8"),
+        bytes(message, "utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+
+    if generated_signature == razorpay_signature:
+        return jsonify({"status": "success"})
+    else:
+        return jsonify({"status": "failed"}), 400
 
 # ------------------ WEBHOOK ------------------
 
@@ -55,67 +73,17 @@ def webhook():
     signature = request.headers.get("X-Razorpay-Signature")
     secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
 
-    generated = hmac.new(
+    expected_signature = hmac.new(
         bytes(secret, "utf-8"),
         payload,
         hashlib.sha256
     ).hexdigest()
 
-    if generated != signature:
-        return "Invalid signature", 400
+    if hmac.compare_digest(expected_signature, signature):
+        return jsonify({"status": "ok"})
+    else:
+        return jsonify({"status": "invalid"}), 400
 
-    data = request.json
-    event = data.get("event")
-
-    if event == "payment.captured":
-        email = data["payload"]["payment"]["entity"].get("email")
-        send_email(email)
-
-    return "OK", 200
-
-# ------------------ EMAIL ------------------
-
-def send_email(to_email):
-    if not to_email:
-        return
-
-    msg = EmailMessage()
-    msg["Subject"] = "✅ Your SURESH AI ORIGIN Access"
-    msg["From"] = os.getenv("EMAIL_USER")
-    msg["To"] = to_email
-
-    msg.set_content(f"""
-Thank you for your purchase 🎉
-
-Your download links:
-Starter Pack:
-https://suresh-ai-origin.onrender.com/download/starter_pack.zip
-
-Quick Wins Pack:
-https://suresh-ai-origin.onrender.com/download/quick_wins_pack.zip
-
-— SURESH AI ORIGIN
-""")
-
-    with smtplib.SMTP("smtp.office365.com", 587) as server:
-        server.starttls()
-        server.login(
-            os.getenv("EMAIL_USER"),
-            os.getenv("EMAIL_PASS")
-        )
-        server.send_message(msg)
-
-# ------------------ DOWNLOAD ------------------
-
-@app.route("/download/<filename>")
-def download(filename):
-    return send_from_directory(
-        DOWNLOAD_FOLDER,
-        filename,
-        as_attachment=True
-    )
-
-# ------------------ RUN ------------------
 
 if __name__ == "__main__":
     app.run(debug=True)
