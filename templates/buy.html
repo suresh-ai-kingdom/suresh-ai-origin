@@ -3,20 +3,15 @@
 <head>
   <title>Checkout</title>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-</head>
-<body>
-
-<h2>Starter Pack – ₹49</h2>
-<button id="payBtn">Pay ₹49</button>
 
 <script>
-document.getElementById("payBtn").onclick = async () => {
+document.getElementById("payBtn").onclick = async function () {
 
-  const res = await fetch("/create-order", { method: "POST" });
-  const order = await res.json();
+  const orderRes = await fetch("/create-order", { method: "POST" });
+  const order = await orderRes.json();
 
   var options = {
-    "key": "{{ key }}",
+    "key": "{{ razorpay_key }}",
     "amount": order.amount,
     "currency": "INR",
     "name": "SURESH AI ORIGIN",
@@ -24,23 +19,24 @@ document.getElementById("payBtn").onclick = async () => {
     "order_id": order.id,
     "handler": async function (response) {
 
-      const verify = await fetch("/payment-success", {
+      const email = prompt("Enter your email for delivery:");
+
+      await fetch("/verify-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(response)
+        body: JSON.stringify({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          email: email
+        })
       });
 
-      const result = await verify.json();
-      if (result.status === "success") {
-        window.location.href = result.download;
-      }
+      window.location.href = "/success";
     }
   };
 
   var rzp = new Razorpay(options);
   rzp.open();
-};
+}
 </script>
-
-</body>
-</html>
