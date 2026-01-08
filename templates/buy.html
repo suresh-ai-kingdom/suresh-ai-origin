@@ -1,28 +1,46 @@
-<script>
-async function pay() {
-  const res = await fetch("/create-order", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({})
-  });
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkout</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
 
+<h2>Starter Pack – ₹49</h2>
+<button id="payBtn">Pay ₹49</button>
+
+<script>
+document.getElementById("payBtn").onclick = async () => {
+
+  const res = await fetch("/create-order", { method: "POST" });
   const order = await res.json();
 
-  const options = {
-    key: order.key,
-    amount: order.amount,
-    currency: order.currency,
-    name: "SURESH AI ORIGIN",
-    order_id: order.id,
-    handler: function () {
-      window.location.href = "/success";
+  var options = {
+    "key": "{{ key }}",
+    "amount": order.amount,
+    "currency": "INR",
+    "name": "SURESH AI ORIGIN",
+    "description": "Starter Pack",
+    "order_id": order.id,
+    "handler": async function (response) {
+
+      const verify = await fetch("/payment-success", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(response)
+      });
+
+      const result = await verify.json();
+      if (result.status === "success") {
+        window.location.href = result.download;
+      }
     }
   };
 
-  const rzp = new Razorpay(options);
+  var rzp = new Razorpay(options);
   rzp.open();
-}
+};
 </script>
-<button onclick="pay()">Pay ₹49</button>
+
+</body>
+</html>

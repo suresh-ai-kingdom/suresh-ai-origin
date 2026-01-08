@@ -1,22 +1,19 @@
-import os
-import hmac
-import hashlib
+import os, hmac, hashlib
+from flask import Flask, render_template, jsonify, request, send_from_directory
 import razorpay
-from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 
-# Load env
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 # Razorpay client
-client = razorpay.Client(
-    auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
-)
+client = razorpay.Client(auth=(
+    os.getenv("RAZORPAY_KEY_ID"),
+    os.getenv("RAZORPAY_KEY_SECRET")
+))
 
-# ------------------ PAGES ------------------
+DOWNLOAD_FOLDER = "downloads"
 
 @app.route("/")
 def home():
@@ -24,13 +21,10 @@ def home():
 
 @app.route("/buy")
 def buy():
-    return render_template("buy.html", key=os.getenv("RAZORPAY_KEY_ID"))
-
-@app.route("/success")
-def success():
-    return render_template("success.html")
-
-# ------------------ CREATE ORDER ------------------
+    return render_template(
+        "buy.html",
+        key=os.getenv("RAZORPAY_KEY_ID")
+    )
 
 @app.route("/create-order", methods=["POST"])
 def create_order():
@@ -41,49 +35,29 @@ def create_order():
     })
     return jsonify(order)
 
-# ------------------ VERIFY PAYMENT ------------------
-
-@app.route("/verify-payment", methods=["POST"])
-def verify_payment():
+@app.route("/payment-success", methods=["POST"])
+def payment_success():
     data = request.json
 
-    razorpay_order_id = data["razorpay_order_id"]
-    razorpay_payment_id = data["razorpay_payment_id"]
-    razorpay_signature = data["razorpay_signature"]
+    params = {
+        "razorpay_order_id": data["razorpay_order_id"],
+        "razorpay_payment_id": data["razorpay_payment_id"],
+        "razorpay_signature": data["razorpay_signature"]
+    }
 
-    secret = os.getenv("RAZORPAY_KEY_SECRET")
-    message = f"{razorpay_order_id}|{razorpay_payment_id}"
-
-    generated_signature = hmac.new(
-        bytes(secret, "utf-8"),
-        bytes(message, "utf-8"),
-        hashlib.sha256
-    ).hexdigest()
-
-    if generated_signature == razorpay_signature:
-        return jsonify({"status": "success"})
-    else:
+    try:
+        client.utility.verify_payment_signature(params)
+    except:
         return jsonify({"status": "failed"}), 400
 
-# ------------------ WEBHOOK ------------------
+    return jsonify({
+        "status": "success",
+        "download": "/download/starter_pack.zip"
+    })
 
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    payload = request.data
-    signature = request.headers.get("X-Razorpay-Signature")
-    secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
-
-    expected_signature = hmac.new(
-        bytes(secret, "utf-8"),
-        payload,
-        hashlib.sha256
-    ).hexdigest()
-
-    if hmac.compare_digest(expected_signature, signature):
-        return jsonify({"status": "ok"})
-    else:
-        return jsonify({"status": "invalid"}), 400
-
+@app.route("/download/<filename>")
+def download_file(filename):
+    return send_from_directory(DOWNLOAD_FOLDER, filename, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True)

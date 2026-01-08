@@ -1,30 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Payment Successful – SURESH AI ORIGIN</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <title>Success – SURESH AI ORIGIN</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<div class="success-container">
-    <h1>✅ Payment Successful</h1>
-    <p>Your access has been unlocked.</p>
+<h1>🎉 Payment Successful!</h1>
+<p>Your download will start automatically.</p>
 
-    <div class="download-box">
-        <a class="download-btn" href="/download/starter">
-            ⬇ Download Starter Pack
-        </a>
+<a href="/download/starter_pack.zip" class="btn" download>Download Starter Pack</a><br><br>
+<a href="/download/quick_wins_pack.zip" class="btn" download>Download Quick Wins Pack</a>
 
-        <a class="download-btn" href="/download/quick">
-            ⬇ Download Quick Wins Pack
-        </a>
-    </div>
-
-    <p class="note">
-        ⚠️ Please download now. Links are session protected.
-    </p>
-</div>
+<script>
+  setTimeout(() => {
+    window.location.href = "/download/starter_pack.zip";
+  }, 2000);
+</script>
 
 </body>
 </html>
