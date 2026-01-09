@@ -1,0 +1,50 @@
+ADVANCED AI PROMPTS – PRO LEVEL
+
+----------------------------------
+1. BUSINESS IDEA GENERATOR
+----------------------------------
+Prompt:
+"You are a startup strategist.
+Generate 10 low-cost online business ideas that can be started in India with zero investment.
+For each idea, include:
+- Target user
+- Problem
+- Simple solution
+- Monetization method"
+
+----------------------------------
+2. CONTENT CREATION MACHINE
+----------------------------------
+Prompt:
+"Act as a professional content creator.
+Create a 30-day content plan for Instagram focused on AI, automation, and productivity.
+Include hooks, captions, and CTA."
+
+----------------------------------
+3. PROBLEM SOLVER PROMPT
+----------------------------------
+Prompt:
+"I am facing this problem: [describe problem].
+Break it down step-by-step.
+Explain root cause.
+Give 3 practical solutions.
+Suggest tools or automation if possible."
+
+----------------------------------
+4. MONEY THINKING PROMPT
+----------------------------------
+Prompt:
+"Think like a digital entrepreneur.
+How can I convert my skills, time, or knowledge into a simple digital product under ₹99?
+Give examples."
+
+----------------------------------
+5. DAILY AI ASSISTANT PROMPT
+----------------------------------
+Prompt:
+"Be my daily AI assistant.
+Help me plan my day, prioritize tasks,
+remove distractions, and focus on income-generating work."
+
+Use these prompts daily.
+Consistency = Results.

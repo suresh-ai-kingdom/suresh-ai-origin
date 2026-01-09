@@ -2,41 +2,17 @@
 <html>
 <head>
   <title>Checkout</title>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
 
-<script>
-document.getElementById("payBtn").onclick = async function () {
+<h2>{{ product.name }}</h2>
+<p>Price: ₹{{ product.price }}</p>
 
-  const orderRes = await fetch("/create-order", { method: "POST" });
-  const order = await orderRes.json();
+<p>(Payment simulation for now)</p>
 
-  var options = {
-    "key": "{{ razorpay_key }}",
-    "amount": order.amount,
-    "currency": "INR",
-    "name": "SURESH AI ORIGIN",
-    "description": "Starter Pack",
-    "order_id": order.id,
-    "handler": async function (response) {
+<a href="/success?product={{ key }}">
+  <button>Pay ₹{{ product.price }}</button>
+</a>
 
-      const email = prompt("Enter your email for delivery:");
-
-      await fetch("/verify-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_signature: response.razorpay_signature,
-          email: email
-        })
-      });
-
-      window.location.href = "/success";
-    }
-  };
-
-  var rzp = new Razorpay(options);
-  rzp.open();
-}
-</script>
+</body>
+</html>
