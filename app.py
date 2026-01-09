@@ -1,53 +1,37 @@
-from flask import Flask, render_template, request, send_from_directory, abort
+from flask import Flask, render_template, send_from_directory, request
+import os
 
 app = Flask(__name__)
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
+
 PRODUCTS = {
-    "starter": {
-        "name": "Starter Pack",
-        "price": 49,
-        "file": "starter_pack.zip"
-    },
-    "pro": {
-        "name": "Pro Pack",
-        "price": 99,
-        "file": "pro_pack.zip"
-    },
-    "premium": {
-        "name": "Premium Pack",
-        "price": 199,
-        "file": "premium_pack.zip"
-    }
+    "starter": "starter_pack.zip",
+    "pro": "pro_pack.zip",
+    "premium": "premium_pack.zip"
 }
 
 @app.route("/")
 def home():
-    return render_template("index.html", products=PRODUCTS)
+    return render_template("index.html")
 
 @app.route("/buy")
 def buy():
-    product_key = request.args.get("product")
-    if product_key not in PRODUCTS:
-        abort(404)
-    return render_template("buy.html", product=PRODUCTS[product_key], key=product_key)
+    product = request.args.get("product", "starter")
+    return render_template("buy.html", product=product)
 
 @app.route("/success")
 def success():
-    product_key = request.args.get("product")
-    if product_key not in PRODUCTS:
-        abort(404)
-    return render_template("success.html", key=product_key)
+    product = request.args.get("product", "starter")
+    return render_template("success.html", product=product)
 
-@app.route("/download/<product_key>")
-def download(product_key):
-    if product_key not in PRODUCTS:
-        abort(404)
-
-    return send_from_directory(
-        directory="downloads",
-        path=PRODUCTS[product_key]["file"],
-        as_attachment=True
-    )
+@app.route("/download/<product>")
+def download(product):
+    filename = PRODUCTS.get(product)
+    if not filename:
+        return "Invalid product", 404
+    return send_from_directory(DOWNLOAD_DIR, filename, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True)

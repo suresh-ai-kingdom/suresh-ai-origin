@@ -4,15 +4,12 @@
   <title>Checkout</title>
 </head>
 <body>
+  <h2>Confirm Purchase</h2>
 
-<h2>{{ product.name }}</h2>
-<p>Price: ₹{{ product.price }}</p>
+  <p>You selected: <b>{{ product }}</b></p>
 
-<p>(Payment simulation for now)</p>
-
-<a href="/success?product={{ key }}">
-  <button>Pay ₹{{ product.price }}</button>
-</a>
-
+  <a href="/success?product={{ product }}">
+    <button>Pay Now</button>
+  </a>
 </body>
 </html>
