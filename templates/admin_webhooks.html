@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Webhooks</title>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Recent Webhooks</h2>
+
+  <form method="get">
+    <label>Event: <input name="event" value="{{ event_filter or '' }}"></label>
+    <label>Per page: <input name="per_page" value="{{ per_page }}" style="width:60px"></label>
+    <button type="submit">Filter</button>
+  </form>
+
+  <p>Total: {{ total }}</p>
+
+  <table border="1">
+    <tr><th>ID</th><th>Event</th><th>Received At</th><th>Payload</th></tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row[0] }}</td>
+      <td>{{ row[1] }}</td>
+      <td>{{ row[3] }}</td>
+      <td><pre>{{ row[2] }}</pre></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <div>
+    {% if page > 1 %}
+      <a href="?page={{ page-1 }}&per_page={{ per_page }}{% if event_filter %}&event={{ event_filter }}{% endif %}">Previous</a>
+    {% endif %}
+    {% if page * per_page < total %}
+      <a href="?page={{ page+1 }}&per_page={{ per_page }}{% if event_filter %}&event={{ event_filter }}{% endif %}">Next</a>
+    {% endif %}
+  </div>
+</body>
+</html>

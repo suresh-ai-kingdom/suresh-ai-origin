@@ -1,0 +1,20 @@
+TOOLS YOU NEED (NO CODING)
+
+AI:
+- ChatGPT
+- Gemini
+- Claude
+
+Automation:
+- Zapier
+- Make.com
+- Google Sheets
+
+Delivery:
+- Gumroad
+- Google Drive
+- Email
+
+Payments:
+- Razorpay
+- UPI

@@ -1,0 +1,24 @@
+REAL AUTOMATION WORKFLOWS
+
+Workflow 1: AI Prompt Selling System
+- Create prompt packs
+- Sell via Gumroad / Website
+- Auto delivery
+
+Workflow 2: WhatsApp Auto Reply Bot
+- Business auto responses
+- Lead qualification
+- Appointment booking
+
+Workflow 3: Resume + Cover Letter Generator
+- Students + Job seekers
+- ₹99 per resume
+
+Workflow 4: Social Media Caption Generator
+- Local businesses
+- Monthly retainer ₹2k–₹5k
+
+Each workflow can be built using:
+- ChatGPT
+- Google Sheets
+- Zapier / Make

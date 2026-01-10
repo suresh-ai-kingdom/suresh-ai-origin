@@ -1,4 +1,7 @@
 flask
 razorpay
 python-dotenv
-gunicorn 
+gunicorn
+pytest
+SQLAlchemy
+alembic

@@ -1,0 +1,18 @@
+MASTER PROMPTS COLLECTION
+
+1️⃣ BUSINESS IDEA GENERATOR
+"Act as a startup advisor. Generate 10 AI-based micro-business ideas that can be launched with zero capital in India. Include pricing and target customers."
+
+2️⃣ CONTENT MACHINE PROMPT
+"You are a viral content strategist. Create 30 Instagram reel ideas for AI tools beginners with hooks and CTAs."
+
+3️⃣ CLIENT CONVERSION PROMPT
+"Act as a freelance closer. Convert this cold message into a high-converting proposal: [paste message]"
+
+4️⃣ AUTOMATION BUILDER PROMPT
+"Design a no-code automation workflow using AI that replaces a manual business task."
+
+5️⃣ PRODUCT CREATION PROMPT
+"Create a digital product outline that solves [problem] and can be sold under ₹299."
+
+(Use ChatGPT / Claude / Gemini)

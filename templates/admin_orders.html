@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Orders</title>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Orders</h2>
+
+  <form method="get">
+    <label>Product: <input name="product" value="{{ product_filter or '' }}"></label>
+    <label>Status: <input name="status" value="{{ status_filter or '' }}"></label>
+    <label>Per page: <input name="per_page" value="{{ per_page }}" style="width:60px"></label>
+    <button type="submit">Filter</button>
+  </form>
+
+  <p>Total: {{ total }}</p>
+
+  <table border="1">
+    <tr><th>ID</th><th>Product</th><th>Amount</th><th>Status</th><th>Created</th><th>Paid</th></tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row[0] }}</td>
+      <td>{{ row[4] }}</td>
+      <td>{{ row[1] }}</td>
+      <td>{{ row[5] }}</td>
+      <td>{{ row[6] }}</td>
+      <td>{{ row[7] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <div>
+    {% if page > 1 %}
+      <a href="?page={{ page-1 }}&per_page={{ per_page }}{% if product_filter %}&product={{ product_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+    {% endif %}
+    {% if page * per_page < total %}
+      <a href="?page={{ page+1 }}&per_page={{ per_page }}{% if product_filter %}&product={{ product_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+    {% endif %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<div>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  {% if session.admin_authenticated %}
+    <span>Admin{% if session.admin_username %}: {{ session.admin_username }}{% endif %}</span>
+    <a href="{{ url_for('admin_logout') }}">Logout</a>
+    {% if ADMIN_SESSION_TIMEOUT and session.admin_logged_in_at %}
+      <div id="session-info">
+        <span id="session-countdown" data-start="{{ session.admin_logged_in_at }}" data-timeout="{{ ADMIN_SESSION_TIMEOUT }}">
+          Session expires in <span id="session-seconds">--</span>s
+          <button id="extend-session">Extend</button>
+        </span>
+      </div>
+      <script>
+        (function(){
+          try{
+            var el = document.getElementById('session-countdown');
+            if(!el) return;
+            var start = parseFloat(el.getAttribute('data-start')) || 0;
+            var timeout = parseInt(el.getAttribute('data-timeout')) || 0;
+            var secondsEl = document.getElementById('session-seconds');
+            function update(){
+              var now = Date.now()/1000;
+              var expires = start + timeout;
+              var remaining = Math.max(0, Math.round(expires - now));
+              secondsEl.textContent = remaining;
+              if(remaining <= 0){
+                // Force reload to show login redirect
+                window.location = '/admin/login?next=' + encodeURIComponent(window.location.pathname);
+              }
+            }
+            update();
+            setInterval(update, 1000);
+            var btn = document.getElementById('extend-session');
+            btn.addEventListener('click', function(e){
+              e.preventDefault();
+              var meta = document.querySelector('meta[name="csrf-token"]');
+              var csrf = meta ? meta.getAttribute('content') : null;
+              var headers = {'Content-Type':'application/json'};
+              if(csrf) headers['X-CSRF-Token'] = csrf;
+              fetch('/admin/keepalive', {method:'POST', headers: headers})
+                .then(function(resp){ return resp.json();})
+                .then(function(j){ if(j && j.ok){ start = Date.now()/1000; }})
+                .catch(function(){/* ignore */});
+            });
+          }catch(e){console.warn('session countdown error', e)}
+        })();
+      </script>
+    {% endif %}
+  {% else %}
+    <a href="{{ url_for('admin_login', next=request.path) }}">Login</a>
+  {% endif %}
+</div> 

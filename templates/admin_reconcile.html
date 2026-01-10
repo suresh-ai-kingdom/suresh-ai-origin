@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Reconcile</title>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Reconciliation Report</h2>
+  <p>Unpaid orders: {{ report.unpaid_orders|length }}</p>
+  <p>Orphan payments: {{ report.orphan_payments|length }}</p>
+  <p>Candidates (unpaid orders with payments): {{ report.candidates|length }}</p>
+
+  <form method="post" action="/admin/reconcile">
+    <button type="submit">Run reconciliation (mark unpaid orders paid when payment exists)</button>
+  </form>
+
+  <h3>Details</h3>
+  <h4>Unpaid orders</h4>
+  <ul>
+    {% for o in report.unpaid_orders %}
+      <li>{{ o[0] }} - {{ o[4] }} - {{ o[1] }} - status={{ o[5] }}</li>
+    {% endfor %}
+  </ul>
+
+  <h4>Orphan payments</h4>
+  <ul>
+    {% for p in report.orphan_payments %}
+      <li>{{ p[0] }} - order_id={{ p[1] }} - payload={{ p[2] }}</li>
+    {% endfor %}
+  </ul>
+
+  <h4>Candidates</h4>
+  <ul>
+    {% for p in report.candidates %}
+      <li>{{ p[0] }} - order_id={{ p[1] }} - payload={{ p[2] }}</li>
+    {% endfor %}
+  </ul>
+
+  {% if result %}
+  <h3>Result</h3>
+  <p>Updated orders: {{ result.updated_orders }}</p>
+  <p>Candidates: {{ result.candidates }}</p>
+  <p>Orphan payments: {{ result.orphan_payments }}</p>
+  {% endif %}
+</body>
+</html>
