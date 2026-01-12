@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Market Intelligence</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; background: #eef; }
+    .price { font-weight: 600; }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Market Intelligence</h2>
+  <p>Signals and insights from the last {{ days }} days.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Signals</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Demand</th>
+            <th>Conversion</th>
+            <th>Avg Price (₹)</th>
+            <th>Revenue (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product, s in summary.signals.items() %}
+          <tr>
+            <td>{{ product }}</td>
+            <td>{{ (s.demand_index * 100)|round(0) }}%</td>
+            <td>{{ (s.conversion_rate * 100)|round(1) }}%</td>
+            <td class="price">{{ s.avg_price_rupees }}</td>
+            <td class="price">{{ s.revenue_rupees }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div style="margin-top: 8px; font-size: 13px; color: #666;">
+        Total revenue: ₹{{ summary.total_revenue_rupees }}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Insights & Recommendations</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Priority</th>
+            <th>Recommendation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in summary.insights %}
+          <tr>
+            <td>{{ i.product }}</td>
+            <td><span class="badge">{{ i.priority }}</span></td>
+            <td>{{ i.recommendation }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p style="margin-top: 20px;"><a href="/admin">Back to Admin Hub</a></p>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Market Intelligence</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+    .price { font-weight: 600; }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Market Intelligence</h2>
+  <p>Trends and competitor insights (last {{ days }} days).</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Revenue Share & Momentum</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Revenue Share</th>
+            <th>Momentum</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p, share in summary.trends.revenue_share_percent.items() %}
+          <tr>
+            <td>{{ p }}</td>
+            <td>{{ share }}%</td>
+            <td>{{ summary.trends.momentum_percent.get(p, 0) }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div style="margin-top: 8px; font-size: 13px; color: #666;">
+        Top products: 
+        {% for p, s in summary.trends.top_products %}
+          <span>{{ p }} ({{ s }}%)</span>{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Competitor Comparison</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Our Price</th>
+            <th>Competitor Price</th>
+            <th>Advantage</th>
+            <th>Positioning</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p, data in summary.competitors.comparison.items() %}
+          <tr>
+            <td>{{ p }}</td>
+            <td class="price">₹{{ data.our_price }}</td>
+            <td class="price">₹{{ data.competitor_price }}</td>
+            <td class="price">₹{{ data.price_advantage }}</td>
+            <td>{{ data.positioning }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 16px;">
+    <h3>Product Sentiment (Proxy)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Score</th>
+          <th>Conversion Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p, data in summary.sentiment.sentiment.items() %}
+        <tr>
+          <td>{{ p }}</td>
+          <td>{{ data.score }}</td>
+          <td>{{ (data.conversion_rate * 100)|round(1) }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top: 20px;"><a href="/admin">Back to Admin Hub</a></p>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Campaign Generator</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; background: #eef; }
+    .price { font-weight: 600; }
+    input, select { padding: 8px; width: 100%; margin: 4px 0; }
+    button { padding: 10px 14px; }
+    pre { background: #f7f7f7; padding: 8px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Campaign Generator</h2>
+  <p>Suggested campaigns based on segments and churn (last {{ days }} days).</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Suggestions</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Goal</th>
+            <th>Segment</th>
+            <th>Product</th>
+            <th>Discount</th>
+            <th>Est. Conv</th>
+            <th>Est. Rev / 100</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in suggestions %}
+          <tr>
+            <td><span class="badge">{{ s.goal }}</span></td>
+            <td>{{ s.target_segment }}</td>
+            <td>{{ s.products[0] }}</td>
+            <td>{{ s.discount_percent }}%</td>
+            <td>{{ (s.estimated_conversion * 100)|round(1) }}%</td>
+            <td class="price">₹{{ s.estimated_revenue_per_100 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div style="margin-top: 8px; font-size: 13px; color: #666;">
+        Top suggestion: ₹{{ (stats.top_suggestion.estimated_revenue_per_100 if stats.top_suggestion) or 0 }} per 100 visitors.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Generate Custom Campaign</h3>
+      <form id="gen-form">
+        <label>Goal</label>
+        <select name="goal">
+          <option value="new-customer">New Customer</option>
+          <option value="win-back">Win-Back</option>
+          <option value="upsell">Upsell</option>
+          <option value="loyalty">Loyalty</option>
+        </select>
+        <label>Target Segment</label>
+        <select name="segment">
+          <option>NEW</option>
+          <option>AT_RISK</option>
+          <option>PROMISING</option>
+          <option>LOYAL</option>
+          <option>VIP</option>
+        </select>
+        <label>Product</label>
+        <select name="product">
+          <option>starter</option>
+          <option>pro</option>
+          <option>premium</option>
+        </select>
+        <label>Discount (%)</label>
+        <input type="number" name="discount" min="0" max="50" value="10"/>
+        <button type="submit">Generate</button>
+      </form>
+      <div id="gen-result" style="margin-top:12px; display:none;">
+        <h4>Result</h4>
+        <div><b>Subject:</b> <span id="res-subject"></span></div>
+        <div><b>CTA:</b> <span id="res-cta"></span></div>
+        <div><b>Estimated:</b> <span id="res-est"></span></div>
+        <pre id="res-message"></pre>
+      </div>
+      <script>
+        (function(){
+          var form = document.getElementById('gen-form');
+          var res = document.getElementById('gen-result');
+          form.addEventListener('submit', function(e){
+            e.preventDefault();
+            var data = new FormData(form);
+            var payload = {
+              goal: data.get('goal'),
+              segment: data.get('segment'),
+              products: [data.get('product')],
+              discount_percent: parseInt(data.get('discount')||'0'),
+              days: {{ days }}
+            };
+            var meta = document.querySelector('meta[name="csrf-token"]');
+            var csrf = meta ? meta.getAttribute('content') : null;
+            var headers = {'Content-Type':'application/json'};
+            if(csrf) headers['X-CSRF-Token'] = csrf;
+            fetch('/api/campaigns/create', {method:'POST', headers: headers, body: JSON.stringify(payload)})
+              .then(function(r){return r.json();})
+              .then(function(j){
+                if(!j.success){ throw new Error(j.error||'error'); }
+                var c = j.campaign;
+                res.style.display = 'block';
+                document.getElementById('res-subject').textContent = c.subject;
+                document.getElementById('res-cta').textContent = c.cta;
+                document.getElementById('res-est').textContent = (Math.round(c.estimated_conversion*1000)/10)+'% | ₹'+c.estimated_revenue_per_100+'/100 visitors';
+                document.getElementById('res-message').textContent = c.message;
+              })
+              .catch(function(){ alert('Failed to generate');});
+          });
+        })();
+      </script>
+    </div>
+  </div>
+
+  <p style="margin-top: 20px;"><a href="/admin">Back to Admin Hub</a></p>
+</body>
+</html>

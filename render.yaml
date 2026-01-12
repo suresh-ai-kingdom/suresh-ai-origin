@@ -3,3 +3,5 @@ services:
     name: suresh-ai-origin
     env: python
     startCommand: gunicorn app:app
+    healthCheckPath: /health
+    autoDeploy: true

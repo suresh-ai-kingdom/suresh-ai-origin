@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Outcome - SURESH AI ORIGIN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .outcome-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .outcome-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .outcome-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .outcome-header p {
+            font-size: 15px;
+            opacity: 0.95;
+        }
+
+        .outcome-form {
+            padding: 30px 20px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .metric-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .metric-tab {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+
+        .metric-tab:hover {
+            border-color: #667eea;
+        }
+
+        .metric-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .input-group .form-input {
+            flex: 1;
+        }
+
+        .currency-select {
+            width: 80px;
+            padding: 12px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .proof-section {
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .proof-section:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .proof-section.dragover {
+            background: #e8ecff;
+            border-color: #667eea;
+        }
+
+        .proof-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .proof-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .proof-subtext {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .proof-preview {
+            display: none;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .proof-preview.active {
+            display: block;
+        }
+
+        .proof-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            max-height: 200px;
+        }
+
+        .proof-remove {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .proof-remove:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #28a745;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons .btn {
+            flex: 1;
+        }
+
+        @media (max-width: 600px) {
+            .outcome-header h1 {
+                font-size: 24px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .currency-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="outcome-container">
+        <!-- Header -->
+        <div class="outcome-header">
+            <h1>📊 Log Your Outcome</h1>
+            <p>What result did you achieve?</p>
+        </div>
+
+        <!-- Form -->
+        <form class="outcome-form" id="outcomeForm">
+            <div id="messageContainer"></div>
+
+            <!-- Metric Type Selection -->
+            <div class="form-group">
+                <div class="form-label">What did you measure?</div>
+                <div class="metric-tabs">
+                    <button type="button" class="metric-tab active" data-metric="revenue">💰 Revenue</button>
+                    <button type="button" class="metric-tab" data-metric="time_saved">⏱️ Time Saved</button>
+                    <button type="button" class="metric-tab" data-metric="customers">👥 Customers</button>
+                    <button type="button" class="metric-tab" data-metric="custom">📝 Custom</button>
+                </div>
+            </div>
+
+            <!-- Value Input -->
+            <div class="form-group">
+                <label class="form-label" id="valueLabel">Amount (₹)</label>
+                <div class="input-group">
+                    <input type="number" id="value" class="form-input" placeholder="0" step="1" min="0" required>
+                    <select id="currency" class="currency-select">
+                        <option value="INR">₹ INR</option>
+                        <option value="USD">$ USD</option>
+                        <option value="EUR">€ EUR</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Proof of Outcome -->
+            <div class="form-group">
+                <label class="form-label">Proof (Screenshot/Invoice)</label>
+                <div class="proof-section" id="proofSection">
+                    <div class="proof-icon">📸</div>
+                    <div class="proof-text">Click to upload or drag & drop</div>
+                    <div class="proof-subtext">PNG, JPG, PDF (max 5MB)</div>
+                    <div class="proof-preview" id="proofPreview">
+                        <img id="proofImage" src="" alt="Proof preview">
+                        <button type="button" class="proof-remove" id="proofRemove">&times;</button>
+                    </div>
+                </div>
+                <input type="file" id="proofFile" class="file-input" accept="image/*,.pdf">
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-buttons">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">Back</button>
+                <button type="submit" class="btn btn-primary">Log Outcome ✓</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <h2>✅ Success!</h2>
+            <p>Your outcome has been logged. You earned real data today!</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="location.href='/'">Back Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const executionId = "{{ execution_id }}";
+        const userId = "{{ user_id }}";
+        let selectedMetric = 'revenue';
+        let proofFile = null;
+
+        // Metric Tabs
+        document.querySelectorAll('.metric-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.metric-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                selectedMetric = tab.dataset.metric;
+                updateLabel();
+            });
+        });
+
+        function updateLabel() {
+            const labels = {
+                revenue: 'Amount (₹)',
+                time_saved: 'Hours',
+                customers: 'Number',
+                custom: 'Value'
+            };
+            document.getElementById('valueLabel').textContent = labels[selectedMetric];
+            document.getElementById('currency').style.display = selectedMetric === 'revenue' ? 'block' : 'none';
+        }
+
+        // File Upload
+        const proofSection = document.getElementById('proofSection');
+        const fileInput = document.getElementById('proofFile');
+        const proofPreview = document.getElementById('proofPreview');
+
+        proofSection.addEventListener('click', () => fileInput.click());
+
+        proofSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            proofSection.classList.add('dragover');
+        });
+
+        proofSection.addEventListener('dragleave', () => {
+            proofSection.classList.remove('dragover');
+        });
+
+        proofSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            proofSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (file.size > 5 * 1024 * 1024) {
+                showMessage('File must be less than 5MB', 'error');
+                return;
+            }
+
+            proofFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (file.type.startsWith('image/')) {
+                    document.getElementById('proofImage').src = e.target.result;
+                    proofPreview.classList.add('active');
+                    proofSection.style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('proofRemove').addEventListener('click', (e) => {
+            e.preventDefault();
+            proofFile = null;
+            proofPreview.classList.remove('active');
+            proofSection.style.display = 'block';
+            fileInput.value = '';
+        });
+
+        // Form Submit
+        document.getElementById('outcomeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const value = parseFloat(document.getElementById('value').value);
+            const currency = document.getElementById('currency').value;
+
+            if (!value || value <= 0) {
+                showMessage('Please enter a valid value', 'error');
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('[type="submit"]');
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            try {
+                const outcomeData = {
+                    execution_id: executionId,
+                    user_id: userId,
+                    metric_type: selectedMetric,
+                    value: value,
+                    currency: currency,
+                    proof_type: proofFile ? 'screenshot' : 'text'
+                };
+
+                const response = await fetch('/api/outcome', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(outcomeData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('successModal').classList.add('active');
+                } else {
+                    showMessage(data.error || 'Failed to log outcome', 'error');
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            } catch (err) {
+                showMessage('Network error: ' + err.message, 'error');
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showMessage(msg, type) {
+            const container = document.getElementById('messageContainer');
+            const div = document.createElement('div');
+            div.className = `${type}-message`;
+            div.textContent = msg;
+            container.innerHTML = '';
+            container.appendChild(div);
+        }
+
+        updateLabel();
+    </script>
+</body>
+</html>

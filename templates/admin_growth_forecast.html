@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Growth Forecast - Admin{% endblock %}
+{% block content %}
+<style>
+.wrapper { max-width: 1100px; margin: 20px auto; background:#fff; border-radius:12px; box-shadow:0 6px 24px rgba(0,0,0,0.08); overflow:hidden; }
+.header { background: linear-gradient(135deg, #667eea, #764ba2); color:#fff; padding:16px 20px; display:flex; align-items:center; gap:12px; }
+.header h1 { margin:0; font-size:1.6rem; }
+.section { padding:20px; border-top:1px solid #eee; }
+.grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:16px; }
+.card { background:#f8f9ff; border:1px solid #e3e7ff; border-radius:8px; padding:16px; }
+.value { font-size:1.8rem; font-weight:800; color:#667eea; }
+.sub { color:#888; font-size:0.9rem; }
+.table { width:100%; border-collapse: collapse; }
+.table th, .table td { border-bottom:1px solid #eee; padding:8px; text-align:left; }
+.badge { display:inline-block; background:#667eea; color:#fff; border-radius:16px; padding:4px 10px; font-size:0.85rem; }
+</style>
+<div class="wrapper">
+  <div class="header">
+    <div style="font-size:1.6rem">📈</div>
+    <h1>Growth Forecast</h1>
+  </div>
+
+  <div class="section">
+    <div class="grid">
+      <div class="card">
+        <div class="sub">Recommended Scenario</div>
+        <div id="recScenario" class="value">--</div>
+      </div>
+      <div class="card">
+        <div class="sub">Orders Growth (Aggressive)</div>
+        <div id="aggOrders" class="value">--%</div>
+      </div>
+      <div class="card">
+        <div class="sub">Customers Growth (Aggressive)</div>
+        <div id="aggCustomers" class="value">--%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Scenario Summary</h3>
+    <table class="table" id="summaryTable"></table>
+  </div>
+
+  <div class="section">
+    <h3>Download CSV</h3>
+    <button onclick="exportCSV()">Export</button>
+  </div>
+</div>
+<script>
+async function loadSummary(){
+  const res = await fetch('/api/growth/summary');
+  const data = await res.json();
+  if(data.success){
+    document.getElementById('recScenario').textContent = data.summary.recommended.toUpperCase();
+    const s = data.summary.summary;
+    document.getElementById('aggOrders').textContent = s.aggressive.orders_growth_pct + '%';
+    document.getElementById('aggCustomers').textContent = s.aggressive.customers_growth_pct + '%';
+    const table = document.getElementById('summaryTable');
+    table.innerHTML = `<tr><th>Scenario</th><th>Orders Growth %</th><th>Customers Growth %</th></tr>` +
+      ['conservative','baseline','aggressive'].map(name => `
+        <tr>
+          <td><span class='badge'>${name}</span></td>
+          <td>${s[name].orders_growth_pct}%</td>
+          <td>${s[name].customers_growth_pct}%</td>
+        </tr>
+      `).join('');
+  }
+}
+async function exportCSV(){
+  const res = await fetch('/api/growth/scenarios');
+  const data = await res.json();
+  if(data.success){
+    const scenarios = data.scenarios;
+    let csv = 'scenario,type,day,value\n';
+    ['conservative','baseline','aggressive'].forEach(name => {
+      ['orders','customers'].forEach(type => {
+        scenarios[name][type].forEach((v, i) => {
+          csv += `${name},${type},${i+1},${v}\n`;
+        });
+      });
+    });
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'growth_forecast.csv';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+}
+loadSummary();
+</script>
+{% endblock %}

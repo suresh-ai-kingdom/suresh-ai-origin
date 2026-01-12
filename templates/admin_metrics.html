@@ -1,0 +1,244 @@
+{% extends "_admin_header.html" %}
+{% block title %}Business Metrics{% endblock %}
+{% block content %}
+<style>
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .metric-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .metric-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+        margin: 10px 0;
+    }
+    .metric-label {
+        color: #666;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .metric-subtitle {
+        color: #999;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    .product-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .product-table th {
+        background: #667eea;
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+    .product-table td {
+        padding: 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .chart-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 30px 0 15px 0;
+        color: #333;
+    }
+    .period-selector {
+        float: right;
+        margin-bottom: 20px;
+    }
+</style>
+
+<h1>📊 Business Metrics</h1>
+
+<div class="period-selector">
+    <form method="get" style="display: inline;">
+        <label>Period:
+            <select name="days" onchange="this.form.submit()">
+                <option value="7" {% if metrics.period_days == 7 %}selected{% endif %}>Last 7 days</option>
+                <option value="30" {% if metrics.period_days == 30 %}selected{% endif %}>Last 30 days</option>
+                <option value="90" {% if metrics.period_days == 90 %}selected{% endif %}>Last 90 days</option>
+                <option value="365" {% if metrics.period_days == 365 %}selected{% endif %}>Last year</option>
+            </select>
+        </label>
+    </form>
+</div>
+
+<div style="clear: both;"></div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-label">Total Orders</div>
+        <div class="metric-value">{{ metrics.overview.total_orders }}</div>
+        <div class="metric-subtitle">{{ metrics.overview.period_orders }} in last {{ metrics.period_days }} days</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">Paid Orders</div>
+        <div class="metric-value">{{ metrics.overview.paid_orders }}</div>
+        <div class="metric-subtitle">{{ metrics.overview.period_paid_orders }} in period</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">Total Revenue</div>
+        <div class="metric-value">₹{{ metrics.revenue.total }}</div>
+        <div class="metric-subtitle">₹{{ metrics.revenue.period }} in period</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">Avg Order Value</div>
+        <div class="metric-value">₹{{ metrics.revenue.average_order_value }}</div>
+        <div class="metric-subtitle">{{ metrics.revenue.currency }}</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">Conversion Rate</div>
+        <div class="metric-value">{{ metrics.overview.conversion_rate }}%</div>
+        <div class="metric-subtitle">Orders to paid</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">Webhook Events</div>
+        <div class="metric-value">{{ metrics.system.webhook_events }}</div>
+        <div class="metric-subtitle">Total processed</div>
+    </div>
+</div>
+
+<div class="section-title">📈 Daily Sales (Last {{ chart_data|length }} Days)</div>
+<div class="chart-container">
+    <canvas id="salesChart" width="400" height="100"></canvas>
+</div>
+
+<div class="section-title">🛍️ Product Sales</div>
+{% if metrics.products %}
+<table class="product-table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Orders</th>
+            <th>Revenue</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in metrics.products %}
+        <tr>
+            <td>{{ product.product|replace('_', ' ')|title }}</td>
+            <td>{{ product.orders }}</td>
+            <td>₹{{ "%.2f"|format(product.revenue) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="color: #999;">No product sales yet.</p>
+{% endif %}
+
+<div class="section-title">🕒 Recent Orders</div>
+{% if metrics.recent_orders %}
+<table class="product-table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Product</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in metrics.recent_orders %}
+        <tr>
+            <td><code>{{ order.id[:20] }}...</code></td>
+            <td>{{ order.product|replace('_', ' ')|title }}</td>
+            <td>₹{{ "%.2f"|format(order.amount) }}</td>
+            <td><span style="color: {{ 'green' if order.status == 'paid' else 'orange' }};">{{ order.status }}</span></td>
+            <td>{{ order.created_at[:10] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="color: #999;">No orders yet.</p>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('salesChart');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_data|map(attribute='date')|list|tojson }},
+        datasets: [{
+            label: 'Orders',
+            data: {{ chart_data|map(attribute='orders')|list|tojson }},
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.3,
+            yAxisID: 'y'
+        }, {
+            label: 'Revenue (₹)',
+            data: {{ chart_data|map(attribute='revenue')|list|tojson }},
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.3,
+            yAxisID: 'y1'
+        }]
+    },
+    options: {
+        responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            legend: {
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Orders'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Revenue (₹)'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Social Auto-Share</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; background: #eef; }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Social Auto-Share</h2>
+  <p>Suggested posts and schedules (last {{ days }} days).</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Suggested Posts</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Message</th>
+            <th>Tags</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in posts %}
+          <tr>
+            <td>{{ p.product }}</td>
+            <td>{{ p.message }}</td>
+            <td>
+              {% for t in p.tags %}
+                <span class="badge">{{ t }}</span>
+              {% endfor %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Schedule (next 3 days)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Platform</th>
+            <th>Local Hour</th>
+            <th>Product</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in schedule %}
+          <tr>
+            <td>{{ s.platform }}</td>
+            <td>{{ s.local_hour }}:00</td>
+            <td>{{ s.product }}</td>
+            <td>{{ s.message }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p style="margin-top: 20px;"><a href="/admin">Back to Admin Hub</a></p>
+</body>
+</html>

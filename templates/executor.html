@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ workflow_name | title }} - SURESH AI ORIGIN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .executor-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .executor-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .executor-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .executor-timer {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+        .executor-timer .time {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .executor-timer .label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .executor-progress {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .executor-content {
+            padding: 30px 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .step {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .step.completed .step-number {
+            background: #28a745;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #222;
+            flex: 1;
+        }
+
+        .step-time {
+            font-size: 13px;
+            color: #999;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .step-description {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .step-tips {
+            background: #f0f7ff;
+            border-left: 4px solid #667eea;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .step-tips strong {
+            color: #667eea;
+        }
+
+        .step-input {
+            margin-top: 15px;
+        }
+
+        .step-input label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .step-input textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            height: 80px;
+        }
+
+        .step-input textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .executor-footer {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #222;
+        }
+
+        .modal-content p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons .btn {
+            flex: 1;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .executor-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .executor-header h1 {
+                font-size: 20px;
+            }
+
+            .step-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .executor-content {
+                max-height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="executor-container">
+        <!-- Header with Timer -->
+        <div class="executor-header">
+            <div>
+                <h1>{{ workflow_name | title }}</h1>
+            </div>
+            <div class="executor-timer">
+                <div class="time" id="timer">00:00</div>
+                <div class="label">Elapsed</div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="executor-progress">
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">
+                <span id="stepsText">Step 1 of {{ total_steps }}</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="executor-content" id="content">
+            <div id="messagesContainer"></div>
+            <div id="stepsContainer"></div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="executor-footer">
+            <button class="btn btn-secondary" id="prevBtn" style="display: none;">← Previous</button>
+            <button class="btn btn-primary" id="nextBtn">Next Step →</button>
+            <button class="btn btn-success" id="completeBtn" style="display: none;">Complete ✓</button>
+        </div>
+    </div>
+
+    <!-- Completion Modal -->
+    <div class="modal" id="completionModal">
+        <div class="modal-content">
+            <h2>🎉 Workflow Completed!</h2>
+            <p>Great job completing this workflow! Now let's capture your outcome.</p>
+            <p>What result did you achieve?</p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="location.href='/'">Back Home</button>
+                <button class="btn btn-primary" id="logOutcomeBtn">Log Outcome →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const executionId = "{{ execution_id }}";
+        const userId = "{{ user_id }}";
+        const workflowName = "{{ workflow_name }}";
+        const totalSteps = {{ total_steps }};
+        const workflowData = {
+            steps: [
+                {% for step in steps %}
+                {
+                    number: {{ step.number }},
+                    title: "{{ step.title }}",
+                    description: "{{ step.description }}",
+                    tips: "{{ step.tips }}",
+                    estimatedTime: "{{ step.estimated_time }}"
+                },
+                {% endfor %}
+            ]
+        };
+
+        let currentStep = 1;
+        let elapsedSeconds = 0;
+        let timerInterval = null;
+
+        // Initialize
+        function init() {
+            startTimer();
+            renderStep(currentStep);
+            updateProgressBar();
+            attachEventListeners();
+        }
+
+        // Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                elapsedSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(elapsedSeconds / 60);
+            const secs = elapsedSeconds % 60;
+            document.getElementById('timer').textContent = 
+                `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // Render Step
+        function renderStep(stepNum) {
+            if (stepNum < 1 || stepNum > totalSteps) return;
+
+            const step = workflowData.steps[stepNum - 1];
+            const container = document.getElementById('stepsContainer');
+            
+            container.innerHTML = `
+                <div class="step active">
+                    <div class="step-header">
+                        <div class="step-number">${step.number}</div>
+                        <div class="step-title">${step.title}</div>
+                        <div class="step-time">${step.estimatedTime}</div>
+                    </div>
+                    <div class="step-description">${step.description}</div>
+                    <div class="step-tips">
+                        <strong>💡 Tip:</strong> ${step.tips}
+                    </div>
+                    <div class="step-input">
+                        <label for="notes">Your Notes</label>
+                        <textarea id="notes" placeholder="What are you doing? What worked? What didn't?"></textarea>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Progress Bar
+        function updateProgressBar() {
+            const percentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('stepsText').textContent = `Step ${currentStep} of ${totalSteps}`;
+
+            // Update buttons
+            document.getElementById('prevBtn').style.display = currentStep > 1 ? 'block' : 'none';
+            document.getElementById('nextBtn').style.display = currentStep < totalSteps ? 'block' : 'none';
+            document.getElementById('completeBtn').style.display = currentStep === totalSteps ? 'block' : 'none';
+        }
+
+        // Event Listeners
+        function attachEventListeners() {
+            document.getElementById('nextBtn').addEventListener('click', nextStep);
+            document.getElementById('prevBtn').addEventListener('click', prevStep);
+            document.getElementById('completeBtn').addEventListener('click', completeWorkflow);
+            document.getElementById('logOutcomeBtn').addEventListener('click', () => {
+                window.location.href = `/outcome/${executionId}`;
+            });
+        }
+
+        // Navigation
+        function nextStep() {
+            saveProgress();
+            if (currentStep < totalSteps) {
+                currentStep++;
+                renderStep(currentStep);
+                updateProgressBar();
+                scrollToTop();
+            }
+        }
+
+        function prevStep() {
+            saveProgress();
+            if (currentStep > 1) {
+                currentStep--;
+                renderStep(currentStep);
+                updateProgressBar();
+                scrollToTop();
+            }
+        }
+
+        function scrollToTop() {
+            document.getElementById('content').scrollTop = 0;
+        }
+
+        // Save Progress
+        function saveProgress() {
+            const notes = document.getElementById('notes')?.value || '';
+            
+            fetch(`/api/execution/${executionId}/progress`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    steps_completed: currentStep,
+                    notes: notes
+                })
+            }).catch(err => console.error('Save failed:', err));
+        }
+
+        // Complete Workflow
+        function completeWorkflow() {
+            clearInterval(timerInterval);
+            saveProgress();
+            
+            fetch(`/api/execution/${executionId}/progress`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    steps_completed: totalSteps,
+                    status: 'completed'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('completionModal').classList.add('active');
+                }
+            })
+            .catch(err => console.error('Completion failed:', err));
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>

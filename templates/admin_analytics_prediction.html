@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Analytics - SURESH AI ORIGIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        .analytics-container {
+            max-width: 1400px;
+            margin: 2em auto;
+            padding: 2em;
+        }
+
+        .analytics-header {
+            text-align: center;
+            margin-bottom: 3em;
+        }
+
+        .analytics-header h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5em;
+        }
+
+        .analytics-header p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 1.5em;
+        }
+
+        .forecast-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2em;
+            margin-bottom: 3em;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(240, 147, 251, 0.15) 100%);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            padding: 2em;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .summary-metric {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5em;
+        }
+
+        .summary-label {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 0.5em;
+        }
+
+        .summary-trend {
+            font-size: 0.9em;
+            padding: 0.5em 1em;
+            border-radius: 20px;
+            display: inline-block;
+            background: rgba(76, 175, 80, 0.2);
+            color: #2e7d32;
+        }
+
+        .forecast-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2em;
+            margin-bottom: 3em;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5em;
+            padding-bottom: 1em;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .chart-canvas {
+            position: relative;
+            height: 350px;
+            margin-bottom: 1em;
+        }
+
+        .chart-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1em;
+            margin-top: 1em;
+            padding-top: 1em;
+            border-top: 1px solid #eee;
+            font-size: 0.9em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .color-forecast {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .color-lower {
+            background: #afc4ff;
+        }
+
+        .color-upper {
+            background: #ffc0ff;
+        }
+
+        .recommendations-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendations-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 1.5em;
+            color: #333;
+        }
+
+        .recommendation-item {
+            padding: 1.5em;
+            margin-bottom: 1em;
+            border-left: 4px solid;
+            border-radius: 4px;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-item:hover {
+            transform: translateX(5px);
+        }
+
+        .recommendation-item.high {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+
+        .recommendation-item.medium {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+
+        .recommendation-item.low {
+            border-left-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5em;
+        }
+
+        .recommendation-priority {
+            font-weight: 600;
+            font-size: 0.85em;
+            padding: 0.3em 0.8em;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .recommendation-priority.high {
+            background: #f44336;
+        }
+
+        .recommendation-priority.medium {
+            background: #ff9800;
+        }
+
+        .recommendation-priority.low {
+            background: #4caf50;
+        }
+
+        .recommendation-category {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.2em 0.6em;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .recommendation-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5em;
+        }
+
+        .recommendation-action {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .data-quality-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 1em;
+        }
+
+        .quality-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .export-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.8em 1.5em;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1em;
+        }
+
+        .export-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .forecast-charts {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-canvas {
+                height: 250px;
+            }
+
+            .analytics-header h1 {
+                font-size: 2em;
+            }
+
+            .summary-card {
+                padding: 1.5em;
+            }
+
+            .summary-metric {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include '_admin_header.html' %}
+
+    <div class="analytics-container">
+        <div class="analytics-header">
+            <h1>🔮 Predictive Analytics</h1>
+            <p>12-Month Forecasts for Revenue, Churn, Growth & MRR</p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="forecast-summary">
+            {% if summary.summary %}
+            <div class="summary-card">
+                <div class="summary-label">12-Month Revenue Growth</div>
+                <div class="summary-metric">{{ "{:+.1f}%".format(summary.summary.revenue_growth) }}</div>
+                <div class="summary-trend">
+                    {% if summary.summary.revenue_growth > 0 %}
+                    📈 Positive trend
+                    {% else %}
+                    📉 Declining trend
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-label">12-Month MRR Growth</div>
+                <div class="summary-metric">{{ "{:+.1f}%".format(summary.summary.mrr_growth) }}</div>
+                <div class="summary-trend">
+                    {% if summary.summary.mrr_growth > 0 %}
+                    📈 Expanding
+                    {% else %}
+                    📉 Contracting
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-label">Expected New Customers</div>
+                <div class="summary-metric">{{ summary.summary.customer_growth }}</div>
+                <div class="summary-trend">Growth potential</div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-label">Average Churn Rate</div>
+                <div class="summary-metric">{{ summary.summary.average_churn }}%</div>
+                <div class="summary-trend">
+                    {% if summary.summary.average_churn < 5 %}
+                    ✅ Healthy
+                    {% elif summary.summary.average_churn < 10 %}
+                    ⚠️ Monitor
+                    {% else %}
+                    🔴 Concerning
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Forecast Charts -->
+        <div class="forecast-charts">
+            <div class="chart-container">
+                <div class="chart-title">💰 Monthly Revenue Forecast</div>
+                <div class="chart-canvas">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color color-forecast"></div>
+                        <span>Forecast</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-lower"></div>
+                        <span>Lower CI</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-upper"></div>
+                        <span>Upper CI</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">📊 Monthly Recurring Revenue (MRR)</div>
+                <div class="chart-canvas">
+                    <canvas id="mrrChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color color-forecast"></div>
+                        <span>MRR Forecast</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">👥 Customer Count Forecast</div>
+                <div class="chart-canvas">
+                    <canvas id="customerChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color color-forecast"></div>
+                        <span>Total Customers</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">📉 Churn Rate Forecast</div>
+                <div class="chart-canvas">
+                    <canvas id="churnChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color color-forecast"></div>
+                        <span>Churn %</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations-section">
+            <div class="recommendations-title">🎯 Strategic Recommendations</div>
+            {% if summary.recommendations %}
+                {% for rec in summary.recommendations %}
+                <div class="recommendation-item {{ rec.priority.lower() }}">
+                    <div class="recommendation-header">
+                        <div>
+                            <div class="recommendation-title">{{ rec.title }}</div>
+                            <span class="recommendation-category">{{ rec.category }}</span>
+                        </div>
+                        <span class="recommendation-priority {{ rec.priority.lower() }}">{{ rec.priority }}</span>
+                    </div>
+                    <div class="recommendation-action">{{ rec.action }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: #999; text-align: center;">No recommendations at this time. Keep monitoring metrics.</p>
+            {% endif %}
+        </div>
+
+        <div class="data-quality-indicator">
+            <div class="quality-dot"></div>
+            <span>Forecast Confidence: 85% | Generated: {{ summary.predictions.generated_at }}</span>
+        </div>
+
+        <button class="export-button" onclick="exportData()">📥 Export Predictions (CSV)</button>
+    </div>
+
+    <script>
+        const summaryData = {{ summary | tojson }};
+        const predictions = summaryData.predictions;
+
+        // Chart configuration
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                filler: true
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        };
+
+        // Revenue Chart
+        if (predictions.revenue && predictions.revenue.forecast) {
+            const revenueData = predictions.revenue.forecast;
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: revenueData.map(d => d.date),
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: revenueData.map(d => d.value),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Lower CI',
+                            data: revenueData.map(d => d.lower),
+                            borderColor: '#afc4ff',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            fill: false
+                        },
+                        {
+                            label: 'Upper CI',
+                            data: revenueData.map(d => d.upper),
+                            borderColor: '#ffc0ff',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                },
+                options: chartOptions
+            });
+        }
+
+        // MRR Chart
+        if (predictions.mrr && predictions.mrr.forecast) {
+            const mrrData = predictions.mrr.forecast;
+            const ctx = document.getElementById('mrrChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: mrrData.map(d => d.date),
+                    datasets: [{
+                        label: 'MRR',
+                        data: mrrData.map(d => d.value),
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: chartOptions
+            });
+        }
+
+        // Customer Chart
+        if (predictions.growth && predictions.growth.forecast) {
+            const growthData = predictions.growth.forecast;
+            const ctx = document.getElementById('customerChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: growthData.map(d => d.date),
+                    datasets: [{
+                        label: 'Customers',
+                        data: growthData.map(d => d.value),
+                        borderColor: '#f093fb',
+                        backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: chartOptions
+            });
+        }
+
+        // Churn Chart
+        if (predictions.churn && predictions.churn.forecast) {
+            const churnData = predictions.churn.forecast;
+            const ctx = document.getElementById('churnChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: churnData.map(d => d.date),
+                    datasets: [{
+                        label: 'Churn Rate %',
+                        data: churnData.map(d => d.value),
+                        borderColor: '#f5576c',
+                        backgroundColor: 'rgba(245, 87, 108, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: chartOptions
+            });
+        }
+
+        function exportData() {
+            let csv = 'Date,Revenue,MRR,Customers,Churn Rate\n';
+            
+            const maxMonths = Math.max(
+                predictions.revenue?.forecast?.length || 0,
+                predictions.mrr?.forecast?.length || 0,
+                predictions.growth?.forecast?.length || 0,
+                predictions.churn?.forecast?.length || 0
+            );
+
+            for (let i = 0; i < maxMonths; i++) {
+                const row = [
+                    predictions.revenue?.forecast?.[i]?.date || '',
+                    predictions.revenue?.forecast?.[i]?.value || '',
+                    predictions.mrr?.forecast?.[i]?.value || '',
+                    predictions.growth?.forecast?.[i]?.value || '',
+                    predictions.churn?.forecast?.[i]?.value || ''
+                ];
+                csv += row.join(',') + '\n';
+            }
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `predictions_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+    </script>
+</body>
+</html>

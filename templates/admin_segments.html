@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Segment Optimization</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 20px 0; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; text-align: center; }
+    .card-value { font-size: 28px; font-weight: bold; margin: 8px 0; color: #333; }
+    .card-label { color: #666; font-size: 14px; }
+    .opportunities { margin: 24px 0; }
+    .opportunity { border: 1px solid #eee; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .priority-CRITICAL { border-left: 4px solid #f44; background: #ffefef; }
+    .priority-HIGH { border-left: 4px solid #fa0; background: #fffbef; }
+    .priority-MEDIUM { border-left: 4px solid #49f; background: #eff8ff; }
+    .priority-LOW { border-left: 4px solid #888; background: #f7f7f7; }
+    .opp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .opp-title { font-size: 18px; font-weight: 600; }
+    .priority-badge { padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; color: white; }
+    .badge-CRITICAL { background: #f44; }
+    .badge-HIGH { background: #fa0; }
+    .badge-MEDIUM { background: #49f; }
+    .badge-LOW { background: #888; }
+    .actions { margin-top: 8px; }
+    .action-item { padding: 6px 0; color: #444; }
+    .health-matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 20px 0; }
+    .health-card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+    .health-score { font-size: 24px; font-weight: bold; margin: 8px 0; }
+    .status-HEALTHY { color: #4c4; }
+    .status-NEEDS_ATTENTION { color: #fa0; }
+    .status-CRITICAL { color: #f44; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Segment Optimization</h2>
+  <p>Analyze customer segments and identify growth opportunities (last {{ days }} days)</p>
+
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-label">Total Opportunities</div>
+      <div class="card-value">{{ summary.summary.total_opportunities }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Revenue Potential</div>
+      <div class="card-value">₹{{ summary.summary.total_revenue_potential }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Healthiest Segment</div>
+      <div class="card-value" style="font-size: 20px;">{{ summary.summary.healthiest_segment or 'N/A' }}</div>
+    </div>
+  </div>
+
+  <h3>Segment Health Matrix</h3>
+  <div class="health-matrix">
+    {% for name, h in summary.health.items() %}
+    <div class="health-card">
+      <div style="font-weight: 600; font-size: 16px;">{{ name }}</div>
+      <div class="health-score status-{{ h.status }}">{{ h.health_score }}/100</div>
+      <div style="font-size: 13px; color: #666;">
+        {{ h.count }} customers | ₹{{ h.revenue|round(0) }} revenue<br>
+        {{ h.size_percent }}% of base | {{ h.revenue_percent }}% of revenue
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h3>Optimization Opportunities</h3>
+  <div class="opportunities">
+    {% for opp in summary.opportunities %}
+    <div class="opportunity priority-{{ opp.priority }}">
+      <div class="opp-header">
+        <div class="opp-title">{{ opp.segment }}: {{ opp.opportunity }}</div>
+        <span class="priority-badge badge-{{ opp.priority }}">{{ opp.priority }}</span>
+      </div>
+      <div style="color: #666; margin: 8px 0;">
+        <b>{{ opp.potential_customers }}</b> customers | 
+        Est. revenue lift: <b>₹{{ opp.estimated_revenue_lift }}</b>
+      </div>
+      <div class="actions">
+        <div style="font-weight: 600; margin-bottom: 4px;">Recommended Actions:</div>
+        {% for action in opp.actions %}
+        <div class="action-item">→ {{ action }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h3>Segment Distribution</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Segment</th>
+        <th>Customers</th>
+        <th>Revenue (₹)</th>
+        <th>Avg Orders</th>
+        <th>Avg Revenue</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for name, seg in summary.segments.items() %}
+      <tr>
+        <td><b>{{ name }}</b></td>
+        <td>{{ seg.count }}</td>
+        <td>{{ seg.revenue|round(2) }}</td>
+        <td>{{ seg.avg_orders }}</td>
+        <td>₹{{ seg.get('avg_revenue', 0)|round(2) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p style="margin-top: 20px;"><a href="/admin">Back to Admin Hub</a></p>
+</body>
+</html>

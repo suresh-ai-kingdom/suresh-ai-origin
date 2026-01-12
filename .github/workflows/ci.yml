@@ -46,6 +46,14 @@ jobs:
           alembic upgrade head || alembic stamp head
       - name: Run tests
         run: pytest -q
+      
+      - name: Test health endpoint
+        run: |
+          python app.py &
+          APP_PID=$!
+          sleep 5
+          curl -f http://localhost:5000/health || (kill $APP_PID && exit 1)
+          kill $APP_PID
 
   prod-warning-check:
     runs-on: ubuntu-latest

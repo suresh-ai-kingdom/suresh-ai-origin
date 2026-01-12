@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dynamic Pricing</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { border: 1px solid #eee; border-radius: 8px; padding: 12px; }
+    .price { font-weight: 600; }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Dynamic Pricing</h2>
+  <p>Last 30 days demand and conversion inform price suggestions. Values are indicative.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Product Metrics</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Base (₹)</th>
+            <th>Dynamic (₹)</th>
+            <th>Created</th>
+            <th>Paid</th>
+            <th>Conversion</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product, m in stats.items() %}
+          <tr>
+            <td>{{ product }}</td>
+            <td class="price">{{ m.base_price_rupees|round(0) }}</td>
+            <td class="price">{{ dynamic[product] }}</td>
+            <td>{{ m.created_count|round(0) }}</td>
+            <td>{{ m.paid_count|round(0) }}</td>
+            <td>{{ (m.conversion_rate * 100)|round(1) }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Scenario Suggestions</h3>
+      {% for product, m in stats.items() %}
+        <details style="margin-bottom:8px;">
+          <summary><b>{{ product }}</b> scenarios</summary>
+          <table>
+            <thead>
+              <tr>
+                <th>Factor</th>
+                <th>Price (₹)</th>
+                <th>Est. Conversion</th>
+                <th>Est. Revenue / 100 visitors</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Filled by JS below -->
+            </tbody>
+          </table>
+          <script>
+            (function(){
+              fetch('/api/pricing/product/{{ product }}')
+                .then(function(r){return r.json();})
+                .then(function(j){
+                  var tbody = document.currentScript.previousElementSibling.querySelector('tbody');
+                  tbody.innerHTML = '';
+                  (j.scenarios || []).forEach(function(s){
+                    var tr = document.createElement('tr');
+                    var conv = Math.round(s.estimated_conversion * 1000)/10;
+                    var price = (s.price_rupees || 0).toFixed ? s.price_rupees.toFixed(2) : s.price_rupees;
+                    var rev = (s.estimated_revenue_per_100 || 0).toFixed ? s.estimated_revenue_per_100.toFixed(2) : s.estimated_revenue_per_100;
+                    tr.innerHTML = '<td>'+s.factor+'</td>'+
+                                   '<td class="price">'+price+'</td>'+
+                                   '<td>'+conv+'%'</td>+
+                                   '<td class="price">'+rev+'</td>';
+                    tbody.appendChild(tr);
+                  });
+                }).catch(function(){ /* ignore */ });
+            })();
+          </script>
+        </details>
+      {% endfor %}
+    </div>
+  </div>
+
+  <p><a href="/admin">Back to Admin Hub</a></p>
+</body>
+</html>

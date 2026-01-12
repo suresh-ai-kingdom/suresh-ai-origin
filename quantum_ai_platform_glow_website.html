@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Revolutionary AI platform that transforms business intelligence">
+    <title>Quantum AI Platform - Top 5% - Excellent Performance</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
+            background: linear-gradient(90deg, #0a0a0a 0%, #1a0a3f 50%, #0a0a0a 100%);
+            background-size: 400% 400%;
+            animation: gradient-shift 15s ease infinite;
+            color: #00D9FF;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        /* Glow particle effect background */
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #8338EC33 0%, transparent 70%);
+            border-radius: 50%;
+            top: -250px;
+            right: -250px;
+            animation: float 6s ease-in-out infinite;
+            z-index: 0;
+        }
+        
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #8338EC22 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -200px;
+            left: -200px;
+            animation: float 8s ease-in-out infinite reverse;
+            z-index: 0;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+            border-radius: 24px;
+            padding: 4rem 3rem;
+            max-width: 900px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+        
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            text-shadow: 0 0 20px #8338EC, 
+                         0 0 40px #8338EC,
+                         0 0 60px #8338EC88;
+            letter-spacing: -0.02em;
+        }
+        
+        .tier-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: #8338EC;
+            color: #000;
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 50px;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 30px #8338EC;
+        }
+        
+        p {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+            line-height: 1.6;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta {
+            display: inline-block;
+            padding: 1.25rem 3.5rem;
+            background: #8338EC;
+            color: #000;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 50px;
+            box-shadow: 0 0 40px #8338EC;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .cta:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 60px #8338EC,
+                        0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .cta:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .features {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+        
+        .feature-pill {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            font-size: 0.95rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-pill:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8338EC, #8338EC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .glassmorphism {
+                padding: 2.5rem 1.5rem;
+            }
+            
+            .hero {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .cta {
+                padding: 1rem 2.5rem;
+                font-size: 1.1rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+        
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px #8338EC, 
+                            0 0 40px #8338EC; 
+            }
+            50% { 
+                box-shadow: 0 0 40px #8338EC, 
+                            0 0 60px #8338EC,
+                            0 0 80px #8338EC; 
+            }
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-on-scroll { animation: slide-up 0.8s ease-out; }
+        
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <div class="glassmorphism animate-on-scroll">
+                <div class="tier-badge">Top 5% - Excellent Performance</div>
+                <h1>Your Success Story Starts Today</h1>
+                <p>Smart solutions for ambitious teams.</p>
+                <a href="#signup" class="cta">Get Started Free</a>
+                
+                <div class="features">
+                    <div class="feature-pill">✨ AI Copy</div><div class="feature-pill">✨ Mobile Optimized</div><div class="feature-pill">✨ Animations</div><div class="feature-pill">✨ Fast Load Time</div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number">79</div>
+                        <div class="stat-label">Performance Score</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">+35%</div>
+                        <div class="stat-label">Conversion Lift</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">85</div>
+                        <div class="stat-label">Page Speed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Smooth scroll for CTA
+        document.querySelector('.cta').addEventListener('click', (e) => {
+            e.preventDefault();
+            // Add your signup logic here
+            console.log('CTA clicked!');
+        });
+        
+        // Animate elements on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-on-scroll');
+                }
+            });
+        });
+        
+        document.querySelectorAll('.glassmorphism').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

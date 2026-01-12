@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Services - SURESH AI ORIGIN</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 80px;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px);
+            border: 2px solid rgba(255, 0, 110, 0.15);
+            border-radius: 30px;
+            padding: 50px 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            group: 'service';
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--primary)30 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-card:hover {
+            transform: translateY(-25px) scale(1.05);
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 40px 100px rgba(255, 0, 110, 0.3), 
+                        0 0 60px var(--primary);
+        }
+
+        .service-icon {
+            font-size: 4rem;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 0 15px var(--accent));
+            transition: all 0.4s ease;
+        }
+
+        .service-card:hover .service-icon {
+            transform: scale(1.4) rotate(360deg);
+            filter: drop-shadow(0 0 40px var(--primary));
+        }
+
+        .service-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover .service-title {
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary);
+        }
+
+        .service-description {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .service-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .service-features li {
+            padding: 10px 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 0, 110, 0.1);
+        }
+
+        .service-features li::before {
+            content: '✓';
+            color: var(--accent);
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+
+        .service-price {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+        }
+
+        .service-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .service-btn:hover {
+            transform: scale(1.08) translateY(-3px);
+            box-shadow: 0 0 50px var(--primary), 0 15px 40px rgba(255, 0, 110, 0.4);
+        }
+
+        .service-badge {
+            display: inline-block;
+            background: rgba(0, 255, 159, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .premium-badge {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        @media (max-width: 768px) {
+            .services-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .service-card {
+                padding: 35px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">SURESH AI</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/#features">Features</a>
+                <a href="/admin">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Services Section -->
+    <section style="max-width: 1400px; margin: 0 auto; padding: 120px 30px; position: relative; z-index: 1;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #FF006E, #8338EC); border-radius: 50px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; box-shadow: 0 0 40px rgba(255, 0, 110, 0.3);">
+                🌟 PREMIUM SERVICES
+            </div>
+        </div>
+
+        <h1 style="font-size: clamp(2.2rem, 6vw, 4.5rem); font-weight: 950; text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #FF006E, #00FF9F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.02em;">
+            Next-Level AI Services
+        </h1>
+
+        <p style="text-align: center; color: var(--text-secondary); font-size: 1.25rem; margin-bottom: 80px; max-width: 800px; margin-left: auto; margin-right: auto; line-height: 1.8;">
+            Enterprise-grade AI solutions designed for ambitious teams and businesses ready to scale
+        </p>
+
+        <div class="services-grid">
+            <!-- Service 1 -->
+            <div class="service-card">
+                <div class="service-badge">ESSENTIAL</div>
+                <div class="service-icon">🤖</div>
+                <h3 class="service-title">AI Content Generation</h3>
+                <p class="service-description">Auto-generate high-quality marketing content, social posts, and email campaigns powered by advanced AI.</p>
+                <ul class="service-features">
+                    <li>Unlimited content generation</li>
+                    <li>Multi-language support</li>
+                    <li>SEO optimization</li>
+                    <li>Brand voice customization</li>
+                </ul>
+                <div class="service-price">₹4,999</div>
+                <button class="service-btn">Get Started</button>
+            </div>
+
+            <!-- Service 2 -->
+            <div class="service-card">
+                <div class="service-badge">ADVANCED</div>
+                <div class="service-icon">📊</div>
+                <h3 class="service-title">Predictive Analytics</h3>
+                <p class="service-description">Unlock data-driven insights with ML-powered revenue forecasting, churn prediction, and market analysis.</p>
+                <ul class="service-features">
+                    <li>Revenue forecasting</li>
+                    <li>Churn prediction</li>
+                    <li>Customer lifetime value</li>
+                    <li>Real-time dashboards</li>
+                </ul>
+                <div class="service-price">₹7,999</div>
+                <button class="service-btn">Get Started</button>
+            </div>
+
+            <!-- Service 3 -->
+            <div class="service-card">
+                <div class="service-badge premium-badge">PREMIUM</div>
+                <div class="service-icon">💎</div>
+                <h3 class="service-title">Custom AI Agent</h3>
+                <p class="service-description">Deploy your own intelligent AI agent that handles customer support, leads, and automations 24/7.</p>
+                <ul class="service-features">
+                    <li>24/7 automation</li>
+                    <li>Natural conversations</li>
+                    <li>Custom workflows</li>
+                    <li>API integration</li>
+                </ul>
+                <div class="service-price">₹12,999</div>
+                <button class="service-btn">Get Started</button>
+            </div>
+
+            <!-- Service 4 -->
+            <div class="service-card">
+                <div class="service-badge">ESSENTIAL</div>
+                <div class="service-icon">🎯</div>
+                <h3 class="service-title">Customer Segmentation</h3>
+                <p class="service-description">Intelligent customer grouping for hyper-targeted campaigns and personalized experiences at scale.</p>
+                <ul class="service-features">
+                    <li>AI-driven segmentation</li>
+                    <li>Behavioral analysis</li>
+                    <li>Automated campaigns</li>
+                    <li>Performance tracking</li>
+                </ul>
+                <div class="service-price">₹5,999</div>
+                <button class="service-btn">Get Started</button>
+            </div>
+
+            <!-- Service 5 -->
+            <div class="service-card">
+                <div class="service-badge">ADVANCED</div>
+                <div class="service-icon">🚀</div>
+                <h3 class="service-title">Growth Automation</h3>
+                <p class="service-description">Automate your entire growth engine with email sequences, referral programs, and recovery campaigns.</p>
+                <ul class="service-features">
+                    <li>Email automation</li>
+                    <li>Referral programs</li>
+                    <li>Abandoned recovery</li>
+                    <li>Conversion optimization</li>
+                </ul>
+                <div class="service-price">₹8,999</div>
+                <button class="service-btn">Get Started</button>
+            </div>
+
+            <!-- Service 6 -->
+            <div class="service-card">
+                <div class="service-badge premium-badge">PREMIUM</div>
+                <div class="service-icon">👑</div>
+                <h3 class="service-title">Enterprise Suite</h3>
+                <p class="service-description">Complete AI ecosystem with all services, custom integrations, dedicated support, and priority features.</p>
+                <ul class="service-features">
+                    <li>All services included</li>
+                    <li>Custom development</li>
+                    <li>24/7 dedicated support</li>
+                    <li>API access</li>
+                </ul>
+                <div class="service-price">₹29,999</div>
+                <button class="service-btn">Schedule Demo</button>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div style="margin-top: 150px; text-align: center;">
+            <h2 style="font-size: 2.5rem; margin-bottom: 60px; background: linear-gradient(135deg, #FF006E, #00FF9F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                Complete Feature Comparison
+            </h2>
+
+            <div style="background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(30px); border: 1px solid rgba(255, 0, 110, 0.15); border-radius: 30px; padding: 50px; overflow-x: auto;">
+                <table style="width: 100%; color: var(--text-light);">
+                    <thead>
+                        <tr style="border-bottom: 2px solid rgba(255, 0, 110, 0.2);">
+                            <th style="text-align: left; padding: 20px;">Feature</th>
+                            <th style="padding: 20px;">Essential</th>
+                            <th style="padding: 20px;">Advanced</th>
+                            <th style="padding: 20px; color: var(--gold);">Enterprise</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid rgba(255, 0, 110, 0.1);">
+                            <td style="text-align: left; padding: 20px;">AI Content Generation</td>
+                            <td style="text-align: center; padding: 20px;">✓</td>
+                            <td style="text-align: center; padding: 20px;">✓</td>
+                            <td style="text-align: center; padding: 20px;">✓</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 0, 110, 0.1);">
+                            <td style="text-align: left; padding: 20px;">Analytics Dashboard</td>
+                            <td style="text-align: center; padding: 20px;">Basic</td>
+                            <td style="text-align: center; padding: 20px;">✓</td>
+                            <td style="text-align: center; padding: 20px;">✓</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 0, 110, 0.1);">
+                            <td style="text-align: left; padding: 20px;">API Access</td>
+                            <td style="text-align: center; padding: 20px;">-</td>
+                            <td style="text-align: center; padding: 20px;">✓</td>
+                            <td style="text-align: center; padding: 20px;">✓</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 0, 110, 0.1);">
+                            <td style="text-align: left; padding: 20px;">Support</td>
+                            <td style="text-align: center; padding: 20px;">Email</td>
+                            <td style="text-align: center; padding: 20px;">Priority</td>
+                            <td style="text-align: center; padding: 20px;">24/7 Dedicated</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left; padding: 20px;">Custom Integrations</td>
+                            <td style="text-align: center; padding: 20px;">-</td>
+                            <td style="text-align: center; padding: 20px;">-</td>
+                            <td style="text-align: center; padding: 20px;">✓</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.querySelectorAll('.service-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                alert('🎉 Redirecting to checkout...');
+                // window.location.href = '/buy_ultra';
+            });
+        });
+    </script>
+</body>
+</html>

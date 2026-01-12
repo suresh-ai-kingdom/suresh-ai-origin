@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Intelligence</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; background: #eef; }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Payment Intelligence</h2>
+  <p>Health and insights for the last {{ days }} days.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Metrics</h3>
+      <table>
+        <tbody>
+          <tr><th>Orders Created</th><td>{{ summary.metrics.orders_created }}</td></tr>
+          <tr><th>Orders Paid</th><td>{{ summary.metrics.orders_paid }}</td></tr>
+          <tr><th>Pay Rate</th><td>{{ summary.metrics.pay_rate_percent }}%</td></tr>
+          <tr><th>Avg Capture Latency</th><td>{{ summary.metrics.avg_capture_latency_hours }} hours</td></tr>
+          <tr><th>Failed Orders</th><td>{{ summary.metrics.failed_orders }}</td></tr>
+          <tr><th>Retry Candidates</th><td>{{ summary.metrics.retry_candidates }}</td></tr>
+          <tr><th>Payments Received</th><td>{{ summary.metrics.payments_received }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Failure Reasons</h3>
+      <table>
+        <thead>
+          <tr><th>Reason</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+          {% for reason, count in summary.reasons.items() %}
+          <tr><td>{{ reason }}</td><td>{{ count }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 16px;">
+    <h3>Insights</h3>
+    <ul>
+      {% for i in summary.insights %}
+        <li><span class="badge">{{ i.priority }}</span> {{ i.message }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <p style="margin-top: 20px;"><a href="/admin">Back to Admin Hub</a></p>
+</body>
+</html>

@@ -1,0 +1,353 @@
+# SURESH AI ORIGIN - Kubernetes Deployment Configuration
+# Production-grade Kubernetes manifests for scalable deployment
+
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: suresh-ai-origin
+  labels:
+    name: suresh-ai-origin
+    environment: production
+
+---
+# ConfigMap for application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: suresh-config
+  namespace: suresh-ai-origin
+data:
+  FLASK_DEBUG: "false"
+  DATA_DB: "/app/data/data.db"
+  REDIS_URL: "redis://suresh-redis-service:6379/0"
+  FLAG_FINANCE_ENTITLEMENTS_ENFORCED: "true"
+  FLAG_INTEL_RECOMMENDATIONS_ENABLED: "true"
+  FLAG_GROWTH_NUDGES_ENABLED: "true"
+  SESSION_COOKIE_SECURE: "true"
+  SESSION_COOKIE_HTTPONLY: "true"
+  SESSION_COOKIE_SAMESITE: "Lax"
+  ADMIN_SESSION_TIMEOUT: "3600"
+
+---
+# Secret for sensitive data (base64 encode values)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: suresh-secrets
+  namespace: suresh-ai-origin
+type: Opaque
+stringData:
+  FLASK_SECRET_KEY: "your-secret-key-here"
+  RAZORPAY_KEY_ID: "your-razorpay-key"
+  RAZORPAY_KEY_SECRET: "your-razorpay-secret"
+  RAZORPAY_WEBHOOK_SECRET: "your-webhook-secret"
+  STRIPE_SECRET_KEY: "your-stripe-secret"
+  STRIPE_PUBLISHABLE_KEY: "your-stripe-publishable"
+  STRIPE_WEBHOOK_SECRET: "your-stripe-webhook-secret"
+  EMAIL_USER: "your-email@gmail.com"
+  EMAIL_PASS: "your-app-password"
+  ADMIN_USERNAME: "admin"
+  ADMIN_PASSWORD: "your-admin-password"
+  ADMIN_TOKEN: "your-admin-token"
+
+---
+# PersistentVolumeClaim for application data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: suresh-data-pvc
+  namespace: suresh-ai-origin
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+# PersistentVolumeClaim for logs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: suresh-logs-pvc
+  namespace: suresh-ai-origin
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+
+---
+# Redis StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: suresh-redis
+  namespace: suresh-ai-origin
+spec:
+  serviceName: suresh-redis-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: suresh-redis
+  template:
+    metadata:
+      labels:
+        app: suresh-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+          name: redis
+        command:
+          - redis-server
+          - --appendonly
+          - "yes"
+          - --maxmemory
+          - "512mb"
+          - --maxmemory-policy
+          - allkeys-lru
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: suresh-redis-service
+  namespace: suresh-ai-origin
+spec:
+  selector:
+    app: suresh-redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  clusterIP: None
+
+---
+# Application Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suresh-app
+  namespace: suresh-ai-origin
+  labels:
+    app: suresh-app
+spec:
+  replicas: 3  # Scale as needed
+  selector:
+    matchLabels:
+      app: suresh-app
+  template:
+    metadata:
+      labels:
+        app: suresh-app
+    spec:
+      containers:
+      - name: app
+        image: suresh-ai-origin:latest  # Replace with your registry
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+          name: http
+        env:
+        - name: FLASK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: FLASK_SECRET_KEY
+        - name: RAZORPAY_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: RAZORPAY_KEY_ID
+        - name: RAZORPAY_KEY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: RAZORPAY_KEY_SECRET
+        - name: RAZORPAY_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: RAZORPAY_WEBHOOK_SECRET
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: STRIPE_SECRET_KEY
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: STRIPE_WEBHOOK_SECRET
+        - name: EMAIL_USER
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: EMAIL_USER
+        - name: EMAIL_PASS
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: EMAIL_PASS
+        - name: ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: ADMIN_USERNAME
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: suresh-secrets
+              key: ADMIN_PASSWORD
+        envFrom:
+        - configMapRef:
+            name: suresh-config
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+        - name: logs
+          mountPath: /app/logs
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: suresh-data-pvc
+      - name: logs
+        persistentVolumeClaim:
+          claimName: suresh-logs-pvc
+
+---
+# Application Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: suresh-app-service
+  namespace: suresh-ai-origin
+spec:
+  selector:
+    app: suresh-app
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 5000
+    protocol: TCP
+    name: http
+
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: suresh-app-hpa
+  namespace: suresh-ai-origin
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: suresh-app
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Ingress (for HTTPS and domain routing)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: suresh-ingress
+  namespace: suresh-ai-origin
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - your-domain.com
+    secretName: suresh-tls-secret
+  rules:
+  - host: your-domain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: suresh-app-service
+            port:
+              number: 80

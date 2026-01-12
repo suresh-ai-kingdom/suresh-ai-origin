@@ -1,0 +1,825 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>🎯 Customer Journey Orchestration</h1>
+        <p>Multi-touch automated campaigns with real-time personalization</p>
+    </div>
+
+    <!-- Journey Stats Overview -->
+    <div class="stats-grid">
+        <div class="stat-card gradient-blue">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.total_journeys }}</div>
+                <div class="stat-label">Total Journeys</div>
+            </div>
+        </div>
+
+        <div class="stat-card gradient-purple">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.published_journeys }}</div>
+                <div class="stat-label">Published</div>
+            </div>
+        </div>
+
+        <div class="stat-card gradient-green">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.total_enrolled_customers }}</div>
+                <div class="stat-label">Enrolled Customers</div>
+            </div>
+        </div>
+
+        <div class="stat-card gradient-orange">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ "%.1f"|format(stats.completion_rate * 100) }}%</div>
+                <div class="stat-label">Completion Rate</div>
+            </div>
+        </div>
+
+        <div class="stat-card gradient-red">
+            <div class="stat-icon">💬</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.active_customers }}</div>
+                <div class="stat-label">Active Now</div>
+            </div>
+        </div>
+
+        <div class="stat-card gradient-indigo">
+            <div class="stat-icon">✉️</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.total_completed_customers }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Channel Performance -->
+    <div class="section-container">
+        <h2>📱 Channel Performance</h2>
+        <div class="channel-grid">
+            {% for channel, metrics in stats.channel_performance.items() %}
+            <div class="channel-card">
+                <div class="channel-header">
+                    {% if channel == 'email' %}
+                        📧 Email
+                    {% elif channel == 'sms' %}
+                        📱 SMS
+                    {% elif channel == 'push' %}
+                        🔔 Push
+                    {% else %}
+                        💬 {{ channel|title }}
+                    {% endif %}
+                </div>
+                <div class="channel-metrics">
+                    <div class="metric-row">
+                        <span>Sends:</span>
+                        <strong>{{ metrics.sends }}</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span>Click Rate:</span>
+                        <strong>{{ "%.2f"|format(metrics.ctr * 100) }}%</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span>Conversion Rate:</span>
+                        <strong>{{ "%.2f"|format(metrics.cvr * 100) }}%</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span>Opens:</span>
+                        <strong>{{ metrics.opens }}</strong>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Active Journeys -->
+    <div class="section-container">
+        <div class="section-header">
+            <h2>🔄 Active Journeys</h2>
+            <button class="btn-primary" onclick="openCreateJourneyModal()">+ Create Journey</button>
+        </div>
+
+        <div class="journeys-list">
+            {% for journey in journeys %}
+            {% if journey.status == 'published' %}
+            <div class="journey-card">
+                <div class="journey-header">
+                    <div>
+                        <h3>{{ journey.name }}</h3>
+                        <p class="journey-description">{{ journey.description }}</p>
+                    </div>
+                    <div class="journey-badge status-{{ journey.status }}">
+                        {{ journey.status|upper }}
+                    </div>
+                </div>
+
+                <div class="journey-stats">
+                    <div class="journey-stat">
+                        <span class="stat-label">Trigger:</span>
+                        <span class="stat-value">{{ journey.trigger.type }}</span>
+                    </div>
+                    <div class="journey-stat">
+                        <span class="stat-label">Enrolled:</span>
+                        <span class="stat-value">{{ journey.enrolled_count }}</span>
+                    </div>
+                    <div class="journey-stat">
+                        <span class="stat-label">Completed:</span>
+                        <span class="stat-value">{{ journey.completed_count }}</span>
+                    </div>
+                    <div class="journey-stat">
+                        <span class="stat-label">Steps:</span>
+                        <span class="stat-value">{{ journey.steps|length }}</span>
+                    </div>
+                </div>
+
+                <!-- Journey Steps Timeline -->
+                <div class="journey-timeline">
+                    {% for step in journey.steps %}
+                    <div class="timeline-step">
+                        <div class="step-marker">
+                            {% if step.type == 'email' %}
+                                ✉️
+                            {% elif step.type == 'sms' %}
+                                📱
+                            {% elif step.type == 'wait' %}
+                                ⏱️
+                            {% elif step.type == 'decision' %}
+                                🔀
+                            {% elif step.type == 'push' %}
+                                🔔
+                            {% else %}
+                                📦
+                            {% endif %}
+                        </div>
+                        <div class="step-info">
+                            <strong>{{ step.type|title }}</strong>
+                            {% if step.config.subject %}
+                            <div class="step-detail">Subject: {{ step.config.subject }}</div>
+                            {% endif %}
+                            {% if step.config.hours %}
+                            <div class="step-detail">Wait: {{ step.config.hours }} hours</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="journey-actions">
+                    <button class="btn-secondary" onclick="pauseJourney('{{ journey.id }}')">Pause</button>
+                    <button class="btn-secondary" onclick="viewJourneyAnalytics('{{ journey.id }}')">Analytics</button>
+                    <button class="btn-secondary" onclick="enrollCustomer('{{ journey.id }}')">Enroll</button>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if journeys|length == 0 %}
+        <div class="empty-state">
+            <p>No active journeys yet. Create one to get started!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Draft Journeys -->
+    <div class="section-container">
+        <h2>📝 Draft Journeys</h2>
+        <div class="journeys-list">
+            {% for journey in journeys %}
+            {% if journey.status == 'draft' %}
+            <div class="journey-card draft">
+                <div class="journey-header">
+                    <div>
+                        <h3>{{ journey.name }}</h3>
+                        <p class="journey-description">{{ journey.description }}</p>
+                    </div>
+                    <div class="journey-badge status-draft">DRAFT</div>
+                </div>
+
+                <div class="journey-stats">
+                    <div class="journey-stat">
+                        <span class="stat-label">Steps:</span>
+                        <span class="stat-value">{{ journey.steps|length }}</span>
+                    </div>
+                    <div class="journey-stat">
+                        <span class="stat-label">Created:</span>
+                        <span class="stat-value">Ready</span>
+                    </div>
+                </div>
+
+                <div class="journey-actions">
+                    <button class="btn-primary" onclick="publishJourney('{{ journey.id }}')">Publish</button>
+                    <button class="btn-secondary" onclick="editJourney('{{ journey.id }}')">Edit</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Create Journey Modal -->
+<div id="createJourneyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create New Journey</h2>
+            <span class="close" onclick="closeCreateJourneyModal()">&times;</span>
+        </div>
+        <form onsubmit="createJourney(event)">
+            <div class="form-group">
+                <label for="journeyName">Journey Name</label>
+                <input type="text" id="journeyName" placeholder="e.g., Welcome Series" required>
+            </div>
+
+            <div class="form-group">
+                <label for="journeyDesc">Description</label>
+                <textarea id="journeyDesc" placeholder="Describe this journey's purpose"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="triggerType">Trigger Type</label>
+                <select id="triggerType">
+                    <option value="signup">User Signup</option>
+                    <option value="cart_abandoned">Abandoned Cart</option>
+                    <option value="high_ltv">High Value Customer</option>
+                    <option value="manual">Manual</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="targetSegment">Target Segment</label>
+                <select id="targetSegment">
+                    <option value="all">All Customers</option>
+                    <option value="new_users">New Users</option>
+                    <option value="vip">VIP</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="maxEnrollments">Max Enrollments (optional)</label>
+                <input type="number" id="maxEnrollments" min="0" placeholder="Leave blank for unlimited">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeCreateJourneyModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Create Journey</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Enroll Customer Modal -->
+<div id="enrollCustomerModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Enroll Customer</h2>
+            <span class="close" onclick="closeEnrollCustomerModal()">&times;</span>
+        </div>
+        <form onsubmit="submitEnrollment(event)">
+            <div class="form-group">
+                <label for="customerId">Customer ID</label>
+                <input type="text" id="customerId" placeholder="customer_123" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerEmail">Email</label>
+                <input type="email" id="customerEmail" placeholder="customer@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerPhone">Phone</label>
+                <input type="tel" id="customerPhone" placeholder="+1234567890">
+            </div>
+
+            <div class="form-group">
+                <label for="customerSegment">Segment</label>
+                <select id="customerSegment">
+                    <option value="default">Default</option>
+                    <option value="new_users">New Users</option>
+                    <option value="vip">VIP</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeEnrollCustomerModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Enroll Customer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.admin-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.admin-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.admin-header h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+    font-size: 32px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.gradient-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.gradient-purple { background: linear-gradient(135deg, #764ba2 0%, #c084fc 100%); }
+.gradient-green { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+.gradient-orange { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.gradient-red { background: linear-gradient(135deg, #ff6a88 0%, #ff5e78 100%); }
+.gradient-indigo { background: linear-gradient(135deg, #667eea 0%, #4c51bf 100%); }
+
+.section-container {
+    background: #1a1a2e;
+    border: 1px solid #16213e;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    margin: 0;
+}
+
+/* Channel Performance */
+.channel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.channel-card {
+    background: #0f3460;
+    border: 1px solid #16213e;
+    border-radius: 8px;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+.channel-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
+}
+
+.channel-header {
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: #667eea;
+}
+
+.channel-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.metric-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.metric-row span {
+    color: #b0b0b0;
+}
+
+.metric-row strong {
+    color: #fff;
+}
+
+/* Journey Cards */
+.journeys-list {
+    display: grid;
+    gap: 20px;
+}
+
+.journey-card {
+    background: #0f3460;
+    border: 1px solid #16213e;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.journey-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.15);
+}
+
+.journey-card.draft {
+    opacity: 0.7;
+}
+
+.journey-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.journey-header h3 {
+    margin: 0 0 5px 0;
+    color: #fff;
+}
+
+.journey-description {
+    margin: 0;
+    color: #b0b0b0;
+    font-size: 13px;
+}
+
+.journey-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.status-published { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #0a3d0a; }
+.status-draft { background: #888; color: #fff; }
+.status-paused { background: #ff6a88; color: #fff; }
+
+.journey-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #16213e;
+}
+
+.journey-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.journey-stat .stat-label {
+    color: #b0b0b0;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.journey-stat .stat-value {
+    color: #667eea;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Journey Timeline */
+.journey-timeline {
+    margin: 15px 0;
+    padding-left: 20px;
+    border-left: 2px solid #16213e;
+}
+
+.timeline-step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.step-marker {
+    font-size: 20px;
+    margin-left: -28px;
+    margin-top: -2px;
+}
+
+.step-info {
+    flex: 1;
+}
+
+.step-info strong {
+    color: #667eea;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.step-detail {
+    font-size: 12px;
+    color: #b0b0b0;
+    margin-top: 2px;
+}
+
+.journey-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #16213e;
+    color: #b0b0b0;
+    border: 1px solid #16213e;
+}
+
+.btn-secondary:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #0f3460;
+    margin: 50px auto;
+    padding: 0;
+    border: 1px solid #16213e;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #16213e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #fff;
+}
+
+.close {
+    font-size: 28px;
+    font-weight: bold;
+    color: #b0b0b0;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close:hover {
+    color: #667eea;
+}
+
+.modal form {
+    padding: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #b0b0b0;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    background: #1a1a2e;
+    border: 1px solid #16213e;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #16213e;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #b0b0b0;
+}
+
+@media (max-width: 768px) {
+    .journey-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .journey-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+
+<script>
+function openCreateJourneyModal() {
+    document.getElementById('createJourneyModal').style.display = 'block';
+}
+
+function closeCreateJourneyModal() {
+    document.getElementById('createJourneyModal').style.display = 'none';
+}
+
+function openEnrollCustomerModal() {
+    document.getElementById('enrollCustomerModal').style.display = 'block';
+}
+
+function closeEnrollCustomerModal() {
+    document.getElementById('enrollCustomerModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    let modal = document.getElementById('createJourneyModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+    
+    let enrollModal = document.getElementById('enrollCustomerModal');
+    if (event.target == enrollModal) {
+        enrollModal.style.display = 'none';
+    }
+}
+
+function createJourney(e) {
+    e.preventDefault();
+    
+    const data = {
+        name: document.getElementById('journeyName').value,
+        description: document.getElementById('journeyDesc').value,
+        trigger: {
+            type: document.getElementById('triggerType').value,
+            segment: document.getElementById('targetSegment').value,
+            max_enrollments: document.getElementById('maxEnrollments').value
+        }
+    };
+    
+    fetch('/api/journeys/create', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            alert('Journey created: ' + d.journey_id);
+            closeCreateJourneyModal();
+            location.reload();
+        } else {
+            alert('Error: ' + d.error);
+        }
+    });
+}
+
+function publishJourney(journeyId) {
+    if (confirm('Publish this journey?')) {
+        fetch(`/api/journeys/${journeyId}/publish`, { method: 'POST' })
+            .then(r => r.json())
+            .then(d => {
+                alert(d.success ? d.message : 'Error: ' + d.error);
+                location.reload();
+            });
+    }
+}
+
+function pauseJourney(journeyId) {
+    alert('Journey paused: ' + journeyId);
+}
+
+function enrollCustomer(journeyId) {
+    currentJourneyId = journeyId;
+    openEnrollCustomerModal();
+}
+
+let currentJourneyId = null;
+
+function submitEnrollment(e) {
+    e.preventDefault();
+    
+    const data = {
+        customer_id: document.getElementById('customerId').value,
+        customer_data: {
+            email: document.getElementById('customerEmail').value,
+            phone: document.getElementById('customerPhone').value,
+            segment: document.getElementById('customerSegment').value
+        }
+    };
+    
+    fetch(`/api/journeys/${currentJourneyId}/enroll`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(d => {
+        alert(d.success ? d.message : 'Error: ' + d.error);
+        closeEnrollCustomerModal();
+        location.reload();
+    });
+}
+
+function viewJourneyAnalytics(journeyId) {
+    fetch(`/api/journeys/${journeyId}/analytics`)
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                alert(JSON.stringify(d.analytics, null, 2));
+            }
+        });
+}
+
+function editJourney(journeyId) {
+    alert('Edit journey: ' + journeyId);
+}
+</script>
+{% endblock %}

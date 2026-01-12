@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Voice Analytics</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; background: #eef; }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Voice Analytics</h2>
+  <p>Recent analyses and metrics (last {{ days }} days).</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Aggregate Metrics</h3>
+      <table>
+        <tbody>
+          <tr><th>Analyses Count</th><td>{{ metrics.count }}</td></tr>
+          <tr><th>Avg Sentiment</th><td>{{ metrics.avg_sentiment }}</td></tr>
+          <tr><th>Avg Duration</th><td>{{ metrics.avg_duration_secs }} secs</td></tr>
+          <tr>
+            <th>Top Intents</th>
+            <td>
+              {% for intent, c in metrics.top_intents %}
+                <span class="badge">{{ intent }} ({{ c }})</span>
+              {% endfor %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Recent Analyses</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Receipt</th>
+            <th>Sentiment</th>
+            <th>Intents</th>
+            <th>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in items %}
+          <tr>
+            <td>{{ i.id }}</td>
+            <td>{{ i.receipt or '-' }}</td>
+            <td>{{ i.sentiment_score }}</td>
+            <td>{% for t in i.intents %}<span class="badge">{{ t }}</span>{% endfor %}</td>
+            <td>{{ i.duration_secs if i.duration_secs else '-' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p style="margin-top: 20px;"><a href="/admin">Back to Admin Hub</a></p>
+</body>
+</html>

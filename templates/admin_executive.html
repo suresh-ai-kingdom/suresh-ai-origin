@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Executive Dashboard</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; background: #0a0e1a; color: #fff; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .header h1 { font-size: 2.5em; margin-bottom: 10px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .stat-card { background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 12px; padding: 24px; }
+    .stat-card h3 { margin: 0 0 16px 0; color: #667eea; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-value { font-size: 2.5em; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .stat-label { color: #888; font-size: 0.85em; }
+    .alerts-section { background: rgba(245, 87, 108, 0.1); border: 1px solid rgba(245, 87, 108, 0.3); border-radius: 12px; padding: 24px; margin-bottom: 40px; }
+    .alerts-section h2 { color: #f5576c; margin-top: 0; }
+    .alert-item { background: rgba(0, 0, 0, 0.3); border-left: 4px solid #f5576c; padding: 16px; margin-bottom: 16px; border-radius: 8px; }
+    .alert-item.medium { border-left-color: #f59c3d; }
+    .alert-item.low { border-left-color: #48bb78; }
+    .alert-priority { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.75em; font-weight: 600; background: #f5576c; color: #fff; margin-bottom: 8px; }
+    .alert-priority.medium { background: #f59c3d; }
+    .alert-priority.low { background: #48bb78; }
+    .sections-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; }
+    .section-card { background: rgba(102, 126, 234, 0.05); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 12px; padding: 24px; }
+    .section-card h3 { color: #667eea; margin-top: 0; }
+    .metric-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-label { color: #888; }
+    .metric-value { color: #fff; font-weight: 600; }
+    .back-link { display: inline-block; margin-top: 30px; padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; text-decoration: none; border-radius: 8px; transition: transform 0.2s; }
+    .back-link:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  
+  <div class="header">
+    <h1>📊 Executive Dashboard</h1>
+    <p style="color: #888;">Real-time insights from all 15 AI systems (last {{ days }} days)</p>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>💰 Revenue</h3>
+      <div class="stat-value">₹{{ summary.revenue.total_revenue_rupees }}</div>
+      <div class="stat-label">{{ summary.revenue.paid_orders }} paid / {{ summary.revenue.total_orders }} orders</div>
+    </div>
+    
+    <div class="stat-card">
+      <h3>📈 MRR</h3>
+      <div class="stat-value">₹{{ summary.subscriptions.mrr_rupees }}</div>
+      <div class="stat-label">{{ summary.subscriptions.active_subscriptions }} active subscriptions</div>
+    </div>
+    
+    <div class="stat-card">
+      <h3>💎 Avg CLV</h3>
+      <div class="stat-value">₹{{ summary.clv.avg_clv_rupees }}</div>
+      <div class="stat-label">{{ summary.clv.total_customers }} customers</div>
+    </div>
+    
+    <div class="stat-card">
+      <h3>⚠️ Churn Risk</h3>
+      <div class="stat-value">{{ summary.churn.at_risk_count }}</div>
+      <div class="stat-label">Avg risk: {{ (summary.churn.avg_risk_score * 100)|round(1) }}%</div>
+    </div>
+  </div>
+
+  <!-- Critical Alerts -->
+  {% if alerts %}
+  <div class="alerts-section">
+    <h2>🔔 Critical Alerts</h2>
+    {% for alert in alerts %}
+    <div class="alert-item {{ alert.priority|lower }}">
+      <span class="alert-priority {{ alert.priority|lower }}">{{ alert.priority }}</span>
+      <div style="margin-bottom: 8px;"><strong>{{ alert.system }}:</strong> {{ alert.message }}</div>
+      <div style="color: #aaa; font-size: 0.9em;">→ {{ alert.action }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Detailed Sections -->
+  <div class="sections-grid">
+    <div class="section-card">
+      <h3>💳 Payment Health</h3>
+      <div class="metric-row">
+        <span class="metric-label">Pay Rate</span>
+        <span class="metric-value">{{ summary.payments.pay_rate_percent }}%</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Failed Orders</span>
+        <span class="metric-value">{{ summary.payments.failed_orders }}</span>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3>📢 Campaign Performance</h3>
+      <div class="metric-row">
+        <span class="metric-label">Active Campaigns</span>
+        <span class="metric-value">{{ summary.campaigns.campaign_count }}</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Avg Effectiveness</span>
+        <span class="metric-value">{{ (summary.campaigns.avg_effectiveness * 100)|round(1) }}%</span>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3>📱 Social Scheduling</h3>
+      <div class="metric-row">
+        <span class="metric-label">Scheduled Posts</span>
+        <span class="metric-value">{{ summary.social.scheduled_posts }}</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Platforms</span>
+        <span class="metric-value">{{ summary.social.platforms }}</span>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3>🎙️ Voice Sentiment</h3>
+      <div class="metric-row">
+        <span class="metric-label">Analyses</span>
+        <span class="metric-value">{{ summary.voice.analysis_count }}</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Avg Sentiment</span>
+        <span class="metric-value">{{ (summary.voice.avg_sentiment * 100)|round(1) }}%</span>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3>📈 Growth Forecast</h3>
+      <div class="metric-row">
+        <span class="metric-label">Recommended</span>
+        <span class="metric-value">{{ summary.growth.recommended_scenario|upper }}</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Growth Rate</span>
+        <span class="metric-value">{{ (summary.growth.growth_rate * 100)|round(1) }}%</span>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3>📊 Market Intelligence</h3>
+      <div class="metric-row">
+        <span class="metric-label">Market Revenue</span>
+        <span class="metric-value">₹{{ summary.market.total_revenue_rupees }}</span>
+      </div>
+      {% if summary.market.top_recommendation %}
+      <div style="margin-top: 12px; padding: 12px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; font-size: 0.9em;">
+        <strong>{{ summary.market.top_recommendation.product }}</strong><br>
+        <span style="color: #888;">{{ summary.market.top_recommendation.recommendation }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="text-align: center;">
+    <a href="/admin" class="back-link">← Back to Admin Hub</a>
+  </div>
+</body>
+</html>

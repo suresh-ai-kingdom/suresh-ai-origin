@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Checkout - SURESH AI ORIGIN</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Checkout-specific premium styling */
+        .checkout-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 30px;
+        }
+
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+            margin-top: 60px;
+        }
+
+        .checkout-form-wrapper, .checkout-summary {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 0, 110, 0.15);
+            border-radius: 30px;
+            padding: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .checkout-form-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--primary)10 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .checkout-summary {
+            position: sticky;
+            top: 150px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 0, 110, 0.2);
+            border-radius: 15px;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 30px rgba(255, 0, 110, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .payment-method {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px solid rgba(255, 0, 110, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary);
+            background: rgba(255, 0, 110, 0.1);
+            transform: scale(1.05);
+        }
+
+        .payment-method.active {
+            background: rgba(255, 0, 110, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 40px rgba(255, 0, 110, 0.3);
+        }
+
+        .order-summary-header {
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 35px;
+            color: var(--text-light);
+            border-bottom: 2px solid rgba(255, 0, 110, 0.2);
+            padding-bottom: 20px;
+        }
+
+        .cart-items {
+            margin-bottom: 40px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 0, 110, 0.1);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .cart-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .item-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--text-light);
+        }
+
+        .item-info p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .item-price {
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .price-breakdown {
+            border-top: 2px solid rgba(255, 0, 110, 0.2);
+            padding-top: 25px;
+            margin-top: 25px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .price-row.total {
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary);
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 0, 110, 0.3);
+        }
+
+        .coupon-section {
+            margin-bottom: 30px;
+        }
+
+        .coupon-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .coupon-input-group input {
+            flex: 1;
+        }
+
+        .coupon-btn {
+            background: rgba(255, 0, 110, 0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 16px 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .coupon-btn:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 30px var(--primary);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 40px var(--primary), 0 0 80px rgba(255, 0, 110, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 15px;
+        }
+
+        .checkout-btn:hover {
+            transform: scale(1.05) translateY(-4px);
+            box-shadow: 0 0 60px var(--primary), 0 15px 40px rgba(255, 0, 110, 0.4);
+        }
+
+        .security-badges {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 0, 110, 0.2);
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .badge-icon {
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        .success-message {
+            display: none;
+            background: rgba(0, 255, 159, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: var(--accent);
+            margin-bottom: 20px;
+            animation: slideUp 0.5s ease;
+        }
+
+        .error-message {
+            display: none;
+            background: rgba(255, 0, 110, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .promo-tag {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .checkout-summary {
+                position: static;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">SURESH AI</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/#features">Features</a>
+                <a href="/admin">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Checkout Section -->
+    <section class="checkout-section">
+        <div class="text-center" style="margin-bottom: 60px;">
+            <div style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #FF006E, #8338EC); border-radius: 50px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; box-shadow: 0 0 40px rgba(255, 0, 110, 0.3); margin-bottom: 30px;">
+                🔒 SECURE ULTRA-PREMIUM CHECKOUT
+            </div>
+            <h1 style="background: linear-gradient(135deg, #FF006E, #00FF9F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 3.5rem; margin-bottom: 20px; font-weight: 900;">Complete Your Order</h1>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 1.2rem;">Join thousands of premium users in the top 1% ecosystem</p>
+        </div>
+
+        <div class="checkout-container">
+            <!-- Checkout Form -->
+            <div class="checkout-form-wrapper">
+                <div class="success-message">✓ Order submitted successfully!</div>
+                <div class="error-message">✗ Please fill all required fields</div>
+
+                <form id="checkoutForm">
+                    <!-- Contact Info -->
+                    <div style="margin-bottom: 40px;">
+                        <h3 style="font-size: 1.3rem; margin-bottom: 25px; color: #FF006E;">Contact Information</h3>
+                        
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input type="text" name="name" placeholder="Your full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" name="email" placeholder="your@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" name="phone" placeholder="+1 (555) 000-0000">
+                        </div>
+                    </div>
+
+                    <!-- Billing Address -->
+                    <div style="margin-bottom: 40px;">
+                        <h3 style="font-size: 1.3rem; margin-bottom: 25px; color: #FF006E;">Billing Address</h3>
+                        
+                        <div class="form-group">
+                            <label>Street Address *</label>
+                            <input type="text" name="address" placeholder="123 Main Street" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>City *</label>
+                                <input type="text" name="city" placeholder="New York" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Country *</label>
+                                <input type="text" name="country" placeholder="United States" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Zip Code</label>
+                                <input type="text" name="zip" placeholder="10001">
+                            </div>
+                            <div class="form-group">
+                                <label>State</label>
+                                <input type="text" name="state" placeholder="NY">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div style="margin-bottom: 40px;">
+                        <h3 style="font-size: 1.3rem; margin-bottom: 25px; color: #FF006E;">Payment Method</h3>
+                        
+                        <div class="payment-methods">
+                            <label class="payment-method active" onclick="selectPayment(this, 'card')">
+                                💳 Card
+                            </label>
+                            <label class="payment-method" onclick="selectPayment(this, 'razorpay')">
+                                🔐 Razorpay
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Cardholder Name *</label>
+                            <input type="text" name="cardholder" placeholder="Name on card" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Card Number *</label>
+                            <input type="text" name="cardnumber" placeholder="1234 5678 9012 3456" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Expiry Date *</label>
+                                <input type="text" name="expiry" placeholder="MM/YY" required>
+                            </div>
+                            <div class="form-group">
+                                <label>CVV *</label>
+                                <input type="text" name="cvv" placeholder="123" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coupon -->
+                    <div class="coupon-section">
+                        <label style="display: block; margin-bottom: 12px; font-weight: 600; color: var(--text-light);">Have a Coupon Code?</label>
+                        <div class="coupon-input-group">
+                            <input type="text" name="coupon" placeholder="Enter coupon code" id="couponInput">
+                            <button type="button" class="coupon-btn" onclick="applyCoupon()">Apply</button>
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px;">
+                            Popular: <strong>SAVE20</strong> (20% off) | <strong>PREMIUM30</strong> (30% off)
+                        </div>
+                    </div>
+
+                    <!-- Checkout Button -->
+                    <button type="submit" class="checkout-btn">💎 COMPLETE PURCHASE NOW</button>
+
+                    <!-- Security Badges -->
+                    <div class="security-badges">
+                        <div class="badge"><span class="badge-icon">🔒</span> 256-bit SSL</div>
+                        <div class="badge"><span class="badge-icon">✓</span> Secure</div>
+                        <div class="badge"><span class="badge-icon">⚡</span> Instant Delivery</div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Order Summary (Sticky) -->
+            <div class="checkout-summary">
+                <div class="order-summary-header">📦 Order Summary</div>
+
+                <div class="cart-items">
+                    <!-- Cart Items will be populated dynamically -->
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <h4>PREMIUM AI PLATFORM</h4>
+                            <p>Lifetime access + all features</p>
+                        </div>
+                        <div class="item-price">₹9,999</div>
+                    </div>
+
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <h4>Priority Support</h4>
+                            <p>24/7 dedicated support</p>
+                        </div>
+                        <div class="item-price">₹2,999</div>
+                    </div>
+
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <h4>Custom Integration</h4>
+                            <p>API access + webhooks</p>
+                        </div>
+                        <div class="item-price">₹3,999</div>
+                    </div>
+                </div>
+
+                <div class="price-breakdown">
+                    <div class="price-row">
+                        <span>Subtotal</span>
+                        <span>₹16,997</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Tax (18%)</span>
+                        <span>₹3,059</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Shipping</span>
+                        <span>Free ✨</span>
+                    </div>
+                    <div class="price-row">
+                        <span id="discountRow" style="display: none;">
+                            Discount
+                        </span>
+                        <span id="discountAmount" style="display: none; color: var(--accent);">
+                            -₹0
+                        </span>
+                    </div>
+                    <div class="price-row total">
+                        <span>Total</span>
+                        <span id="totalPrice">₹20,056</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 20px; background: rgba(0, 255, 159, 0.05); border: 1px solid rgba(0, 255, 159, 0.2); border-radius: 15px; text-align: center;">
+                    <p style="color: var(--accent); font-weight: 600;">✓ 30-day money-back guarantee</p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">No questions asked • Full refund</p>
+                </div>
+
+                <div class="promo-tag">
+                    🎁 Limited time: 40% off premium bundle
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function selectPayment(element, method) {
+            document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            console.log('Payment method selected:', method);
+        }
+
+        function applyCoupon() {
+            const coupon = document.getElementById('couponInput').value;
+            const coupons = {
+                'SAVE20': 0.20,
+                'PREMIUM30': 0.30,
+                'VIP50': 0.50
+            };
+            
+            if (coupons[coupon]) {
+                const subtotal = 16997;
+                const discount = Math.floor(subtotal * coupons[coupon]);
+                const tax = Math.floor(((subtotal - discount) * 0.18));
+                const total = subtotal - discount + tax;
+                
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('discountAmount').style.display = 'flex';
+                document.getElementById('discountAmount').textContent = `-₹${discount}`;
+                document.getElementById('totalPrice').textContent = `₹${total}`;
+                
+                alert(`✓ Coupon applied! Saved ₹${discount}`);
+            } else {
+                alert('Invalid coupon code');
+            }
+        }
+
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.querySelector('.success-message').style.display = 'block';
+            setTimeout(() => {
+                alert('Order received! Redirecting to payment gateway...');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

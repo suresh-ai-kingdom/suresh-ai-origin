@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Analytics - Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1b4e 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #00E5FF;
+        }
+        
+        h1 {
+            color: #00E5FF;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #8338EC;
+            font-size: 1.1em;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .kpi-card {
+            background: linear-gradient(135deg, rgba(131, 56, 236, 0.2) 0%, rgba(0, 229, 255, 0.1) 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            text-align: center;
+        }
+        
+        .kpi-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #00E5FF;
+            margin-bottom: 5px;
+        }
+        
+        .kpi-label {
+            color: #888;
+            font-size: 0.85em;
+            text-transform: uppercase;
+        }
+        
+        .section {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(131, 56, 236, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            color: #00E5FF;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, #00E5FF 0%, #8338EC 100%);
+            border-radius: 2px;
+        }
+        
+        .alert {
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.1) 0%, rgba(255, 106, 0, 0.1) 100%);
+            border-left: 4px solid #FF006E;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .alert.high {
+            border-left-color: #FF006E;
+        }
+        
+        .alert-priority {
+            color: #FF006E;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75em;
+            margin-bottom: 5px;
+        }
+        
+        .alert-message {
+            color: #e0e0e0;
+            margin-bottom: 5px;
+        }
+        
+        .alert-action {
+            color: #888;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+        
+        .metric-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .metric-table th {
+            background: rgba(131, 56, 236, 0.2);
+            color: #00E5FF;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(131, 56, 236, 0.3);
+        }
+        
+        .metric-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(131, 56, 236, 0.2);
+        }
+        
+        .metric-table tr:hover {
+            background: rgba(0, 229, 255, 0.05);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .badge-device {
+            background: rgba(0, 229, 255, 0.2);
+            color: #00E5FF;
+        }
+        
+        .badge-source {
+            background: rgba(131, 56, 236, 0.2);
+            color: #8338EC;
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00FF9F;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 5px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .recommendation {
+            background: rgba(0, 229, 255, 0.1);
+            border-left: 4px solid #00E5FF;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="live-indicator"></span>
+            <h1>📊 Real-time Analytics</h1>
+        </div>
+        <p class="subtitle">Live KPIs, Conversion Funnels, User Journeys & Heatmaps</p>
+    </header>
+
+    <!-- Real-time KPIs -->
+    <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card">
+            <div class="kpi-value">{{ summary.kpis.active_visitors }}</div>
+            <div class="kpi-label">Active Now</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ summary.kpis.total_visitors }}</div>
+            <div class="kpi-label">Total Visitors</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ summary.kpis.total_pageviews }}</div>
+            <div class="kpi-label">Page Views</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ "%.1f"|format(summary.kpis.conversion_rate_percentage) }}%</div>
+            <div class="kpi-label">Conversion Rate</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ "%.1f"|format(summary.kpis.bounce_rate_percentage) }}%</div>
+            <div class="kpi-label">Bounce Rate</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ summary.kpis.total_conversions }}</div>
+            <div class="kpi-label">Conversions</div>
+        </div>
+    </div>
+
+    <!-- Critical Alerts -->
+    <div class="section">
+        <div class="section-title">⚠️ Critical Alerts</div>
+        <div id="alertsContainer">
+            {% if summary.critical_alerts %}
+                {% for alert in summary.critical_alerts %}
+                    <div class="alert {{ alert.priority.lower() }}">
+                        <div class="alert-priority">{{ alert.priority }} - {{ alert.category }}</div>
+                        <div class="alert-message">{{ alert.message }}</div>
+                        <div class="alert-action">👉 {{ alert.action }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="color: #00FF9F; text-align: center; padding: 20px;">
+                    ✅ All systems performing well
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Conversion Funnel -->
+    <div class="section">
+        <div class="section-title">🔄 Conversion Funnel</div>
+        <div style="margin-bottom: 15px;">
+            <strong style="color: #00E5FF;">Overall Conversion Rate: {{ "%.2f"|format(summary.funnel.overall_conversion_rate) }}%</strong>
+        </div>
+        <table class="metric-table">
+            <thead>
+                <tr>
+                    <th>Funnel Step</th>
+                    <th>Visitors</th>
+                    <th>% of Start</th>
+                    <th>Dropoff</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for step in summary.funnel.steps %}
+                    <tr>
+                        <td>{{ step | replace('_', ' ') | title }}</td>
+                        <td style="color: #00E5FF; font-weight: 600;">{{ summary.funnel.visitor_counts.get(step, 0) }}</td>
+                        <td style="color: #00E5FF;">{{ "%.0f"|format((summary.funnel.visitor_counts.get(step, 0) / max(summary.funnel.visitor_counts.get(summary.funnel.steps[0], 1), 1)) * 100) }}%</td>
+                        <td style="color: #FF6A00;">N/A</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div style="margin-top: 20px;">
+            <strong style="color: #00E5FF;">Recommendations:</strong>
+            {% for rec in summary.funnel.recommendations %}
+                <div class="recommendation">{{ rec }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Traffic Analysis -->
+    <div class="grid-2">
+        <div class="section">
+            <div class="section-title">📡 Traffic Sources</div>
+            {% for source, count in summary.kpis.traffic_sources.items() %}
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(131, 56, 236, 0.2);">
+                    <span><span class="badge badge-source">{{ source }}</span></span>
+                    <span style="color: #00E5FF; font-weight: 600;">{{ count }} ({{ "%.1f"|format((count / summary.kpis.total_visitors) * 100) }}%)</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="section">
+            <div class="section-title">📱 Device Distribution</div>
+            {% for device, count in summary.kpis.device_distribution.items() %}
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(131, 56, 236, 0.2);">
+                    <span><span class="badge badge-device">{{ device }}</span></span>
+                    <span style="color: #00E5FF; font-weight: 600;">{{ count }} ({{ "%.1f"|format((count / summary.kpis.total_visitors) * 100) }}%)</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Engagement Metrics -->
+    <div class="section">
+        <div class="section-title">⏱️ Key Engagement Metrics</div>
+        <table class="metric-table">
+            <tr>
+                <td>Avg Time on Site</td>
+                <td style="color: #00E5FF; font-weight: 600;">{{ summary.kpis.avg_time_on_site_seconds }}s</td>
+            </tr>
+            <tr>
+                <td>Avg Events per Visitor</td>
+                <td style="color: #00E5FF; font-weight: 600;">{{ summary.kpis.avg_events_per_visitor }}</td>
+            </tr>
+            <tr>
+                <td>Revenue per Visitor</td>
+                <td style="color: #00FF9F; font-weight: 600;">${{ summary.kpis.revenue_per_visitor }}</td>
+            </tr>
+            <tr>
+                <td>User Bounce Rate</td>
+                <td style="color: #FF6A00; font-weight: 600;">{{ "%.1f"|format(summary.kpis.bounce_rate_percentage) }}%</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; color: #666; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(131, 56, 236, 0.2);">
+        <small>Last updated: {{ summary.summary_timestamp }}</small>
+    </div>
+</body>
+</html>

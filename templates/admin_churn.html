@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Churn Prediction & Alerts</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 20px 0; }
+    .stat-card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-value { font-size: 32px; font-weight: bold; margin: 8px 0; }
+    .stat-label { color: #666; font-size: 14px; }
+    .critical { background: #fee; border-color: #fcc; }
+    .high { background: #ffe; border-color: #fc6; }
+    .medium { background: #fef; border-color: #ccf; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+    .risk-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .risk-CRITICAL { background: #f44; color: white; }
+    .risk-HIGH { background: #fa0; color: white; }
+    .risk-MEDIUM { background: #49f; color: white; }
+    .risk-LOW { background: #4c4; color: white; }
+    .recommendations { font-size: 13px; color: #666; }
+  </style>
+</head>
+<body>
+  {% include '_admin_header.html' %}
+  <h2>Churn Prediction & Alerts</h2>
+  <p>Identify at-risk customers and take action before they churn.</p>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Total Customers</div>
+      <div class="stat-value">{{ stats.total_customers }}</div>
+    </div>
+    <div class="stat-card critical">
+      <div class="stat-label">Critical Risk</div>
+      <div class="stat-value">{{ stats.critical_risk }}</div>
+    </div>
+    <div class="stat-card high">
+      <div class="stat-label">High Risk</div>
+      <div class="stat-value">{{ stats.high_risk }}</div>
+    </div>
+    <div class="stat-card medium">
+      <div class="stat-label">Medium Risk</div>
+      <div class="stat-value">{{ stats.medium_risk }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Low Risk</div>
+      <div class="stat-value">{{ stats.low_risk }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Risk Score</div>
+      <div class="stat-value">{{ stats.avg_risk_score }}</div>
+    </div>
+  </div>
+
+  <h3>At-Risk Customers (Risk ≥ 50)</h3>
+  {% if at_risk %}
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Risk Level</th>
+        <th>Score</th>
+        <th>Last Purchase</th>
+        <th>Orders</th>
+        <th>Reasons</th>
+        <th>Recommendations</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for customer in at_risk %}
+      <tr>
+        <td>{{ customer.receipt }}</td>
+        <td><span class="risk-badge risk-{{ customer.risk_level }}">{{ customer.risk_level }}</span></td>
+        <td><b>{{ customer.risk_score }}</b></td>
+        <td>{{ customer.last_purchase_days }} days ago</td>
+        <td>{{ customer.order_count }}</td>
+        <td>
+          {% for reason in customer.reasons %}
+            <div>• {{ reason }}</div>
+          {% endfor %}
+        </td>
+        <td class="recommendations">
+          {% for rec in customer.recommendations %}
+            <div>→ {{ rec }}</div>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No customers at high risk currently. Great job!</p>
+  {% endif %}
+
+  <p style="margin-top: 20px;"><a href="/admin">Back to Admin Hub</a></p>
+</body>
+</html>

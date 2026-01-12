@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Smart Email Timing - Admin{% endblock %}
+{% block content %}
+<style>
+.container { max-width: 1000px; margin: 20px auto; background:#fff; border-radius:12px; box-shadow:0 6px 24px rgba(0,0,0,0.08); overflow:hidden; }
+.header { background: linear-gradient(135deg, #667eea, #764ba2); color:#fff; padding:16px 20px; display:flex; align-items:center; gap:12px; }
+.header h1 { margin:0; font-size:1.6rem; }
+.section { padding:20px; border-top:1px solid #eee; }
+.grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:16px; }
+.card { background:#f8f9ff; border:1px solid #e3e7ff; border-radius:8px; padding:16px; }
+.value { font-size:1.8rem; font-weight:800; color:#667eea; }
+.sub { color:#888; font-size:0.9rem; }
+.input-row { display:flex; gap:10px; }
+.input-row input { flex:1; padding:10px; border-radius:8px; border:2px solid #ddd; }
+.input-row input:focus { outline:none; border-color:#667eea; }
+.input-row button { padding:10px 14px; background:#667eea; color:#fff; border:none; border-radius:8px; }
+.list { display:grid; gap:8px; }
+.item { padding:10px 12px; border-left:4px solid #667eea; background:#fff; border-radius:6px; }
+.item .meta { color:#888; font-size:0.85rem; }
+</style>
+<div class="container">
+  <div class="header">
+    <div style="font-size:1.6rem">⏰</div>
+    <h1>Smart Email Timing</h1>
+  </div>
+  <div class="section">
+    <div class="grid">
+      <div class="card">
+        <div class="sub">Global Best Hour</div>
+        <div id="globalHour" class="value">--</div>
+        <div id="globalConf" class="sub">Confidence: --</div>
+      </div>
+      <div class="card">
+        <div class="sub">Customers</div>
+        <div id="statCustomers" class="value">0</div>
+      </div>
+      <div class="card">
+        <div class="sub">Orders</div>
+        <div id="statOrders" class="value">0</div>
+      </div>
+      <div class="card">
+        <div class="sub">Reminders</div>
+        <div id="statReminders" class="value">0</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <h3>Get Best Send Time (by Customer)</h3>
+    <div class="input-row">
+      <input id="receiptInput" placeholder="Enter customer receipt..." />
+      <button onclick="lookupCustomer()">Lookup</button>
+    </div>
+    <div id="customerResult" class="list" style="margin-top:12px"></div>
+  </div>
+  <div class="section">
+    <h3>Recommended Schedule Windows</h3>
+    <div id="scheduleList" class="list"></div>
+  </div>
+</div>
+<script>
+async function loadStats(){
+  const res = await fetch('/api/email_timing/stats');
+  const data = await res.json();
+  if(data.success){
+    document.getElementById('statCustomers').textContent = data.stats.customers;
+    document.getElementById('statOrders').textContent = data.stats.orders;
+    document.getElementById('statReminders').textContent = data.stats.reminders;
+    document.getElementById('globalHour').textContent = (data.stats.global_best.hour + ':00');
+    document.getElementById('globalConf').textContent = 'Confidence: ' + Math.round(data.stats.global_best.confidence*100) + '%';
+  }
+}
+async function loadSchedule(){
+  const res = await fetch('/api/email_timing/schedule');
+  const data = await res.json();
+  if(data.success){
+    const list = document.getElementById('scheduleList');
+    list.innerHTML = data.schedule.map(s => `<div class='item'><strong>${s.hour}:00</strong><div class='meta'>${s.reason} • ${s.priority}</div></div>`).join('');
+  }
+}
+async function lookupCustomer(){
+  const id = document.getElementById('receiptInput').value.trim();
+  if(!id) return;
+  const res = await fetch('/api/email_timing/customer/' + id);
+  const data = await res.json();
+  const el = document.getElementById('customerResult');
+  if(data.success){
+    const r = data.result;
+    el.innerHTML = `<div class='item'><strong>Best Hour: ${r.hour}:00</strong><div class='meta'>Confidence ${Math.round(r.confidence*100)}%</div></div>`;
+  } else {
+    el.innerHTML = `<div class='item'>Error: ${data.error || 'Unable to get timing.'}</div>`;
+  }
+}
+loadStats();
+loadSchedule();
+</script>
+{% endblock %}

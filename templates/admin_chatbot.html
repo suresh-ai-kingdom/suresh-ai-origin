@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}AI Chatbot - Admin{% endblock %}
+{% block content %}
+<style>
+.chat-container { max-width: 900px; margin: 20px auto; background: #fff; border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,0.08); overflow: hidden; }
+.chat-header { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; padding: 16px 20px; display:flex; align-items:center; gap:12px; }
+.chat-header h1 { font-size: 1.6rem; margin: 0; }
+.chat-body { padding: 20px; height: 480px; overflow-y: auto; background: linear-gradient(180deg, #f8f9ff, #fdfdfd); }
+.msg { margin: 12px 0; display:flex; }
+.msg.user { justify-content: flex-end; }
+.bubble { max-width: 70%; padding: 12px 14px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.msg.user .bubble { background: #667eea; color:#fff; border-bottom-right-radius: 4px; }
+.msg.bot .bubble { background: #ffffff; color:#333; border-left: 4px solid #667eea; }
+.chat-input { display:flex; gap:10px; padding: 16px; border-top: 1px solid #eee; }
+.chat-input input { flex:1; padding: 12px; border-radius: 8px; border:2px solid #ddd; }
+.chat-input input:focus { outline:none; border-color:#667eea; }
+.chat-input button { padding: 12px 18px; background:#667eea; color:#fff; border:none; border-radius:8px; cursor:pointer; }
+.suggestions { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.suggest { background:#f0f3ff; color:#555; border:1px solid #dde3ff; border-radius: 16px; padding:6px 10px; font-size: 0.85rem; cursor:pointer; }
+.meta { color:#999; font-size: 0.8rem; margin-top: 6px; }
+</style>
+<div class="chat-container">
+  <div class="chat-header">
+    <div style="font-size:1.6rem">💬</div>
+    <h1>AI Chatbot (Admin)</h1>
+  </div>
+  <div id="chatBody" class="chat-body"></div>
+  <div class="chat-input">
+    <input id="chatInput" type="text" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+<script>
+const chatBody = document.getElementById('chatBody');
+const chatInput = document.getElementById('chatInput');
+let history = [];
+
+function addMessage(role, content, suggestions=[]) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+  wrap.innerHTML = `<div class="bubble">${content}${suggestions?.length ? renderSuggestions(suggestions) : ''}</div>`;
+  chatBody.appendChild(wrap);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function renderSuggestions(items){
+  return `<div class="suggestions">` + items.map(s => `<span class="suggest" onclick="handleSuggestion('${s.action}')">${s.label}</span>`).join('') + `</div>`;
+}
+
+function handleSuggestion(action){
+  if(!action) return;
+  if(action.startsWith('open:')){
+    const url = action.replace('open:', '');
+    window.location.href = url;
+  }
+}
+
+async function sendMessage(){
+  const text = chatInput.value.trim();
+  if(!text) return;
+  addMessage('user', text);
+  chatInput.value = '';
+  const res = await fetch('/api/chat/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, history }) });
+  const data = await res.json();
+  if(data.success){
+    const reply = data.reply;
+    addMessage('bot', reply.content, reply.suggestions);
+    history.push({ role: 'user', content: text });
+    history.push({ role: 'assistant', content: reply.content });
+  } else {
+    addMessage('bot', 'Sorry, something went wrong.');
+  }
+}
+
+// greet
+addMessage('bot', 'Hello! 👋 I\'m your AI assistant. Ask me about pricing, downloads, refunds or support.');
+</script>
+{% endblock %}

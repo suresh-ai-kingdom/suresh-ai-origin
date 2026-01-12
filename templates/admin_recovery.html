@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abandoned Order Recovery - Suresh AI Origin Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --critical: #dc2626;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary);
+        }
+
+        .metric-card.danger {
+            border-left-color: var(--danger);
+        }
+
+        .metric-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .metric-card.critical {
+            border-left-color: var(--critical);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .metric-card.danger .metric-value {
+            color: var(--danger);
+        }
+
+        .metric-card.warning .metric-value {
+            color: var(--warning);
+        }
+
+        .metric-subtext {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .alert-box {
+            background: #fef2f2;
+            border: 2px solid var(--danger);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: var(--critical);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .alert-content {
+            color: #7f1d1d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .suggestion-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .suggestion-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .suggestion-card.critical {
+            border-top: 4px solid var(--critical);
+        }
+
+        .suggestion-card.high {
+            border-top: 4px solid var(--danger);
+        }
+
+        .suggestion-card.medium {
+            border-top: 4px solid var(--warning);
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .priority-badge.critical {
+            background: #fee2e2;
+            color: var(--critical);
+        }
+
+        .priority-badge.high {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        .priority-badge.medium {
+            background: #dbeafe;
+            color: #0284c7;
+        }
+
+        .card-title {
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .card-detail {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .card-revenue {
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+            color: var(--success);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-bottom: 2px solid #d1d5db;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .amount-cell {
+            font-weight: bold;
+            color: var(--danger);
+        }
+
+        .hours-cell {
+            background: #fef3c7;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 500;
+            color: #92400e;
+            font-size: 12px;
+        }
+
+        .hours-cell.critical {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .no-data {
+            padding: 40px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 15px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            position: relative;
+            height: 400px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+        .recovery-potential {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .recovery-potential h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            opacity: 0.95;
+        }
+
+        .recovery-value {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .recovery-text {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .recovery-rate {
+            font-size: 28px;
+            margin-top: 15px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            th, td {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .metric-value {
+                font-size: 24px;
+            }
+
+            .recovery-value {
+                font-size: 36px;
+            }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-new {
+            background: #dbeafe;
+            color: #0284c7;
+        }
+
+        .status-recent {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-old {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+    </style>
+</head>
+<body>
+    {% include '_admin_header.html' %}
+
+    <div class="container">
+        <header>
+            <h1>🛒 Abandoned Order Recovery</h1>
+            <p class="subtitle">Recover lost revenue from incomplete purchases and abandoned carts</p>
+        </header>
+
+        <!-- Key Metrics -->
+        <div class="metric-grid">
+            <div class="metric-card danger">
+                <div class="metric-label">Total Abandoned Orders</div>
+                <div class="metric-value">{{ metrics.total_abandoned_orders }}</div>
+                <div class="metric-subtext">Worth ₹{{ "%.0f"|format(metrics.total_abandoned_value_rupees) }}</div>
+            </div>
+
+            <div class="metric-card warning">
+                <div class="metric-label">Abandoned in Last 24h</div>
+                <div class="metric-value">{{ metrics.abandoned_24h }}</div>
+                <div class="metric-subtext">Need immediate recovery action</div>
+            </div>
+
+            <div class="metric-card critical">
+                <div class="metric-label">Abandoned 24h+ Ago</div>
+                <div class="metric-value">{{ metrics.abandoned_24h_plus }}</div>
+                <div class="metric-subtext">Older carts need special handling</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Recovery Potential (30%)</div>
+                <div class="metric-value">₹{{ "%.0f"|format(recovery_potential.estimated_recoverable_rupees) }}</div>
+                <div class="metric-subtext">Estimated achievable with campaigns</div>
+            </div>
+        </div>
+
+        <!-- Recovery Alert -->
+        {% if metrics.total_abandoned_value_rupees >= 10000 %}
+        <div class="alert-box">
+            <div class="alert-title">⚠️ Significant Revenue at Risk</div>
+            <div class="alert-content">
+                You have <strong>₹{{ "%.0f"|format(metrics.total_abandoned_value_rupees) }}</strong> in abandoned orders.
+                Even a 20% recovery rate would bring in <strong>₹{{ "%.0f"|format(metrics.total_abandoned_value_rupees * 0.2) }}</strong>.
+                Automated recovery emails can recover 25-35% of abandoned carts.
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actionable Suggestions -->
+        <h2 class="section-title">📋 Recovery Strategy</h2>
+        <div class="suggestion-cards">
+            {% for suggestion in suggestions %}
+            <div class="suggestion-card {{ suggestion.priority.lower() }}">
+                <div class="priority-badge {{ suggestion.priority.lower() }}">{{ suggestion.priority }}</div>
+                <div class="card-title">{{ suggestion.action }}</div>
+                <div class="card-detail">{{ suggestion.detail }}</div>
+                <div class="card-revenue">
+                    💰 Potential: ₹{{ "%.0f"|format(suggestion.potential_revenue / 100) }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Recovery Potential -->
+        <div class="recovery-potential">
+            <h3>🎯 Recovery Opportunity</h3>
+            <div class="recovery-value">₹{{ "%.0f"|format(recovery_potential.estimated_recoverable_rupees) }}</div>
+            <div class="recovery-text">
+                {{ recovery_potential.recovery_rate_percent }}% of abandoned orders can be recovered through targeted email campaigns.
+                <br><strong>Effort:</strong> {{ recovery_potential.effort_required }} | <strong>Risk:</strong> {{ recovery_potential.risk_level }}
+            </div>
+            <div class="recovery-rate">
+                {{ recovery_potential.recovery_rate_percent }}% Recovery Rate
+            </div>
+        </div>
+
+        <!-- Product Abandonment Analysis -->
+        <h2 class="section-title">📊 Abandonment by Product</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Total Initiated</th>
+                        <th>Completed</th>
+                        <th>Abandoned</th>
+                        <th>Abandonment Rate</th>
+                        <th>Value at Risk</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product, stats in product_rates.items() %}
+                    <tr>
+                        <td><strong>{{ product }}</strong></td>
+                        <td>{{ stats.total_initiated }}</td>
+                        <td>{{ stats.completed_orders }}</td>
+                        <td>{{ stats.abandoned_orders }}</td>
+                        <td>
+                            <span class="hours-cell {% if stats.abandonment_rate > 60 %}critical{% endif %}">
+                                {{ stats.abandonment_rate }}%
+                            </span>
+                        </td>
+                        <td class="amount-cell">₹{{ "%.0f"|format(stats.abandoned_value_rupees) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Abandoned Orders Table -->
+        <h2 class="section-title">📋 Recent Abandoned Orders (Top 100)</h2>
+        <div class="table-container">
+            {% if abandoned_orders %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Receipt ID</th>
+                        <th>Product</th>
+                        <th>Amount</th>
+                        <th>Abandoned Time</th>
+                        <th>Hours Since</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in abandoned_orders %}
+                    <tr>
+                        <td><code>{{ order.receipt }}</code></td>
+                        <td>{{ order.product }}</td>
+                        <td class="amount-cell">₹{{ order.amount_rupees }}</td>
+                        <td>{{ order.abandoned_at }}</td>
+                        <td>
+                            <span class="hours-cell {% if order.hours_abandoned > 72 %}critical{% elif order.hours_abandoned > 24 %}warning{% endif %}">
+                                {{ order.hours_abandoned }}h ago
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data">
+                🎉 Great news! No abandoned orders at the moment.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recovery Distribution Chart -->
+        <div class="chart-container">
+            <div class="chart-title">Abandonment Timeline</div>
+            <canvas id="abandonmentChart"></canvas>
+        </div>
+
+        <script>
+            const distribution = {{ metrics.distribution|tojson }};
+            const labels = Object.keys(distribution);
+            const data = Object.values(distribution);
+
+            new Chart(document.getElementById('abandonmentChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Abandoned Orders',
+                        data: data,
+                        backgroundColor: [
+                            '#ef4444',
+                            '#f97316',
+                            '#eab308',
+                            '#84cc16',
+                            '#22c55e'
+                        ],
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#e5e7eb' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

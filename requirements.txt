@@ -1,7 +1,15 @@
 flask
+stripe>=8.0.0
 razorpay
 python-dotenv
 gunicorn
 pytest
 SQLAlchemy
 alembic
+redis>=4.0.0
+psutil
+bcrypt
+werkzeug
+requests
+pyjwt
+

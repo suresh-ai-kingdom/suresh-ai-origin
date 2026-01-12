@@ -1,0 +1,368 @@
+{% extends "_admin_header.html" %}
+
+{% block title %}Coupon Codes - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .coupon-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    @media (max-width: 900px) {
+        .coupon-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .coupon-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .coupon-card h3 {
+        margin-top: 0;
+        color: #333;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 12px;
+    }
+    
+    .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        color: #666;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 60px;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .coupons-table {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .coupons-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .coupons-table th {
+        background: #f8f9fa;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #ddd;
+        font-size: 13px;
+    }
+    
+    .coupons-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+    }
+    
+    .coupons-table tr:hover {
+        background: #f9f9f9;
+    }
+    
+    .code-badge {
+        background: #667eea;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+    }
+    
+    .discount-badge {
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        color: #28a745;
+        font-weight: 600;
+    }
+    
+    .status-inactive {
+        color: #dc3545;
+        font-weight: 600;
+    }
+    
+    .status-expired {
+        color: #ffc107;
+        font-weight: 600;
+    }
+    
+    .btn-small {
+        padding: 6px 12px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-small:hover {
+        background: #c82333;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+    }
+    
+    .empty-state p {
+        margin: 0;
+        font-size: 14px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    @media (max-width: 600px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .stat-box {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 4px;
+        text-align: center;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
+    }
+</style>
+
+<div class="admin-content">
+    <h2>💰 Discount Coupons</h2>
+    
+    <div class="coupon-container">
+        <!-- Create Coupon Form -->
+        <div class="coupon-card">
+            <h3>Create New Coupon</h3>
+            <form method="POST">
+                <input type="hidden" name="action" value="create">
+                
+                <div class="form-group">
+                    <label for="code">Coupon Code *</label>
+                    <input type="text" id="code" name="code" placeholder="e.g., SAVE20" maxlength="20" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="discount">Discount % *</label>
+                    <input type="number" id="discount" name="discount" min="1" max="100" value="10" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" placeholder="e.g., Spring Sale 2026 - 20% off"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="max_uses">Max Uses (blank = unlimited)</label>
+                        <input type="number" id="max_uses" name="max_uses" min="1" placeholder="e.g., 100">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="expiry_days">Expiry (days, blank = never)</label>
+                        <input type="number" id="expiry_days" name="expiry_days" min="1" placeholder="e.g., 30">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-submit">Create Coupon</button>
+            </form>
+        </div>
+        
+        <!-- Coupon Stats -->
+        <div class="coupon-card">
+            <h3>Coupon Statistics</h3>
+            <div class="stats-grid">
+                {% set active_count = coupons|selectattr('is_active')|list|length %}
+                {% set inactive_count = coupons|rejectattr('is_active')|list|length %}
+                {% set total_uses = coupons|map(attribute='current_uses')|sum %}
+                
+                <div class="stat-box">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value">{{ active_count }}</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-label">Inactive</div>
+                    <div class="stat-value">{{ inactive_count }}</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-label">Total Uses</div>
+                    <div class="stat-value">{{ total_uses }}</div>
+                </div>
+            </div>
+            
+            <div style="background: white; padding: 12px; border-radius: 4px; color: #666; font-size: 13px;">
+                <p><strong>Tips:</strong></p>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                    <li>Leave "Max Uses" empty for unlimited uses</li>
+                    <li>Leave "Expiry" empty for codes that never expire</li>
+                    <li>Codes are automatically converted to uppercase</li>
+                    <li>Expired or maxed-out codes can't be used</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Coupons Table -->
+    {% if coupons %}
+        <div class="coupons-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Discount</th>
+                        <th>Status</th>
+                        <th>Uses</th>
+                        <th>Expires</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for coupon in coupons %}
+                        <tr>
+                            <td><span class="code-badge">{{ coupon.code }}</span></td>
+                            <td><span class="discount-badge">{{ coupon.discount_percent }}%</span></td>
+                            <td>
+                                {% if not coupon.is_active %}
+                                    <span class="status-inactive">Inactive</span>
+                                {% elif coupon.is_expired %}
+                                    <span class="status-expired">Expired</span>
+                                {% elif coupon.is_maxed_out %}
+                                    <span class="status-expired">Maxed Out</span>
+                                {% else %}
+                                    <span class="status-active">Active</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if coupon.max_uses %}
+                                    {{ coupon.current_uses }}/{{ coupon.max_uses }}
+                                {% else %}
+                                    {{ coupon.current_uses }}/∞
+                                {% endif %}
+                            </td>
+                            <td style="font-size: 12px; color: #999;">
+                                {% if coupon.expiry_date %}
+                                    {{ coupon.expiry_date|strftime('%Y-%m-%d') }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if coupon.is_active %}
+                                    <form method="POST" style="display: inline;">
+                                        <input type="hidden" name="action" value="deactivate">
+                                        <input type="hidden" name="code" value="{{ coupon.code }}">
+                                        <button type="submit" class="btn-small" onclick="return confirm('Deactivate this coupon?')">Deactivate</button>
+                                    </form>
+                                {% else %}
+                                    <span style="color: #999; font-size: 12px;">Deactivated</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="coupons-table">
+            <div class="empty-state">
+                <p>No coupons created yet. Create one above to get started! 🎟️</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // Add strftime filter for Jinja2
+    if (!Jinja.defaults.filters.strftime) {
+        Jinja.defaults.filters.strftime = function(timestamp, format) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp * 1000);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return format.replace('%Y', year).replace('%m', month).replace('%d', day);
+        };
+    }
+</script>
+
+{% endblock %}

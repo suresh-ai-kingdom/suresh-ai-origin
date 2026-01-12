@@ -1,0 +1,136 @@
+{
+  "workflows": {
+    "resume_generator": {
+      "title": "Resume Generator",
+      "description": "Create a professional resume using AI",
+      "total_steps": 5,
+      "estimated_total_time": "45 minutes",
+      "tier": "pro",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Gather Your Info",
+          "description": "Collect your work experience, education, and skills. You'll need: last 3 jobs, achievements, certifications, and key skills.",
+          "tips": "Copy-paste from LinkedIn or your old resume. Include specific numbers: revenue, team size, % improvement.",
+          "estimated_time": "10 min"
+        },
+        {
+          "number": 2,
+          "title": "Input Your Background",
+          "description": "Feed your information into the AI prompt. The system will parse and organize it.",
+          "tips": "Be detailed with accomplishments. Use numbers and metrics instead of vague descriptions.",
+          "estimated_time": "8 min"
+        },
+        {
+          "number": 3,
+          "title": "Generate Resume",
+          "description": "Run the AI generator. It will create multiple resume variations optimized for ATS (Applicant Tracking Systems).",
+          "tips": "Run 2-3 variations and pick the one that highlights your best achievements.",
+          "estimated_time": "5 min"
+        },
+        {
+          "number": 4,
+          "title": "Edit & Personalize",
+          "description": "Customize the output for your target job. Adjust keywords and emphasis based on job description.",
+          "tips": "Copy the job description keywords into your resume to improve ATS score.",
+          "estimated_time": "15 min"
+        },
+        {
+          "number": 5,
+          "title": "Export & Apply",
+          "description": "Download your resume as PDF and start applying to jobs.",
+          "tips": "Use this for 10+ applications to maximize chances. Track which version gets most interviews.",
+          "estimated_time": "7 min"
+        }
+      ]
+    },
+    "whatsapp_bot": {
+      "title": "WhatsApp Automation Bot",
+      "description": "Build a WhatsApp bot that automates customer interactions",
+      "total_steps": 4,
+      "estimated_total_time": "60 minutes",
+      "tier": "scale",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Set Up WhatsApp Business API",
+          "description": "Create a Meta Business Account and configure WhatsApp API credentials.",
+          "tips": "This takes 2-3 days for approval. Do this first and come back when approved.",
+          "estimated_time": "15 min"
+        },
+        {
+          "number": 2,
+          "title": "Design Your Automation Flows",
+          "description": "Plan what messages to send and when. Example: greet → ask question → send offer → follow up.",
+          "tips": "Keep flows short. Most people ignore long messages. Use quick replies.",
+          "estimated_time": "20 min"
+        },
+        {
+          "number": 3,
+          "title": "Code Your Bot Logic",
+          "description": "Write or configure bot code using the provided templates. Connect to your CRM if you have one.",
+          "tips": "Start simple: greeting + FAQ answers. Add complexity later.",
+          "estimated_time": "15 min"
+        },
+        {
+          "number": 4,
+          "title": "Test & Deploy",
+          "description": "Test all flows with friends. Deploy to production. Monitor responses.",
+          "tips": "Test edge cases: typos, unexpected inputs, long waits between messages.",
+          "estimated_time": "10 min"
+        }
+      ]
+    },
+    "prompt_selling": {
+      "title": "Sell AI Prompts",
+      "description": "Create and sell high-value AI prompts online",
+      "total_steps": 6,
+      "estimated_total_time": "90 minutes",
+      "tier": "pro",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Brainstorm Prompt Ideas",
+          "description": "Find problems people pay to solve: content creation, email writing, code generation, marketing copy, etc.",
+          "tips": "Check Gumroad, Payhip, Etsy to see what's selling. Find gaps.",
+          "estimated_time": "15 min"
+        },
+        {
+          "number": 2,
+          "title": "Write & Test Prompts",
+          "description": "Create detailed prompts. Test them with ChatGPT, Claude, Gemini to ensure they work consistently.",
+          "tips": "Include variables [VARIABLES] so buyers can customize. Test 5+ times with different inputs.",
+          "estimated_time": "30 min"
+        },
+        {
+          "number": 3,
+          "title": "Create Landing Page",
+          "description": "Build a simple sales page describing the prompt benefit. Include examples of output.",
+          "tips": "Show before/after: bad prompt vs your prompt. Use your landing page tool or Carrd.",
+          "estimated_time": "15 min"
+        },
+        {
+          "number": 4,
+          "title": "Set Up Payment",
+          "description": "Use Gumroad, Payhip, or Stripe to handle payments. Price at $5-50 depending on value.",
+          "tips": "Start at $9-19. Increase price as demand grows. Bundle related prompts.",
+          "estimated_time": "10 min"
+        },
+        {
+          "number": 5,
+          "title": "Launch to Audience",
+          "description": "Share in forums, Twitter, LinkedIn, newsletters. Get 10+ sales to validate demand.",
+          "tips": "Post genuine success stories. Share your process. Be authentic.",
+          "estimated_time": "15 min"
+        },
+        {
+          "number": 6,
+          "title": "Iterate & Scale",
+          "description": "Based on feedback, improve prompts or create new ones. Aim for $500+/mo per prompt.",
+          "tips": "Track which prompts sell best. Double down on winners.",
+          "estimated_time": "5 min"
+        }
+      ]
+    }
+  }
+}

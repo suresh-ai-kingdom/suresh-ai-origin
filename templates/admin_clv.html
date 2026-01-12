@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Customer Lifetime Value - Admin{% endblock %}
+{% block content %}
+<style>
+.wrap { max-width: 1100px; margin:20px auto; background:#fff; border-radius:12px; box-shadow:0 6px 24px rgba(0,0,0,0.08); overflow:hidden; }
+.head { background: linear-gradient(135deg, #667eea, #764ba2); color:#fff; padding:16px 20px; display:flex; align-items:center; gap:12px; }
+.head h1 { margin:0; font-size:1.6rem; }
+.section { padding:20px; border-top:1px solid #eee; }
+.grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:16px; }
+.card { background:#f8f9ff; border:1px solid #e3e7ff; border-radius:8px; padding:16px; }
+.value { font-size:1.8rem; font-weight:800; color:#667eea; }
+.sub { color:#888; font-size:0.9rem; }
+.table { width:100%; border-collapse: collapse; }
+.table th, .table td { border-bottom:1px solid #eee; padding:8px; text-align:left; }
+.badge { display:inline-block; background:#667eea; color:#fff; border-radius:16px; padding:4px 10px; font-size:0.85rem; }
+.input-row { display:flex; gap:10px; }
+.input-row input { flex:1; padding:10px; border-radius:8px; border:2px solid #ddd; }
+.input-row button { padding:10px 14px; background:#667eea; color:#fff; border:none; border-radius:8px; }
+</style>
+<div class="wrap">
+  <div class="head">
+    <div style="font-size:1.6rem">💎</div>
+    <h1>Customer Lifetime Value</h1>
+  </div>
+  <div class="section">
+    <div class="grid">
+      <div class="card">
+        <div class="sub">Top 10 Avg CLV</div>
+        <div id="avgClv" class="value">₹0</div>
+      </div>
+      <div class="card">
+        <div class="sub">Customers</div>
+        <div id="statCustomers" class="value">0</div>
+      </div>
+      <div class="card">
+        <div class="sub">Orders</div>
+        <div id="statOrders" class="value">0</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <h3>Lookup CLV by Customer</h3>
+    <div class="input-row">
+      <input id="receiptInput" placeholder="Enter customer receipt..." />
+      <button onclick="lookupClv()">Compute CLV</button>
+    </div>
+    <div id="lookupResult" style="margin-top:12px"></div>
+  </div>
+  <div class="section">
+    <h3>Top Customers</h3>
+    <table class="table" id="topTable"></table>
+  </div>
+</div>
+<script>
+async function loadStats(){
+  const res = await fetch('/api/clv/stats');
+  const data = await res.json();
+  if(data.success){
+    document.getElementById('avgClv').textContent = '₹' + Math.round(data.stats.avg_clv_top10);
+    document.getElementById('statCustomers').textContent = data.stats.customers;
+    document.getElementById('statOrders').textContent = data.stats.orders;
+    const t = document.getElementById('topTable');
+    t.innerHTML = `<tr><th>Receipt</th><th>CLV (₹)</th><th>Orders</th><th>Confidence</th><th>Segment</th></tr>` +
+      data.stats.top.map(x => `<tr><td>${x.receipt}</td><td>${x.clv_rupees}</td><td>${x.orders}</td><td>${Math.round(x.confidence*100)}%</td><td>${x.segment || '-'}</td></tr>`).join('');
+  }
+}
+async function lookupClv(){
+  const id = document.getElementById('receiptInput').value.trim();
+  if(!id) return;
+  const res = await fetch('/api/clv/customer/' + id);
+  const data = await res.json();
+  const el = document.getElementById('lookupResult');
+  if(data.success){
+    const r = data.result;
+    el.innerHTML = `<div class='card'><div class='sub'>CLV</div><div class='value'>₹${Math.round(r.clv_rupees)}</div><div class='sub'>Orders: ${r.orders} • Confidence: ${Math.round(r.confidence*100)}%</div></div>`;
+  } else { el.textContent = 'Error: ' + (data.error || 'Unable to compute'); }
+}
+loadStats();
+</script>
+{% endblock %}

@@ -1,23 +1,304 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>SURESH AI ORIGIN</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SURESH AI ORIGIN - AI Prompts, Automation Workflows, and Monetization Playbooks">
+    <title>SURESH AI ORIGIN - AI Mastery & Income Automation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>SURESH AI ORIGIN</h1>
-  <p>Start Your AI & Automation Journey</p>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🚀 SURESH AI ORIGIN</div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#products">Products</a>
+                <a href="#faq">FAQ</a>
+                <a href="/admin/referrals" class="btn-nav">Referral Program</a>
+            </div>
+        </div>
+    </nav>
 
-  <a href="/buy?product=starter">
-    <button>Get Instant Access @ ₹49</button>
-  </a>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div style="display: inline-block; padding: 10px 30px; background: linear-gradient(135deg, #FF006E, #8338EC); border-radius: 50px; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 30px; box-shadow: 0 0 40px #FF006E; animation: glow-pulse 2s ease-in-out infinite;">
+                ✨ TOP 1% RARE PLATFORM ✨
+            </div>
+            <h1>Transform Your Life with<br><span class="gradient">AI Mastery & Income Automation</span></h1>
+            <p>Master cutting-edge AI, build multiple income streams, and automate your entire business with proven prompts, workflows, and systems.</p>
+            
+            <div class="hero-stats">
+                <div class="stat"><strong>1000+</strong> AI Prompts</div>
+                <div class="stat"><strong>100+</strong> Workflows</div>
+                <div class="stat"><strong>50+</strong> Case Studies</div>
+            </div>
 
-  <a href="/buy?product=pro">
-    <button>Get Pro Pack @ ₹99</button>
-  </a>
+            <div class="hero-buttons">
+                <a href="#products" class="btn btn-primary">Explore Products</a>
+                <a href="/admin/referrals" class="btn btn-secondary">Earn Referrals</a>
+            </div>
 
-  <a href="/buy?product=premium">
-    <button>Get Premium Pack @ ₹199</button>
-  </a>
+            <div class="trust-badges">
+                <span>✅ Instant Access</span>
+                <span>✅ Lifetime Updates</span>
+                <span>✅ Money-Back Guarantee</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2>Why Choose Us?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon">🤖</div>
+                <h3>AI Prompts</h3>
+                <p>1000+ proven prompts for writing, coding, analysis, marketing, and more.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚙️</div>
+                <h3>Automation</h3>
+                <p>100+ workflows to automate tasks and save 20+ hours per week.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">💰</div>
+                <h3>Monetization</h3>
+                <p>Proven strategies to build ₹1-10 lakh monthly income.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📚</div>
+                <h3>Case Studies</h3>
+                <p>50+ detailed breakdowns of successful AI entrepreneurs.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔧</div>
+                <h3>Tools Stack</h3>
+                <p>Complete setup for Claude, ChatGPT, Midjourney, Make & more.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">👥</div>
+                <h3>Community</h3>
+                <p>VIP community, daily updates, and priority support.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="products">
+        <h2>Choose Your Path</h2>
+        <div class="pricing-grid">
+            <div class="price-card">
+                <span class="badge">Popular</span>
+                <h3>Starter Pack</h3>
+                <div class="price">₹99<span>/month</span></div>
+                <ul>
+                    <li>✅ 100+ AI Prompts</li>
+                    <li>✅ 10+ Workflows</li>
+                    <li>✅ Email Support</li>
+                    <li>✅ Monthly Updates</li>
+                    <li>❌ Private Community</li>
+                </ul>
+                <a href="/buy?product=starter" class="btn btn-primary">Get Started</a>
+                <p class="year-option">or ₹990/year (save 17%)</p>
+            </div>
+
+            <div class="price-card featured">
+                <span class="badge featured">Most Popular ⭐</span>
+                <h3>Pro Pack</h3>
+                <div class="price">₹499<span>/month</span></div>
+                <ul>
+                    <li>✅ 500+ AI Prompts</li>
+                    <li>✅ 50+ Workflows</li>
+                    <li>✅ Priority Support</li>
+                    <li>✅ Private Community</li>
+                    <li>✅ Weekly Updates</li>
+                </ul>
+                <a href="/buy?product=pro" class="btn btn-primary">Start Pro</a>
+                <p class="year-option">or ₹4,990/year (save 17%)</p>
+            </div>
+
+            <div class="price-card">
+                <span class="badge">Elite</span>
+                <h3>Premium Pack</h3>
+                <div class="price">₹999<span>/month</span></div>
+                <ul>
+                    <li>✅ 1000+ AI Prompts</li>
+                    <li>✅ 100+ Workflows</li>
+                    <li>✅ 1-on-1 Coaching</li>
+                    <li>✅ VIP Community</li>
+                    <li>✅ Daily Updates</li>
+                </ul>
+                <a href="/buy?product=premium" class="btn btn-primary">Get Premium</a>
+                <p class="year-option">or ₹9,990/year (save 17%)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section class="included">
+        <h2>Everything You Get</h2>
+        <div class="included-grid">
+            <div class="included-item">
+                <span class="number">1</span>
+                <h4>Master Prompts Library</h4>
+                <p>Organized by category with real-world examples.</p>
+            </div>
+            <div class="included-item">
+                <span class="number">2</span>
+                <h4>Automation Workflows</h4>
+                <p>Copy-paste templates for Make, Zapier & tools.</p>
+            </div>
+            <div class="included-item">
+                <span class="number">3</span>
+                <h4>Monetization Playbook</h4>
+                <p>5 income streams: freelancing, agencies, products.</p>
+            </div>
+            <div class="included-item">
+                <span class="number">4</span>
+                <h4>Real Case Studies</h4>
+                <p>50+ breakdowns with exact execution steps.</p>
+            </div>
+            <div class="included-item">
+                <span class="number">5</span>
+                <h4>Daily AI Routine</h4>
+                <p>30-day system to build AI skills progressively.</p>
+            </div>
+            <div class="included-item">
+                <span class="number">6</span>
+                <h4>Tools & Setup</h4>
+                <p>Complete stack with ROI optimization guide.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Referral CTA -->
+    <section class="referral-section">
+        <h2>Earn While You Refer! 💰</h2>
+        <p>Get 20-30% commission on every referral</p>
+        <div class="referral-info">
+            <div class="ref-item">
+                <span>🎁</span>
+                <div>
+                    <strong>20% Base Commission</strong>
+                    <p>On all referrals</p>
+                </div>
+            </div>
+            <div class="ref-item">
+                <span>⭐</span>
+                <div>
+                    <strong>30% On Premium</strong>
+                    <p>Tier bonuses included</p>
+                </div>
+            </div>
+            <div class="ref-item">
+                <span>🏆</span>
+                <div>
+                    <strong>Top Referrer Bonuses</strong>
+                    <p>Monthly rewards</p>
+                </div>
+            </div>
+        </div>
+        <a href="/admin/referrals" class="btn btn-primary">Join Referral Program →</a>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <button class="faq-q">Do I get instant access?<span>+</span></button>
+                <div class="faq-a">Yes! Immediate access to all resources after payment.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q">Can I get a refund?<span>+</span></button>
+                <div class="faq-a">Yes, 30-day money-back guarantee. No questions asked.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q">What's the difference between packages?<span>+</span></button>
+                <div class="faq-a">Starter (100 prompts), Pro (500 prompts + automation), Premium (1000+ + coaching).</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q">Is it monthly or lifetime?<span>+</span></button>
+                <div class="faq-a">Choose monthly (₹99-999) or yearly (save 17%). Access while subscribed.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q">How often are resources updated?<span>+</span></button>
+                <div class="faq-a">Daily! New prompts, workflows, and strategies. All included in subscription.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <h2>Ready to Transform Your Life?</h2>
+        <p>Start your AI mastery journey today</p>
+        <a href="#products" class="btn btn-primary">Choose Your Package</a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4>SURESH AI ORIGIN</h4>
+                <p>Master AI, Build Income, Automate Your Life.</p>
+                <p class="footer-faith">🙏 In Faith in God's Grace 🙏</p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="/admin/referrals">Referrals</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Terms</a></li>
+                    <li><a href="#">Refund Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Community</h4>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">LinkedIn</a></li>
+                    <li><a href="#">YouTube</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SURESH AI ORIGIN. All rights reserved. 🚀</p>
+            <p>Made with 🙏 in India | Built with Love for Global Community</p>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-q').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.classList.toggle('active');
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', function(e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({behavior: 'smooth'});
+                }
+            });
+        });
+    </script>
 </body>
 </html>

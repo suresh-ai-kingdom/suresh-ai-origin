@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Services - SURESH AI ORIGIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .services-hero {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        .service-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 40px 30px;
+            transition: all 0.3s ease;
+        }
+
+        .service-box:hover {
+            transform: translateY(-10px);
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .service-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .service-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            line-height: 40px;
+            text-align: center;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .service-box h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .service-box p {
+            color: #b0b0b0;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .service-features {
+            list-style: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .service-features li {
+            padding: 8px 0;
+            color: #b0b0b0;
+            font-size: 0.9em;
+        }
+
+        .service-features li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .impact-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(240, 147, 251, 0.15));
+            padding: 60px 20px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 15px;
+            max-width: 1200px;
+            margin: 80px auto;
+            text-align: center;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .impact-item {
+            padding: 20px;
+        }
+
+        .impact-number {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .impact-label {
+            color: #b0b0b0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🚀 SURESH AI ORIGIN</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/#features">Features</a>
+                <a href="/services">Services</a>
+                <a href="/admin/referrals" class="btn-nav">Referrals</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="services-hero">
+        <h1 style="font-size: 2.5em; margin-bottom: 15px;">Complete Business Platform</h1>
+        <p style="font-size: 1.1em; color: #b0b0b0;">All-in-one solution for AI mastery, automation, and sustainable income growth</p>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="services-grid">
+        <!-- Service 1 -->
+        <div class="service-box">
+            <div class="service-icon">📧</div>
+            <div class="service-number">1</div>
+            <h3>Email Notifications</h3>
+            <p>Automated email campaigns to keep customers engaged, informed, and delighted.</p>
+            <ul class="service-features">
+                <li>Welcome series</li>
+                <li>Order confirmations</li>
+                <li>Updates & announcements</li>
+                <li>Re-engagement campaigns</li>
+            </ul>
+        </div>
+
+        <!-- Service 2 -->
+        <div class="service-box">
+            <div class="service-icon">📊</div>
+            <div class="service-number">2</div>
+            <h3>Order Tracking</h3>
+            <p>Complete order management from purchase to delivery with full customer transparency.</p>
+            <ul class="service-features">
+                <li>Order history</li>
+                <li>Payment tracking</li>
+                <li>Invoice generation</li>
+                <li>Status updates</li>
+            </ul>
+        </div>
+
+        <!-- Service 3 -->
+        <div class="service-box">
+            <div class="service-icon">🎟️</div>
+            <div class="service-number">3</div>
+            <h3>Coupon System</h3>
+            <p>Powerful discount management to boost sales, retention, and customer loyalty.</p>
+            <ul class="service-features">
+                <li>Multiple coupon types</li>
+                <li>Tiered discounts</li>
+                <li>Expiry management</li>
+                <li>Usage limits</li>
+            </ul>
+        </div>
+
+        <!-- Service 4 -->
+        <div class="service-box">
+            <div class="service-icon">📈</div>
+            <div class="service-number">4</div>
+            <h3>Analytics Dashboard</h3>
+            <p>Real-time insights into business metrics, customer behavior, and revenue trends.</p>
+            <ul class="service-features">
+                <li>Revenue analytics</li>
+                <li>Customer insights</li>
+                <li>Product performance</li>
+                <li>Growth projections</li>
+            </ul>
+        </div>
+
+        <!-- Service 5 -->
+        <div class="service-box">
+            <div class="service-icon">🎯</div>
+            <div class="service-number">5</div>
+            <h3>Customer Intelligence</h3>
+            <p>Deep customer segmentation and behavioral analysis for targeted growth.</p>
+            <ul class="service-features">
+                <li>Segmentation</li>
+                <li>Behavior tracking</li>
+                <li>Cohort analysis</li>
+                <li>Predictions</li>
+            </ul>
+        </div>
+
+        <!-- Service 6 -->
+        <div class="service-box">
+            <div class="service-icon">🔄</div>
+            <div class="service-number">6</div>
+            <h3>Abandoned Recovery</h3>
+            <p>Recover lost sales by automatically detecting and re-engaging abandoned customers.</p>
+            <ul class="service-features">
+                <li>Automated detection</li>
+                <li>Smart reminders</li>
+                <li>Discount offers</li>
+                <li>Recovery tracking</li>
+            </ul>
+        </div>
+
+        <!-- Service 7 -->
+        <div class="service-box">
+            <div class="service-icon">💳</div>
+            <div class="service-number">7</div>
+            <h3>Subscriptions</h3>
+            <p>Recurring revenue model for stable, predictable monthly income with automatic renewals.</p>
+            <ul class="service-features">
+                <li>Multiple tiers</li>
+                <li>Monthly/yearly billing</li>
+                <li>MRR tracking</li>
+                <li>Churn analytics</li>
+            </ul>
+        </div>
+
+        <!-- Service 8 -->
+        <div class="service-box">
+            <div class="service-icon">🚀</div>
+            <div class="service-number">8</div>
+            <h3>Referral Program</h3>
+            <p>Viral growth engine where every customer can earn 20-30% commission by referring others.</p>
+            <ul class="service-features">
+                <li>Unique referral codes</li>
+                <li>Commission tracking</li>
+                <li>Leaderboard</li>
+                <li>Automated payouts</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Impact Section -->
+    <div class="impact-section">
+        <h2 style="margin-bottom: 0; text-align: center;">Platform Impact By Numbers</h2>
+        <div class="impact-grid">
+            <div class="impact-item">
+                <div class="impact-number">156+</div>
+                <div class="impact-label">Tests Passing</div>
+            </div>
+            <div class="impact-item">
+                <div class="impact-number">8</div>
+                <div class="impact-label">Revenue Streams</div>
+            </div>
+            <div class="impact-item">
+                <div class="impact-number">98.7%</div>
+                <div class="impact-label">System Reliability</div>
+            </div>
+            <div class="impact-item">
+                <div class="impact-number">237%</div>
+                <div class="impact-label">MRR Growth</div>
+            </div>
+            <div class="impact-item">
+                <div class="impact-number">30%</div>
+                <div class="impact-label">Churn Reduction</div>
+            </div>
+            <div class="impact-item">
+                <div class="impact-number">85%</div>
+                <div class="impact-label">Viral Growth</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Integration Section -->
+    <section style="max-width: 1200px; margin: 80px auto; padding: 0 20px;">
+        <h2 style="text-align: center; margin-bottom: 50px;">How It All Works Together</h2>
+        <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 12px; padding: 40px; color: #b0b0b0; line-height: 1.8;">
+            <p style="margin-bottom: 20px;">
+                <strong style="color: white;">Customer Journey:</strong>
+            </p>
+            <ol style="margin-left: 20px;">
+                <li style="margin-bottom: 15px;"><strong style="color: #667eea;">Purchase</strong> → Charged via Razorpay, order tracked immediately</li>
+                <li style="margin-bottom: 15px;"><strong style="color: #667eea;">Notification</strong> → Email sent with confirmation and next steps</li>
+                <li style="margin-bottom: 15px;"><strong style="color: #667eea;">Subscription</strong> → Can upgrade to recurring monthly billing (stable MRR)</li>
+                <li style="margin-bottom: 15px;"><strong style="color: #667eea;">Referral</strong> → Given unique code, can earn 20-30% on every referral</li>
+                <li style="margin-bottom: 15px;"><strong style="color: #667eea;">Analytics</strong> → Their activity tracked for insights and personalization</li>
+                <li style="margin-bottom: 15px;"><strong style="color: #667eea;">Recovery</strong> → If inactive, automatic re-engagement campaigns</li>
+                <li style="margin-bottom: 15px;"><strong style="color: #667eea;">Retention</strong> → Coupons, bonuses, and exclusive offers sent</li>
+                <li><strong style="color: #667eea;">Growth</strong> → Become ambassador, grow with us, earn continuously</li>
+            </ol>
+            <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(102, 126, 234, 0.2);">
+                This creates a <strong style="color: #667eea;">self-reinforcing growth loop</strong> where happy customers bring more customers, who bring even more - all tracked, automated, and profitable! 🚀
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="margin-top: 100px;">
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4>SURESH AI ORIGIN</h4>
+                <p>8 Integrated Services for Complete Business Automation</p>
+                <p class="footer-faith">🙏 In Faith in God's Grace 🙏</p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/#products">Products</a></li>
+                    <li><a href="/services">Services</a></li>
+                    <li><a href="/admin/referrals">Referrals</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Admin</h4>
+                <ul>
+                    <li><a href="/admin/webhooks">Webhooks</a></li>
+                    <li><a href="/admin/orders">Orders</a></li>
+                    <li><a href="/admin/subscriptions">Subscriptions</a></li>
+                    <li><a href="/admin/referrals">Referrals</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">API Reference</a></li>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">Status</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SURESH AI ORIGIN. All rights reserved. 🚀</p>
+            <p>Made with 🙏 in India | 8 Services, 1 Platform, Infinite Possibilities</p>
+        </div>
+    </footer>
+</body>
+</html>

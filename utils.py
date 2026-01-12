@@ -5,7 +5,7 @@ import hashlib
 import smtplib
 import ssl
 from email.message import EmailMessage
-from models import init_models, get_engine, get_session, Webhook, Order, Payment
+from models import get_engine, get_session, Webhook, Order, Payment, Base
 from sqlalchemy.exc import IntegrityError
 
 # Backwards compatible path helper used in some parts of the codebase
@@ -24,7 +24,8 @@ def _get_db_url():
 
 def init_db():
     # Initialize models (creates tables if missing)
-    init_models(_get_db_url())
+    engine = get_engine(_get_db_url())
+    Base.metadata.create_all(engine)
 
 
 def save_order(order_id: str, amount: int, currency: str, receipt: str, product: str, status: str = 'created') -> bool:
@@ -163,7 +164,15 @@ def get_webhook_by_id(event_id: str):
     return (row.id, row.event, row.payload, row.received_at)
 
 
-def send_email(subject: str, body: str, to_addr: str):
+def send_email(subject: str, body: str, to_addr: str, html_body: str = None):
+    """Send email with optional HTML body.
+    
+    Args:
+        subject: Email subject line
+        body: Plain text body (fallback)
+        to_addr: Recipient email address
+        html_body: Optional HTML formatted body
+    """
     user = os.getenv('EMAIL_USER')
     password = os.getenv('EMAIL_PASS')
     if not user or not password:
@@ -173,6 +182,11 @@ def send_email(subject: str, body: str, to_addr: str):
     msg['From'] = user
     msg['To'] = to_addr
     msg.set_content(body)
+    
+    # Add HTML alternative if provided
+    if html_body:
+        msg.add_alternative(html_body, subtype='html')
+    
     context = ssl.create_default_context()
     # Using SMTP_SSL by default; tests can monkeypatch smtplib.SMTP_SSL
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:

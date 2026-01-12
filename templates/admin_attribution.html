@@ -1,0 +1,1090 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>💰 Attribution Modeling & ROI Analysis</h1>
+        <p>Multi-touch attribution across all marketing channels</p>
+    </div>
+
+    {% set runs_used = plan_context.usage.attribution_runs %}
+    {% set runs_cap = plan_context.usage.attribution_cap or 1 %}
+    {% set usage_pct = (runs_used / runs_cap * 100) if runs_cap else 0 %}
+    <div class="plan-banner">
+        <div class="plan-left">
+            <div class="plan-pill">{{ plan_context.tier|upper }} PLAN</div>
+            <div class="plan-entitlements">
+                <span>{{ plan_context.limits.attribution_runs }} monthly attribution runs</span>
+                <span>{{ plan_context.limits.models }} active models</span>
+                <span>{{ plan_context.limits.lookback_days }}-day lookback</span>
+                <span>{% if plan_context.limits.export %}Exports enabled{% else %}Exports locked{% endif %}</span>
+            </div>
+            <div class="usage-meter" data-used="{{ runs_used }}" data-cap="{{ runs_cap }}">
+                <div class="usage-bar" style="width: {{ '%.0f' % usage_pct }}%"></div>
+            </div>
+            <div class="usage-meta">
+                <span>Attribution runs {{ runs_used }} / {{ runs_cap }}</span>
+                <span class="usage-percent">{{ usage_pct|round(0) }}%</span>
+            </div>
+        </div>
+        <div class="plan-right">
+            {% if plan_context.tier != 'scale' %}
+            <div class="upgrade-copy">Unlock higher limits, CSV/BI export, and extended lookbacks.</div>
+            <a class="btn-upgrade" href="{{ plan_context.upgrade_url }}">Upgrade to Scale</a>
+            {% else %}
+            <div class="upgrade-copy success">Scale plan active — exports and advanced models unlocked.</div>
+            <span class="plan-badge">All features on</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if not plan_context.limits.export %}
+    <div class="lock-banner">
+        <div>
+            <strong>Exports locked</strong> — upgrade to share ROI packets with finance/BI and schedule delivery.
+        </div>
+        <a class="link-upgrade" href="{{ plan_context.upgrade_url }}">View pricing</a>
+    </div>
+    {% endif %}
+
+    <!-- Executive Summary -->
+    <div class="stats-grid">
+        <div class="stat-card gradient-blue">
+            <div class="stat-icon">💵</div>
+            <div class="stat-content">
+                <div class="stat-value">${{ "{:,.2f}".format(report.summary.total_revenue) }}</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+        </div>
+
+        <div class="stat-card gradient-green">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ report.summary.total_conversions }}</div>
+                <div class="stat-label">Total Conversions</div>
+            </div>
+        </div>
+
+        <div class="stat-card gradient-purple">
+            <div class="stat-icon">💳</div>
+            <div class="stat-content">
+                <div class="stat-value">${{ "{:,.2f}".format(report.summary.avg_order_value) }}</div>
+                <div class="stat-label">Avg Order Value</div>
+            </div>
+        </div>
+
+        <div class="stat-card gradient-orange">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ report.path_statistics.avg_path_length }}</div>
+                <div class="stat-label">Avg Path Length</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Channel ROI Overview -->
+    <div class="section-container">
+        <h2>📈 Channel ROI Performance</h2>
+        
+        {% if report.best_channel %}
+        <div class="best-channel-highlight">
+            <div class="highlight-badge">🏆 Best Performing</div>
+            <div class="highlight-content">
+                <h3>{{ report.best_channel[0]|title }}</h3>
+                <div class="highlight-metrics">
+                    <span class="metric">ROI: <strong>{{ "{:,.2f}".format(report.best_channel[1].roi_percent) }}%</strong></span>
+                    <span class="metric">ROAS: <strong>{{ "{:,.2f}".format(report.best_channel[1].roas) }}x</strong></span>
+                    <span class="metric">Conversions: <strong>{{ report.best_channel[1].conversions }}</strong></span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="channel-roi-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Spend</th>
+                        <th>Revenue</th>
+                        <th>ROI %</th>
+                        <th>ROAS</th>
+                        <th>Conversions</th>
+                        <th>Cost/Conv</th>
+                        <th>CTR %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for channel, metrics in report.channel_roi.items() %}
+                    <tr class="roi-row {% if metrics.roi_percent > 100 %}positive{% elif metrics.roi_percent > 0 %}neutral{% else %}negative{% endif %}">
+                        <td><strong>{{ channel|title }}</strong></td>
+                        <td>${{ "{:,.2f}".format(metrics.spend) }}</td>
+                        <td>${{ "{:,.2f}".format(metrics.revenue) }}</td>
+                        <td class="roi-value">{{ "{:,.2f}".format(metrics.roi_percent) }}%</td>
+                        <td>{{ "{:.2f}".format(metrics.roas) }}x</td>
+                        <td>{{ metrics.conversions }}</td>
+                        <td>${{ "{:.2f}".format(metrics.cost_per_conversion) }}</td>
+                        <td>{{ "{:.4f}".format(metrics.ctr) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Attribution Model Comparison -->
+    <div class="section-container">
+        <h2>🔄 Attribution Model Comparison</h2>
+        <div class="model-comparison">
+            {% for model, channels in report.model_comparison.items() %}
+            <div class="model-card">
+                <h3>{{ model|title }}</h3>
+                <div class="model-channels">
+                    {% for channel, revenue in channels.items() %}
+                    <div class="channel-item">
+                        <span class="channel-name">{{ channel|title }}</span>
+                        <span class="channel-revenue">${{ "{:,.2f}".format(revenue) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Model Variance Analysis -->
+    <div class="section-container">
+        <h2>📊 Attribution Model Variance</h2>
+        <p class="subtitle">Variance shows how different models assign credit differently to each channel</p>
+        <div class="variance-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Avg Attributed</th>
+                        <th>Variance</th>
+                        <th>Std Dev</th>
+                        <th>Model Consensus</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for channel, variance_data in report.model_variance.items() %}
+                    <tr>
+                        <td><strong>{{ channel|title }}</strong></td>
+                        <td>${{ "{:,.2f}".format(variance_data.avg_attributed) }}</td>
+                        <td>{{ "{:.2f}".format(variance_data.variance) }}</td>
+                        <td>{{ "{:.2f}".format(variance_data.std_dev) }}</td>
+                        <td>
+                            {% if variance_data.std_dev < 10 %}
+                                <span class="consensus-high">High ✓</span>
+                            {% elif variance_data.std_dev < 50 %}
+                                <span class="consensus-medium">Medium ~</span>
+                            {% else %}
+                                <span class="consensus-low">Low ✗</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Conversion Path Patterns -->
+    <div class="section-container">
+        <h2>🔗 Top Conversion Path Patterns</h2>
+        <div class="path-patterns">
+            {% for pattern, count in report.common_patterns %}
+            <div class="pattern-card">
+                <div class="pattern-path">{{ pattern }}</div>
+                <div class="pattern-meta">
+                    <span class="pattern-count">{{ count }} conversions</span>
+                    <span class="pattern-percent">{{ "{:.1f}".format((count / report.summary.total_conversions) * 100) }}%</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Path Statistics -->
+    <div class="section-container">
+        <h2>📈 Journey Path Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <label>Avg Path Length</label>
+                <value>{{ report.path_statistics.avg_path_length }}</value>
+            </div>
+            <div class="stat-item">
+                <label>Max Path Length</label>
+                <value>{{ report.path_statistics.max_path_length }}</value>
+            </div>
+            <div class="stat-item">
+                <label>Min Path Length</label>
+                <value>{{ report.path_statistics.min_path_length }}</value>
+            </div>
+            <div class="stat-item">
+                <label>Avg Unique Channels</label>
+                <value>{{ report.path_statistics.avg_unique_channels }}</value>
+            </div>
+            <div class="stat-item">
+                <label>Avg Hours Between Touches</label>
+                <value>{{ report.path_statistics.avg_hours_between_touches }}</value>
+            </div>
+            <div class="stat-item">
+                <label>Most Common Pattern</label>
+                <value>{{ report.path_statistics.most_common_pattern }}</value>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Optimization Recommendation -->
+    <div class="section-container optimization-section">
+        <h2>💡 Budget Optimization</h2>
+        <div class="optimization-form">
+            <label for="totalBudget">Total Monthly Budget:</label>
+            <div class="input-group">
+                <span>$</span>
+                <input type="number" id="totalBudget" placeholder="10000" value="10000" min="0">
+                <button class="btn-primary" onclick="optimizeBudget()">Get Recommendations</button>
+            </div>
+        </div>
+        <div id="optimizationResults" class="optimization-results" style="display:none;">
+            <h3>Recommended Budget Allocation</h3>
+            <div id="budgetAllocation"></div>
+        </div>
+    </div>
+
+    <!-- Track New Journey -->
+    <div class="section-container">
+        <div class="section-header">
+            <h2>➕ Track New Customer Journey</h2>
+            <button class="btn-primary" onclick="openTrackJourneyModal()">Track Journey</button>
+        </div>
+    </div>
+</div>
+
+<!-- Track Journey Modal -->
+<div id="trackJourneyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Track Customer Journey</h2>
+            <span class="close" onclick="closeTrackJourneyModal()">&times;</span>
+        </div>
+        <form onsubmit="submitTrackJourney(event)">
+            <div class="form-group">
+                <label for="customerId">Customer ID</label>
+                <input type="text" id="customerId" placeholder="cust_123" required>
+            </div>
+
+            <div class="form-group">
+                <label for="orderId">Order ID (optional)</label>
+                <input type="text" id="orderId" placeholder="ORD_123">
+            </div>
+
+            <div class="form-group">
+                <label for="conversionValue">Conversion Value</label>
+                <input type="number" id="conversionValue" placeholder="199.99" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label>Touchpoints</label>
+                <div id="touchpointsContainer">
+                    <div class="touchpoint-group">
+                        <input type="text" placeholder="Channel (email, paid_search, etc.)" class="touchpoint-channel" required>
+                        <input type="datetime-local" class="touchpoint-time" required>
+                        <button type="button" class="btn-secondary" onclick="removeTouchpoint(this)">Remove</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-secondary" onclick="addTouchpoint()">+ Add Touchpoint</button>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeTrackJourneyModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Track Journey</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.admin-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.plan-banner {
+    display: grid;
+    grid-template-columns: 1.4fr 0.6fr;
+    gap: 20px;
+    background: linear-gradient(135deg, #0f172a 0%, #111827 50%, #0b1021 100%);
+    border: 1px solid #16213e;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 22px;
+    align-items: center;
+}
+
+.plan-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.plan-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(102, 126, 234, 0.15);
+    color: #c7d2fe;
+    border: 1px solid rgba(102, 126, 234, 0.35);
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    font-size: 12px;
+}
+
+.plan-entitlements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: #b0b0b0;
+    font-size: 12px;
+}
+
+.plan-entitlements span {
+    background: rgba(22, 33, 62, 0.8);
+    border: 1px solid #16213e;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.usage-meter {
+    position: relative;
+    width: 100%;
+    height: 12px;
+    background: #0f3460;
+    border: 1px solid #16213e;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.usage-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    transition: width 0.6s ease;
+}
+
+.usage-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #b0b0b0;
+}
+
+.usage-percent {
+    color: #84fab0;
+    font-weight: 700;
+}
+
+.plan-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    text-align: right;
+}
+
+.upgrade-copy {
+    color: #cbd5f5;
+    font-size: 13px;
+}
+
+.upgrade-copy.success {
+    color: #84fab0;
+}
+
+.btn-upgrade {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    color: #0b1021;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(249, 115, 22, 0.25);
+}
+
+.btn-upgrade:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 34px rgba(249, 115, 22, 0.35);
+}
+
+.plan-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: rgba(132, 250, 176, 0.15);
+    border: 1px solid rgba(132, 250, 176, 0.35);
+    color: #84fab0;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.lock-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 193, 7, 0.08);
+    border: 1px dashed rgba(255, 193, 7, 0.4);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #facc15;
+    margin: 0 0 18px 0;
+    font-size: 13px;
+}
+
+.link-upgrade {
+    color: #fbbf24;
+    text-decoration: underline;
+    font-weight: 700;
+}
+
+.admin-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.admin-header h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+    font-size: 32px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.gradient-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.gradient-green { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #000 !important; }
+.gradient-purple { background: linear-gradient(135deg, #764ba2 0%, #c084fc 100%); }
+.gradient-orange { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: #000 !important; }
+
+.section-container {
+    background: #1a1a2e;
+    border: 1px solid #16213e;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-container h2 {
+    margin: 0 0 20px 0;
+    color: #667eea;
+}
+
+.subtitle {
+    color: #b0b0b0;
+    font-size: 13px;
+    margin: -15px 0 15px 0;
+}
+
+.best-channel-highlight {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.highlight-badge {
+    font-size: 11px;
+    font-weight: bold;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.highlight-content h3 {
+    margin: 10px 0;
+    font-size: 24px;
+}
+
+.highlight-metrics {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.metric {
+    font-size: 14px;
+}
+
+.metric strong {
+    font-size: 16px;
+}
+
+.channel-roi-table {
+    overflow-x: auto;
+}
+
+.channel-roi-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.channel-roi-table th {
+    background: #0f3460;
+    padding: 12px;
+    text-align: left;
+    color: #667eea;
+    font-weight: bold;
+    border-bottom: 2px solid #16213e;
+}
+
+.channel-roi-table td {
+    padding: 12px;
+    border-bottom: 1px solid #16213e;
+    color: #b0b0b0;
+}
+
+.channel-roi-table tr.positive {
+    background: rgba(132, 250, 176, 0.05);
+}
+
+.channel-roi-table tr.positive .roi-value {
+    color: #84fab0;
+    font-weight: bold;
+}
+
+.channel-roi-table tr.neutral {
+    background: rgba(255, 206, 86, 0.05);
+}
+
+.channel-roi-table tr.neutral .roi-value {
+    color: #ffce56;
+    font-weight: bold;
+}
+
+.channel-roi-table tr.negative {
+    background: rgba(255, 106, 136, 0.05);
+}
+
+.channel-roi-table tr.negative .roi-value {
+    color: #ff6a88;
+    font-weight: bold;
+}
+
+.model-comparison {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.model-card {
+    background: #0f3460;
+    border: 1px solid #16213e;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.model-card h3 {
+    color: #667eea;
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.model-channels {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.channel-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    background: #16213e;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.channel-name {
+    color: #b0b0b0;
+}
+
+.channel-revenue {
+    color: #667eea;
+    font-weight: bold;
+}
+
+.variance-table {
+    overflow-x: auto;
+}
+
+.variance-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.variance-table th {
+    background: #0f3460;
+    padding: 12px;
+    text-align: left;
+    color: #667eea;
+    font-weight: bold;
+    border-bottom: 2px solid #16213e;
+}
+
+.variance-table td {
+    padding: 12px;
+    border-bottom: 1px solid #16213e;
+    color: #b0b0b0;
+}
+
+.consensus-high {
+    color: #84fab0;
+    font-weight: bold;
+}
+
+.consensus-medium {
+    color: #ffce56;
+    font-weight: bold;
+}
+
+.consensus-low {
+    color: #ff6a88;
+    font-weight: bold;
+}
+
+.path-patterns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.pattern-card {
+    background: #0f3460;
+    border: 1px solid #16213e;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.pattern-path {
+    color: #667eea;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    word-break: break-word;
+}
+
+.pattern-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #b0b0b0;
+    font-size: 12px;
+}
+
+.stats-grid .stat-item {
+    background: #0f3460;
+    border: 1px solid #16213e;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+}
+
+.stat-item label {
+    display: block;
+    color: #b0b0b0;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.stat-item value {
+    display: block;
+    color: #667eea;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.optimization-section {
+    background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+}
+
+.optimization-form {
+    margin-bottom: 20px;
+}
+
+.optimization-form label {
+    display: block;
+    color: #b0b0b0;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.input-group span {
+    color: #b0b0b0;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 10px;
+    background: #16213e;
+    border: 1px solid #16213e;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    max-width: 300px;
+}
+
+.optimization-results {
+    background: #0f3460;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.optimization-results h3 {
+    color: #667eea;
+    margin: 0 0 15px 0;
+}
+
+#budgetAllocation {
+    display: grid;
+    gap: 10px;
+}
+
+.budget-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #16213e;
+    border-radius: 6px;
+    color: #b0b0b0;
+    font-size: 13px;
+}
+
+.budget-amount {
+    color: #84fab0;
+    font-weight: bold;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #0f3460;
+    margin: 50px auto;
+    padding: 0;
+    border: 1px solid #16213e;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #16213e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #fff;
+}
+
+.close {
+    font-size: 28px;
+    font-weight: bold;
+    color: #b0b0b0;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #667eea;
+}
+
+.modal form {
+    padding: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #b0b0b0;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    background: #1a1a2e;
+    border: 1px solid #16213e;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+}
+
+.touchpoint-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.touchpoint-channel,
+.touchpoint-time {
+    flex: 1;
+    padding: 10px 12px;
+    background: #1a1a2e;
+    border: 1px solid #16213e;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 12px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #16213e;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #16213e;
+    color: #b0b0b0;
+    border: 1px solid #16213e;
+}
+
+.btn-secondary:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .highlight-metrics {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .plan-banner {
+        grid-template-columns: 1fr;
+    }
+
+    .plan-right {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+</style>
+
+<script>
+(function(){
+    const meter = document.querySelector('.usage-meter');
+    if (!meter) return;
+    const used = parseFloat(meter.getAttribute('data-used')) || 0;
+    const cap = parseFloat(meter.getAttribute('data-cap')) || 0;
+    const pct = cap ? Math.min(100, Math.max(0, (used / cap) * 100)) : 0;
+    const bar = meter.querySelector('.usage-bar');
+    const percentLabel = document.querySelector('.usage-percent');
+    if (bar) bar.style.width = pct + '%';
+    if (percentLabel) percentLabel.textContent = Math.round(pct) + '%';
+})();
+
+function openTrackJourneyModal() {
+    document.getElementById('trackJourneyModal').style.display = 'block';
+}
+
+function closeTrackJourneyModal() {
+    document.getElementById('trackJourneyModal').style.display = 'none';
+}
+
+function addTouchpoint() {
+    const container = document.getElementById('touchpointsContainer');
+    const div = document.createElement('div');
+    div.className = 'touchpoint-group';
+    div.innerHTML = `
+        <input type="text" placeholder="Channel" class="touchpoint-channel" required>
+        <input type="datetime-local" class="touchpoint-time" required>
+        <button type="button" class="btn-secondary" onclick="removeTouchpoint(this)">Remove</button>
+    `;
+    container.appendChild(div);
+}
+
+function removeTouchpoint(btn) {
+    btn.parentElement.remove();
+}
+
+function optimizeBudget() {
+    const budget = document.getElementById('totalBudget').value;
+    
+    fetch('/api/attribution/budget-optimization', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({total_budget: parseFloat(budget)})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const alloc = data.optimization.recommendations;
+            const html = Object.entries(alloc)
+                .map(([ch, amt]) => `
+                    <div class="budget-item">
+                        <span>${ch.replace(/_/g, ' ').toUpperCase()}</span>
+                        <span class="budget-amount">$${amt.toFixed(2)}</span>
+                    </div>
+                `)
+                .join('');
+            document.getElementById('budgetAllocation').innerHTML = html;
+            document.getElementById('optimizationResults').style.display = 'block';
+        }
+    });
+}
+
+function submitTrackJourney(e) {
+    e.preventDefault();
+    
+    const touchpoints = Array.from(document.querySelectorAll('.touchpoint-group')).map(g => ({
+        channel: g.querySelector('.touchpoint-channel').value,
+        timestamp: g.querySelector('.touchpoint-time').value
+    }));
+    
+    const data = {
+        customer_id: document.getElementById('customerId').value,
+        order_id: document.getElementById('orderId').value,
+        conversion_value: parseFloat(document.getElementById('conversionValue').value),
+        touchpoints: touchpoints
+    };
+    
+    fetch('/api/attribution/track-journey', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(d => {
+        alert(d.success ? 'Journey tracked!' : 'Error: ' + d.error);
+        if (d.success) {
+            closeTrackJourneyModal();
+            location.reload();
+        }
+    });
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('trackJourneyModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

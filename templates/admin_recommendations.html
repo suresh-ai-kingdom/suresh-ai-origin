@@ -1,0 +1,629 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Recommendations - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .recommendations-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem;
+    }
+
+    .rec-header {
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .rec-header h1 {
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .rec-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card h3 {
+        color: #667eea;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 0 0 0.5rem 0;
+        opacity: 0.8;
+    }
+
+    .stat-card .value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+    }
+
+    .stat-card .subtext {
+        color: #999;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .recommendation-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        color: #333;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .customer-selector {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .customer-selector input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .customer-selector input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .customer-selector button {
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .customer-selector button:hover {
+        background: #764ba2;
+    }
+
+    .recommendation-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .recommendation-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .rec-product-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .rec-reason {
+        color: #666;
+        margin: 0 0 1rem 0;
+        font-size: 0.95rem;
+    }
+
+    .rec-metrics {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .rec-metric {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .rec-metric-label {
+        font-size: 0.8rem;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+
+    .rec-metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .confidence-bar {
+        height: 8px;
+        background: #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .confidence-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: width 0.5s ease;
+    }
+
+    .opportunities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .opportunity-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-top: 3px solid #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .opportunity-card:hover {
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+    }
+
+    .opp-receipt {
+        font-weight: 700;
+        color: #333;
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+    }
+
+    .opp-segment {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .opp-detail {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .opp-detail:last-child {
+        border-bottom: none;
+    }
+
+    .opp-detail-label {
+        font-weight: 500;
+    }
+
+    .opp-detail-value {
+        color: #333;
+    }
+
+    .product-perf {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-bottom: 3px solid #667eea;
+    }
+
+    .product-name {
+        font-weight: 700;
+        color: #333;
+        margin: 0 0 1rem 0;
+    }
+
+    .product-stat {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.9rem;
+    }
+
+    .product-stat:last-child {
+        border-bottom: none;
+    }
+
+    .product-stat-label {
+        color: #999;
+    }
+
+    .product-stat-value {
+        font-weight: 700;
+        color: #333;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #f8f9ff;
+    }
+
+    .loading {
+        text-align: center;
+        color: #667eea;
+        font-size: 1rem;
+        padding: 2rem;
+    }
+
+    .success-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #28a745;
+    }
+
+    .error-message {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #f5222d;
+    }
+
+    .no-data {
+        text-align: center;
+        color: #999;
+        padding: 2rem;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+        .recommendations-container {
+            padding: 1rem;
+        }
+
+        .rec-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .recommendation-section {
+            padding: 1.5rem;
+        }
+
+        .customer-selector {
+            flex-direction: column;
+        }
+
+        .opportunities-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="recommendations-container">
+    <div class="rec-header">
+        <h1>🎯 Smart Recommendations Engine</h1>
+        <p>ML-powered product suggestions for maximum conversion</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Customers</h3>
+            <p class="value" id="stat-customers">0</p>
+            <p class="subtext">Active in system</p>
+        </div>
+        <div class="stat-card">
+            <h3>Revenue Lift Potential</h3>
+            <p class="value" id="stat-lift">₹0</p>
+            <p class="subtext">Estimated additional revenue</p>
+        </div>
+        <div class="stat-card">
+            <h3>Lift Percentage</h3>
+            <p class="value" id="stat-lift-pct">0%</p>
+            <p class="subtext">Growth vs current LTV</p>
+        </div>
+        <div class="stat-card">
+            <h3>Avg Customer LTV</h3>
+            <p class="value" id="stat-avg-ltv">₹0</p>
+            <p class="subtext">Lifetime value per customer</p>
+        </div>
+    </div>
+
+    <!-- Individual Recommendations -->
+    <div class="recommendation-section">
+        <h2 class="section-title">🔍 Get Recommendations</h2>
+        
+        <div class="customer-selector">
+            <input type="text" id="customerReceipt" placeholder="Enter customer receipt ID..." />
+            <button class="btn-primary" onclick="getCustomerRecommendations()">Get Recommendations</button>
+        </div>
+
+        <div id="recommendations-result"></div>
+    </div>
+
+    <!-- Top Opportunities -->
+    <div class="recommendation-section">
+        <h2 class="section-title">🌟 Top Cross-Sell Opportunities</h2>
+        <div id="opportunities-list" class="opportunities-grid"></div>
+    </div>
+
+    <!-- Product Performance -->
+    <div class="recommendation-section">
+        <h2 class="section-title">📊 Product Performance</h2>
+        <div id="product-performance" class="product-perf"></div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="button-group">
+        <button class="btn-primary" onclick="refreshAllData()">🔄 Refresh Data</button>
+        <button class="btn-secondary" onclick="exportRecommendations()">📥 Export CSV</button>
+    </div>
+</div>
+
+<script>
+// Load recommendations on page load
+document.addEventListener('DOMContentLoaded', function() {
+    refreshAllData();
+});
+
+async function refreshAllData() {
+    await loadStats();
+    await loadOpportunities();
+    await loadProductPerformance();
+}
+
+async function loadStats() {
+    try {
+        const response = await fetch('/api/recommendations/stats');
+        const data = await response.json();
+
+        if (data.success) {
+            const impact = data.impact;
+            document.getElementById('stat-customers').textContent = impact.total_customers;
+            document.getElementById('stat-lift').textContent = '₹' + Math.round(impact.estimated_revenue_lift);
+            document.getElementById('stat-lift-pct').textContent = impact.estimated_lift_percentage + '%';
+            document.getElementById('stat-avg-ltv').textContent = '₹' + Math.round(impact.average_customer_ltv);
+        }
+    } catch (err) {
+        console.error('Error loading stats:', err);
+    }
+}
+
+async function loadOpportunities() {
+    try {
+        const response = await fetch('/api/recommendations/opportunities');
+        const data = await response.json();
+
+        const container = document.getElementById('opportunities-list');
+        
+        if (data.success && data.opportunities.length > 0) {
+            container.innerHTML = data.opportunities.map(opp => `
+                <div class="opportunity-card">
+                    <p class="opp-receipt">📱 ${opp.receipt}</p>
+                    <span class="opp-segment">${opp.segment || 'Standard'}</span>
+                    <div class="opp-detail">
+                        <span class="opp-detail-label">LTV:</span>
+                        <span class="opp-detail-value">₹${Math.round(opp.ltv)}</span>
+                    </div>
+                    <div class="opp-detail">
+                        <span class="opp-detail-label">Orders:</span>
+                        <span class="opp-detail-value">${opp.order_count}</span>
+                    </div>
+                    <div class="opp-detail">
+                        <span class="opp-detail-label">Recommended:</span>
+                        <span class="opp-detail-value">${opp.recommended_product}</span>
+                    </div>
+                    <div class="opp-detail">
+                        <span class="opp-detail-label">Confidence:</span>
+                        <span class="opp-detail-value">${Math.round(opp.confidence)}%</span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<div class="no-data">No cross-sell opportunities at this time</div>';
+        }
+    } catch (err) {
+        console.error('Error loading opportunities:', err);
+    }
+}
+
+async function loadProductPerformance() {
+    try {
+        const response = await fetch('/api/recommendations/products');
+        const data = await response.json();
+
+        const container = document.getElementById('product-performance');
+        
+        if (data.success && data.products) {
+            container.innerHTML = Object.entries(data.products).map(([code, product]) => `
+                <div class="product-card">
+                    <p class="product-name">${product.name}</p>
+                    <div class="product-stat">
+                        <span class="product-stat-label">Orders:</span>
+                        <span class="product-stat-value">${product.total_orders}</span>
+                    </div>
+                    <div class="product-stat">
+                        <span class="product-stat-label">Revenue:</span>
+                        <span class="product-stat-value">₹${Math.round(product.total_revenue)}</span>
+                    </div>
+                    <div class="product-stat">
+                        <span class="product-stat-label">Customers:</span>
+                        <span class="product-stat-value">${product.unique_customers}</span>
+                    </div>
+                    <div class="product-stat">
+                        <span class="product-stat-label">Avg Order:</span>
+                        <span class="product-stat-value">₹${Math.round(product.avg_order_value)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        console.error('Error loading product performance:', err);
+    }
+}
+
+async function getCustomerRecommendations() {
+    const receipt = document.getElementById('customerReceipt').value.trim();
+    
+    if (!receipt) {
+        alert('Please enter a customer receipt ID');
+        return;
+    }
+
+    const resultDiv = document.getElementById('recommendations-result');
+    resultDiv.innerHTML = '<div class="loading">Loading recommendations...</div>';
+
+    try {
+        const response = await fetch(`/api/recommendations/customer/${receipt}`);
+        const data = await response.json();
+
+        if (data.success) {
+            const recs = data.recommendations;
+            
+            if (recs.length === 0) {
+                resultDiv.innerHTML = '<div class="no-data">No recommendations available for this customer</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="success-message">✅ Found ' + recs.length + ' recommendations</div>' +
+                recs.map((rec, idx) => `
+                    <div class="recommendation-card">
+                        <p class="rec-product-name">
+                            <span style="color: #667eea;">★</span> 
+                            ${rec.product}
+                        </p>
+                        <p class="rec-reason">${rec.reason}</p>
+                        <div class="rec-metrics">
+                            <div class="rec-metric">
+                                <span class="rec-metric-label">Match Score</span>
+                                <span class="rec-metric-value">${Math.round(rec.score)}%</span>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" style="width: ${rec.score}%"></div>
+                                </div>
+                            </div>
+                            <div class="rec-metric">
+                                <span class="rec-metric-label">Confidence</span>
+                                <span class="rec-metric-value">${Math.round(rec.confidence * 100)}%</span>
+                            </div>
+                            <div class="rec-metric">
+                                <span class="rec-metric-label">Est. Value</span>
+                                <span class="rec-metric-value">₹${rec.estimated_conversion_value}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+        } else {
+            resultDiv.innerHTML = '<div class="error-message">❌ ' + (data.error || 'Failed to load recommendations') + '</div>';
+        }
+    } catch (err) {
+        resultDiv.innerHTML = '<div class="error-message">❌ Error: ' + err.message + '</div>';
+    }
+}
+
+async function exportRecommendations() {
+    try {
+        const response = await fetch('/api/recommendations/export');
+        const blob = await response.blob();
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'recommendations_export.csv';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    } catch (err) {
+        alert('Error exporting recommendations: ' + err.message);
+    }
+}
+</script>
+{% endblock %}

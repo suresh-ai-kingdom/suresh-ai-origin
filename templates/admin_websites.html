@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Website Generator - Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1b4e 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #00FF9F;
+        }
+        
+        h1 {
+            color: #00FF9F;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #8338EC;
+            font-size: 1.1em;
+        }
+        
+        .controls {
+            background: rgba(51, 56, 100, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(131, 56, 236, 0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00E5FF;
+            font-weight: 600;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0f1228;
+            border: 1px solid rgba(131, 56, 236, 0.3);
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #00FF9F;
+            box-shadow: 0 0 10px rgba(0, 255, 159, 0.2);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #00FF9F 0%, #00E5FF 100%);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 159, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(131, 56, 236, 0.2) 0%, rgba(0, 255, 159, 0.1) 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(131, 56, 236, 0.3);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #00FF9F;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .websites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .website-card {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1b4e 100%);
+            border: 1px solid rgba(131, 56, 236, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .website-card:hover {
+            transform: translateY(-5px);
+            border-color: #00FF9F;
+            box-shadow: 0 15px 40px rgba(0, 255, 159, 0.2);
+        }
+        
+        .website-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #8338EC 0%, #FF006E 100%);
+            color: white;
+        }
+        
+        .website-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .website-template {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        
+        .website-body {
+            padding: 20px;
+        }
+        
+        .tier-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        
+        .tier-BREAKTHROUGH {
+            background: #FF006E;
+            color: white;
+        }
+        
+        .tier-ELITE {
+            background: #8338EC;
+            color: white;
+        }
+        
+        .tier-PREMIUM {
+            background: #3A86FF;
+            color: white;
+        }
+        
+        .tier-GROWTH {
+            background: #06D6A0;
+            color: white;
+        }
+        
+        .performance-score {
+            font-size: 2em;
+            font-weight: 700;
+            color: #00FF9F;
+            margin-bottom: 10px;
+        }
+        
+        .score-bar {
+            background: #0f1228;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00FF9F 0%, #00E5FF 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .website-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            color: #aaa;
+        }
+        
+        .metric-value {
+            color: #00FF9F;
+            font-weight: 600;
+        }
+        
+        .features-list {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(131, 56, 236, 0.3);
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            background: rgba(0, 255, 159, 0.1);
+            color: #00FF9F;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            margin: 3px 3px 3px 0;
+            border: 1px solid rgba(0, 255, 159, 0.3);
+        }
+        
+        .copy-section {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            font-size: 0.9em;
+            line-height: 1.5;
+            border-left: 3px solid #8338EC;
+        }
+        
+        .copy-label {
+            color: #8338EC;
+            font-weight: 600;
+            font-size: 0.85em;
+            margin-bottom: 3px;
+        }
+        
+        .copy-text {
+            color: #ddd;
+            font-style: italic;
+        }
+        
+        .no-websites {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .no-websites-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .conversion-impact {
+            background: rgba(0, 255, 159, 0.1);
+            border: 1px solid rgba(0, 255, 159, 0.3);
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-size: 0.85em;
+        }
+        
+        .conversion-value {
+            color: #00FF9F;
+            font-weight: 700;
+        }
+        
+        .optimization-btn {
+            background: #3A86FF;
+            margin-top: 10px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .optimization-btn:hover {
+            background: #0066ff;
+        }
+
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .websites-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌐 Website Generator</h1>
+        <p class="subtitle">Generate 1% Tier Futuristic Websites with AI</p>
+    </header>
+
+    <div class="controls">
+        <h3 style="color: #00FF9F; margin-bottom: 15px;">Generate New Website</h3>
+        <form id="generateForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="productName">Product Name *</label>
+                    <input type="text" id="productName" placeholder="e.g., SuperAI Analytics" required>
+                </div>
+                <div class="form-group">
+                    <label for="industry">Industry</label>
+                    <select id="industry">
+                        <option>Technology</option>
+                        <option>Finance</option>
+                        <option>E-Commerce</option>
+                        <option>SaaS</option>
+                        <option>Healthcare</option>
+                        <option>Marketing</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="productDesc">Product Description *</label>
+                <textarea id="productDesc" rows="3" placeholder="Describe your product..." required></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="audience">Target Audience</label>
+                    <select id="audience">
+                        <option>B2B SaaS</option>
+                        <option>Enterprise</option>
+                        <option>SMB</option>
+                        <option>Startup</option>
+                        <option>Consumer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="count">Generate Variations</label>
+                    <input type="number" id="count" min="1" max="10" value="1">
+                </div>
+            </div>
+            
+            <button type="submit">✨ Generate Websites</button>
+        </form>
+    </div>
+
+    <div class="stats" id="stats">
+        <div class="stat-card">
+            <div class="stat-value" id="totalWebsites">0</div>
+            <div class="stat-label">Total Websites</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="breakthroughCount">0</div>
+            <div class="stat-label">🚀 Top 1% (Breakthrough)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="eliteCount">0</div>
+            <div class="stat-label">💎 Elite Tier</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="avgScore">0</div>
+            <div class="stat-label">Avg Performance Score</div>
+        </div>
+    </div>
+
+    <div id="websitesContainer">
+        <div class="no-websites">
+            <div class="no-websites-icon">📭</div>
+            <p>No websites generated yet. Create one to get started!</p>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for demo
+        const sampleWebsites = [
+            {
+                id: "demo_001",
+                product_name: "SuperAI Analytics",
+                product_description: "Real-time AI analytics platform",
+                template: "neo_glassmorphism",
+                tier: "BREAKTHROUGH",
+                tier_color: "#FF006E",
+                performance_score: 96,
+                conversion_lift: 45,
+                copy: {
+                    headline: "Experience SuperAI - Top 1% Performance",
+                    subheader: "AI-powered. Lightning-fast. Game-changing.",
+                    cta_button: "Start Your Breakthrough"
+                },
+                performance: {
+                    page_speed: 98,
+                    mobile_score: 96,
+                    seo_score: 94,
+                    accessibility: 92
+                },
+                features: ["AI Copy", "Mobile Optimized", "Micro-interactions", "3D Elements", "PWA"]
+            },
+            {
+                id: "demo_002",
+                product_name: "SuperAI Analytics",
+                product_description: "Real-time AI analytics platform",
+                template: "quantum_grid",
+                tier: "ELITE",
+                tier_color: "#8338EC",
+                performance_score: 87,
+                conversion_lift: 35,
+                copy: {
+                    headline: "Level Up Your Business",
+                    subheader: "Enterprise-grade power, user-friendly design.",
+                    cta_button: "Get Started Free"
+                },
+                performance: {
+                    page_speed: 86,
+                    mobile_score: 88,
+                    seo_score: 85,
+                    accessibility: 88
+                },
+                features: ["AI Copy", "Mobile Optimized", "Animations", "Fast Load Time"]
+            },
+            {
+                id: "demo_003",
+                product_name: "SuperAI Analytics",
+                product_description: "Real-time AI analytics platform",
+                template: "aurora_flow",
+                tier: "PREMIUM",
+                tier_color: "#3A86FF",
+                performance_score: 72,
+                conversion_lift: 20,
+                copy: {
+                    headline: "Professional Analytics Suite",
+                    subheader: "Professional copy for your business.",
+                    cta_button: "Try Premium"
+                },
+                performance: {
+                    page_speed: 75,
+                    mobile_score: 72,
+                    seo_score: 70,
+                    accessibility: 70
+                },
+                features: ["Professional Copy", "Mobile Responsive", "Clean Design"]
+            }
+        ];
+
+        function updateStats(websites) {
+            const total = websites.length;
+            const breakthrough = websites.filter(w => w.tier === "BREAKTHROUGH").length;
+            const elite = websites.filter(w => w.tier === "ELITE").length;
+            const avgScore = total > 0 ? Math.round(websites.reduce((sum, w) => sum + w.performance_score, 0) / total) : 0;
+            
+            document.getElementById("totalWebsites").textContent = total;
+            document.getElementById("breakthroughCount").textContent = breakthrough;
+            document.getElementById("eliteCount").textContent = elite;
+            document.getElementById("avgScore").textContent = avgScore;
+        }
+
+        function renderWebsites(websites) {
+            const container = document.getElementById("websitesContainer");
+            
+            if (websites.length === 0) {
+                container.innerHTML = `
+                    <div class="no-websites">
+                        <div class="no-websites-icon">📭</div>
+                        <p>No websites generated yet. Create one to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = websites.map(website => `
+                <div class="website-card">
+                    <div class="website-header">
+                        <div class="website-title">${website.product_name}</div>
+                        <div class="website-template">📐 ${website.template}</div>
+                    </div>
+                    <div class="website-body">
+                        <div class="tier-badge tier-${website.tier}">${website.tier}</div>
+                        
+                        <div class="performance-score">${website.performance_score}%</div>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: ${website.performance_score}%"></div>
+                        </div>
+
+                        <div class="website-metrics">
+                            <div class="metric">
+                                <span>Speed:</span>
+                                <span class="metric-value">${website.performance.page_speed}</span>
+                            </div>
+                            <div class="metric">
+                                <span>Mobile:</span>
+                                <span class="metric-value">${website.performance.mobile_score}</span>
+                            </div>
+                            <div class="metric">
+                                <span>SEO:</span>
+                                <span class="metric-value">${website.performance.seo_score}</span>
+                            </div>
+                            <div class="metric">
+                                <span>A11y:</span>
+                                <span class="metric-value">${website.performance.accessibility}</span>
+                            </div>
+                        </div>
+
+                        <div class="copy-section">
+                            <div class="copy-label">📝 Headline</div>
+                            <div class="copy-text">"${website.copy.headline}"</div>
+                        </div>
+
+                        <div class="conversion-impact">
+                            <strong>📈 ${website.conversion_lift}% Conversion Lift</strong><br>
+                            Estimated +$45k/month revenue impact
+                        </div>
+
+                        <div class="features-list">
+                            ${website.features.map(f => `<div class="feature-tag">✓ ${f}</div>`).join('')}
+                        </div>
+
+                        <button class="optimization-btn">⚡ Optimize Performance</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById("generateForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector("button");
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading">⟳</span> Generating...';
+            
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            // Add new websites to samples
+            const newWebsites = [...sampleWebsites];
+            
+            btn.disabled = false;
+            btn.innerHTML = "✨ Generate Websites";
+            
+            renderWebsites(newWebsites);
+            updateStats(newWebsites);
+        });
+
+        // Initialize with sample data
+        updateStats(sampleWebsites);
+        renderWebsites(sampleWebsites);
+    </script>
+</body>
+</html>
