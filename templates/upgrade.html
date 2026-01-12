@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tier Upgrades - SURESH AI ORIGIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .upgrade-hero {
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.15), rgba(51, 56, 236, 0.15));
+            padding: 80px 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 0, 110, 0.3);
+        }
+
+        .upgrade-hero h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FF006E, #8338EC, #00FF9F);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .upgrade-hero p {
+            font-size: 1.3em;
+            color: #b0b0b0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tier-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .tier-btn {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: #b0b0b0;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tier-btn:hover {
+            border-color: #FF006E;
+            color: #FF006E;
+            transform: translateY(-2px);
+        }
+
+        .tier-btn.active {
+            background: linear-gradient(135deg, #FF006E, #8338EC);
+            border-color: #FF006E;
+            color: white;
+        }
+
+        .tiers-container {
+            max-width: 1400px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        .tiers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .tier-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 16px;
+            padding: 40px 30px;
+            position: relative;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .tier-card:hover {
+            transform: translateY(-20px);
+            border-color: #FF006E;
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.12), rgba(51, 56, 236, 0.12));
+            box-shadow: 0 30px 60px rgba(255, 0, 110, 0.2);
+        }
+
+        .tier-card.current {
+            border-color: #00FF9F;
+            background: linear-gradient(135deg, rgba(0, 255, 159, 0.15), rgba(0, 217, 255, 0.15));
+        }
+
+        .tier-card.current::before {
+            content: "✓ YOUR CURRENT TIER";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #00FF9F;
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF006E, #8338EC);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .tier-name {
+            font-size: 2em;
+            font-weight: 800;
+            color: #fff;
+            margin: 15px 0;
+            background: linear-gradient(135deg, #FF006E, #00FF9F);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tier-price {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #FF006E;
+            margin: 20px 0;
+        }
+
+        .tier-price-period {
+            font-size: 0.6em;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .tier-features {
+            list-style: none;
+            padding: 30px 0;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .tier-features li {
+            padding: 12px 0;
+            color: #b0b0b0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tier-features li::before {
+            content: "✓";
+            color: #00FF9F;
+            font-weight: 800;
+            font-size: 1.2em;
+        }
+
+        .tier-btn-upgrade {
+            width: 100%;
+            background: linear-gradient(135deg, #FF006E, #8338EC);
+            border: none;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .tier-btn-upgrade:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 0, 110, 0.4);
+        }
+
+        .tier-btn-upgrade:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .tier-btn-current {
+            background: rgba(0, 255, 159, 0.2);
+            color: #00FF9F;
+            border: 2px solid #00FF9F;
+            cursor: default;
+        }
+
+        .tier-btn-current:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .pricing-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 50px 0;
+        }
+
+        .toggle-btn {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            padding: 12px 30px;
+            border-radius: 8px;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #FF006E, #8338EC);
+            border-color: #FF006E;
+            color: white;
+        }
+
+        .savings-badge {
+            background: #00FF9F;
+            color: #000;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 700;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .upgrade-hero h1 {
+                font-size: 2.5em;
+            }
+
+            .tiers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tier-card {
+                padding: 30px 20px;
+            }
+
+            .tier-name {
+                font-size: 1.5em;
+            }
+
+            .tier-price {
+                font-size: 2em;
+            }
+        }
+
+        .comparison-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            padding: 40px;
+            border-radius: 16px;
+            margin-top: 60px;
+            backdrop-filter: blur(10px);
+        }
+
+        .comparison-section h3 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #FF006E, #00FF9F);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .upgrade-benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .benefit-card {
+            background: rgba(0, 255, 159, 0.1);
+            border: 1px solid rgba(0, 255, 159, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .benefit-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .benefit-title {
+            font-size: 1.2em;
+            color: #00FF9F;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .benefit-text {
+            color: #b0b0b0;
+            font-size: 0.9em;
+        }
+
+        .current-tier-badge {
+            background: linear-gradient(135deg, #00FF9F, #00D9FF);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="upgrade-hero">
+        <h1>🚀 Upgrade Your Tier</h1>
+        <p>Progress from <strong>Starter → Rare → Rarest → 1%</strong> and unlock exclusive features</p>
+    </div>
+
+    <div class="tiers-container">
+        <!-- Pricing Toggle -->
+        <div class="pricing-toggle" id="pricingToggle">
+            <button class="toggle-btn active" onclick="setPricing('monthly')">💳 Monthly Billing</button>
+            <button class="toggle-btn" onclick="setPricing('yearly')">📅 Annual (Save 17%)</button>
+        </div>
+
+        <!-- Tiers Grid -->
+        <div class="tiers-grid" id="tiersGrid">
+            <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Upgrade Benefits -->
+        <div class="comparison-section">
+            <h3>Why Upgrade? 📈</h3>
+            <div class="upgrade-benefits">
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <div class="benefit-title">More Features</div>
+                    <div class="benefit-text">Unlock advanced AI tools, API access, and unlimited projects</div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🤝</div>
+                    <div class="benefit-title">Better Support</div>
+                    <div class="benefit-text">Priority support → 24/7 support → VIP concierge service</div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <div class="benefit-title">Revenue Sharing</div>
+                    <div class="benefit-text">Earn 10-50% commissions on referrals at higher tiers</div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎯</div>
+                    <div class="benefit-title">Exclusive Access</div>
+                    <div class="benefit-text">Get early access to new features and beta programs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TIER_SYSTEM = {{ tiers | tojson }};
+        const CURRENT_TIER = "{{ current_tier }}";
+        let PRICING_MODE = 'monthly';
+
+        function renderTiers() {
+            const grid = document.getElementById('tiersGrid');
+            grid.innerHTML = '';
+
+            Object.entries(TIER_SYSTEM).forEach(([key, tier]) => {
+                const price = PRICING_MODE === 'monthly' ? tier.price_monthly : tier.price_yearly;
+                const period = PRICING_MODE === 'monthly' ? 'month' : 'year';
+                const isCurrent = key === CURRENT_TIER;
+
+                const savingsYearly = tier.price_monthly * 12 - tier.price_yearly;
+                const savingsDisplay = PRICING_MODE === 'yearly' && savingsYearly > 0 
+                    ? `<div class="savings-badge">Save ₹${savingsYearly.toLocaleString()}</div>` 
+                    : '';
+
+                const card = document.createElement('div');
+                card.className = `tier-card ${isCurrent ? 'current' : ''}`;
+                card.innerHTML = `
+                    <div class="tier-badge">${tier.badge}</div>
+                    <div class="tier-name">${tier.name}</div>
+                    <div class="tier-price">₹${price.toLocaleString()}<span class="tier-price-period">/${period}</span></div>
+                    ${savingsDisplay}
+                    <ul class="tier-features">
+                        ${tier.features.slice(0, 6).map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                    <button 
+                        class="tier-btn-upgrade ${isCurrent ? 'tier-btn-current' : ''}"
+                        onclick="upgradeToTier('${key}')"
+                        ${isCurrent ? 'disabled' : ''}
+                    >
+                        ${isCurrent ? '✓ Current Tier' : `Upgrade to ${tier.name}`}
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setPricing(mode) {
+            PRICING_MODE = mode;
+            
+            // Update toggle buttons
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            renderTiers();
+        }
+
+        function upgradeToTier(targetTier) {
+            if (targetTier === CURRENT_TIER) {
+                alert('You are already on this tier');
+                return;
+            }
+
+            const tierInfo = TIER_SYSTEM[targetTier];
+            const currentInfo = TIER_SYSTEM[CURRENT_TIER];
+
+            if (!currentInfo.can_upgrade_to.includes(targetTier)) {
+                alert('You cannot upgrade to this tier. You can only upgrade to higher tiers.');
+                return;
+            }
+
+            const currentPrice = currentInfo.price_monthly;
+            const targetPrice = tierInfo.price_monthly;
+            const upgradeCost = targetPrice - currentPrice;
+
+            if (confirm(`Upgrade from ${currentInfo.name} to ${tierInfo.name}?\n\nAdditional cost: ₹${upgradeCost.toLocaleString()}/month`)) {
+                // Redirect to payment
+                window.location.href = `/pay/${targetTier}?current_tier=${CURRENT_TIER}`;
+            }
+        }
+
+        // Initial render
+        renderTiers();
+    </script>
+</body>
+</html>

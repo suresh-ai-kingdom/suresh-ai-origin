@@ -287,10 +287,78 @@ def _reset_rate_limit_store():
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
 
+# ===== TIER SYSTEM: Starter → Pro → Premium → Rare → Rarest → 1% =====
 PRODUCTS = {
     "starter": "starter_pack.zip",
     "pro": "pro_pack.zip",
-    "premium": "premium_pack.zip"
+    "premium": "premium_pack.zip",
+    "rare": "rare_pack.zip",
+    "rarest": "rarest_pack.zip",
+    "one_percent": "one_percent_pack.zip"
+}
+
+# Tier hierarchy and pricing (in rupees)
+TIER_SYSTEM = {
+    "starter": {
+        "name": "Starter Pack",
+        "price_monthly": 99,
+        "price_yearly": 990,
+        "position": 1,
+        "badge": "🌟 Popular",
+        "features": ["100+ AI Prompts", "Basic Automation", "Email Support", "1 Project", "Updates included"],
+        "benefits": ["Get started quickly", "Perfect for beginners"],
+        "can_upgrade_to": ["pro", "premium", "rare", "rarest", "one_percent"]
+    },
+    "pro": {
+        "name": "Pro Pack",
+        "price_monthly": 499,
+        "price_yearly": 4990,
+        "position": 2,
+        "badge": "⚡ Most Popular",
+        "features": ["500+ AI Prompts", "Advanced Automation", "Priority Support", "5 Projects", "API Access", "Team Collaboration"],
+        "benefits": ["Scale your work", "Professional tools"],
+        "can_upgrade_to": ["premium", "rare", "rarest", "one_percent"]
+    },
+    "premium": {
+        "name": "Premium Pack",
+        "price_monthly": 999,
+        "price_yearly": 9990,
+        "position": 3,
+        "badge": "👑 Premium",
+        "features": ["1000+ AI Prompts", "Enterprise Automation", "24/7 Support", "Unlimited Projects", "Advanced API", "White Label Support"],
+        "benefits": ["Enterprise power", "All features included"],
+        "can_upgrade_to": ["rare", "rarest", "one_percent"]
+    },
+    "rare": {
+        "name": "Rare Pack",
+        "price_monthly": 2999,
+        "price_yearly": 29990,
+        "position": 4,
+        "badge": "💎 RARE",
+        "features": ["Unlimited AI Prompts", "Custom Model Training", "VIP Priority Support", "Unlimited Automation", "Dedicated Account Manager", "Custom Integrations", "Advanced Analytics", "Revenue Sharing (10%)"],
+        "benefits": ["Elite access", "Custom solutions", "Revenue opportunities"],
+        "can_upgrade_to": ["rarest", "one_percent"]
+    },
+    "rarest": {
+        "name": "Rarest Pack",
+        "price_monthly": 9999,
+        "price_yearly": 99990,
+        "position": 5,
+        "badge": "🔥 RAREST",
+        "features": ["Everything in Rare +", "Advanced AI Model Access", "Concierge Service", "Custom AI Fine-tuning", "Priority Dev Queue", "Private Infrastructure", "Revenue Sharing (20%)", "Board Reports", "Private Events"],
+        "benefits": ["Exclusive club", "Unlimited potential", "Premium support"],
+        "can_upgrade_to": ["one_percent"]
+    },
+    "one_percent": {
+        "name": "1% Pack",
+        "price_monthly": 99999,
+        "price_yearly": 999990,
+        "position": 6,
+        "badge": "🚀 1% EXCLUSIVE",
+        "features": ["Everything in Rarest +", "Lifetime Premium Access", "Personal AI Team", "Custom Exclusive Features", "99.99% Uptime SLA", "CEO Access", "Revenue Sharing (50%)", "Equity Discussions", "Co-dev Rights", "VIP Global Events"],
+        "benefits": ["Top 1% club", "Unlimited power", "Success guaranteed"],
+        "can_upgrade_to": []
+    }
 }
 
 PLAN_LIMITS = {
@@ -620,6 +688,137 @@ def download(product):
     
     logging.info(f"Download authorized: order={order_id} product={product} ip={request.remote_addr}")
     return send_from_directory(DOWNLOAD_DIR, filename, as_attachment=True)
+
+# ===== TIER UPGRADE SYSTEM =====
+
+@app.route("/upgrade")
+def upgrade_page():
+    """Show upgrade/tier selection page with all available tiers."""
+    current_tier = request.args.get('current', 'starter')
+    return render_template("upgrade.html", 
+                         current_tier=current_tier, 
+                         tiers=TIER_SYSTEM,
+                         all_tiers=list(TIER_SYSTEM.keys()))
+
+@app.route("/api/tier/all", methods=["GET"])
+def get_all_tiers():
+    """Get all available tiers with full details."""
+    tiers_data = {}
+    for tier_key, tier_info in TIER_SYSTEM.items():
+        tiers_data[tier_key] = {
+            **tier_info,
+            "price_display_monthly": f"₹{tier_info['price_monthly']:,}",
+            "price_display_yearly": f"₹{tier_info['price_yearly']:,}",
+            "savings_yearly": tier_info['price_monthly'] * 12 - tier_info['price_yearly']
+        }
+    return jsonify(tiers_data), 200
+
+@app.route("/api/tier/current", methods=["GET"])
+def get_current_tier():
+    """Get current tier for a customer (if available in session/query)."""
+    receipt = request.args.get('receipt') or session.get('customer_receipt')
+    current_tier = request.args.get('current', 'starter')
+    
+    tier_info = TIER_SYSTEM.get(current_tier, TIER_SYSTEM['starter'])
+    return jsonify({
+        "current_tier": current_tier,
+        "tier_info": tier_info,
+        "can_upgrade_to": tier_info.get("can_upgrade_to", []),
+        "upgrade_options": [
+            {
+                "tier": t,
+                "info": TIER_SYSTEM[t],
+                "upgrade_price_monthly": TIER_SYSTEM[t]["price_monthly"] - tier_info["price_monthly"],
+                "upgrade_price_yearly": TIER_SYSTEM[t]["price_yearly"] - tier_info["price_yearly"]
+            }
+            for t in tier_info.get("can_upgrade_to", [])
+        ]
+    }), 200
+
+@app.route("/api/upgrade/to-tier/<target_tier>", methods=["POST"])
+@rate_limit_feature('upgrade')
+def upgrade_to_tier(target_tier):
+    """Upgrade customer to a higher tier."""
+    if target_tier not in TIER_SYSTEM:
+        return jsonify({"error": "invalid_tier"}), 400
+    
+    current_tier = request.json.get('current_tier', 'starter') if request.json else 'starter'
+    receipt = request.json.get('receipt') if request.json else request.args.get('receipt')
+    
+    if current_tier == target_tier:
+        return jsonify({"error": "already_on_tier", "tier": current_tier}), 400
+    
+    # Check if upgrade is allowed
+    tier_info = TIER_SYSTEM.get(current_tier, TIER_SYSTEM['starter'])
+    if target_tier not in tier_info.get("can_upgrade_to", []):
+        return jsonify({"error": "invalid_upgrade_path", "from": current_tier, "to": target_tier}), 403
+    
+    # Calculate upgrade cost (pro-rata for monthly billing)
+    current_price = tier_info["price_monthly"]
+    target_price = TIER_SYSTEM[target_tier]["price_monthly"]
+    upgrade_cost = target_price - current_price
+    
+    if upgrade_cost <= 0:
+        return jsonify({"error": "downgrade_not_allowed"}), 403
+    
+    logging.info(f"Upgrade initiated: {current_tier} → {target_tier}, cost: ₹{upgrade_cost}, receipt: {receipt}")
+    
+    # Redirect to payment for upgrade
+    session['customer_receipt'] = receipt
+    session['upgrade_from'] = current_tier
+    session['upgrade_to'] = target_tier
+    
+    try:
+        if not razorpay_client:
+            return jsonify({'error': 'payment_gateway_not_configured'}), 503
+        
+        # Create payment link for upgrade
+        payment_link_data = {
+            "amount": upgrade_cost * 100,  # paise
+            "currency": "INR",
+            "description": f"Upgrade: {TIER_SYSTEM[current_tier]['name']} → {TIER_SYSTEM[target_tier]['name']}",
+            "customer": {"name": "Customer", "email": "customer@example.com"},
+            "notify": {"sms": False, "email": False},
+            "callback_url": f"https://suresh-ai-origin.onrender.com/success?product={target_tier}&upgrade=true",
+            "callback_method": "get"
+        }
+        
+        payment_link = razorpay_client.payment_link.create(payment_link_data)
+        payment_url = payment_link.get('short_url') or payment_link.get('link_url')
+        
+        return jsonify({
+            "success": True,
+            "payment_url": payment_url,
+            "upgrade": {
+                "from": current_tier,
+                "to": target_tier,
+                "cost": upgrade_cost,
+                "cost_display": f"₹{upgrade_cost:,}"
+            }
+        }), 200
+    except Exception as e:
+        logging.exception(f"Upgrade payment error: {e}")
+        return jsonify({"error": "upgrade_failed", "details": str(e)}), 500
+
+@app.route("/api/upgrade/compare/<tier1>/<tier2>", methods=["GET"])
+def compare_tiers(tier1, tier2):
+    """Compare two tiers side-by-side."""
+    if tier1 not in TIER_SYSTEM or tier2 not in TIER_SYSTEM:
+        return jsonify({"error": "invalid_tier"}), 400
+    
+    return jsonify({
+        "tier1": {
+            "name": TIER_SYSTEM[tier1]["name"],
+            "price_monthly": TIER_SYSTEM[tier1]["price_monthly"],
+            "features": TIER_SYSTEM[tier1]["features"]
+        },
+        "tier2": {
+            "name": TIER_SYSTEM[tier2]["name"],
+            "price_monthly": TIER_SYSTEM[tier2]["price_monthly"],
+            "features": TIER_SYSTEM[tier2]["features"]
+        },
+        "upgrade_cost": TIER_SYSTEM[tier2]["price_monthly"] - TIER_SYSTEM[tier1]["price_monthly"]
+    }), 200
 
 @app.route("/create_order", methods=["POST"])
 @require_idempotency_key
@@ -1100,6 +1299,12 @@ def admin_keepalive():
     import time as _time
     session['admin_logged_in_at'] = _time.time()
     return jsonify({'ok': True})
+
+@app.route('/admin/tiers')
+@admin_required
+def admin_tiers():
+    """Tier analytics dashboard showing customer distribution, upgrades, and revenue."""
+    return render_template('admin_tiers.html')
 
 @app.route('/admin/webhooks')
 @admin_required
