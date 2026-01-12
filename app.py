@@ -417,10 +417,10 @@ def buy():
 @app.route("/pay/<product>", methods=["GET"])
 @rate_limit_feature('create_order')
 def start_payment(product):
-    """Hosted Checkout Approach - Redirects to Razorpay payment page.
+    """Payment Link Approach - Creates a Razorpay Payment Link.
     
-    This doesn't require Razorpay SDK to load in browser.
-    Works even if CDN is blocked.
+    This doesn't require Razorpay SDK in browser.
+    Creates a hosted payment page that works everywhere.
     """
     if not razorpay_client:
         return jsonify({
@@ -436,59 +436,78 @@ def start_payment(product):
             'premium': 999
         }
         
+        PRODUCT_NAMES = {
+            'starter': 'Starter Pack - AI Prompts & Automation',
+            'pro': 'Pro Pack - Advanced AI Tools',
+            'premium': 'Premium Pack - VIP AI Suite'
+        }
+        
         amount = PRODUCT_AMOUNTS.get(product, 99)
+        product_name = PRODUCT_NAMES.get(product, 'AI Pack')
         receipt = f"receipt#{int(time.time())}"
         
-        # Create Razorpay order
+        # Create Razorpay Payment Link (not just order)
         try:
-            order_data = {
+            payment_link_data = {
                 "amount": amount * 100,  # Convert to paise
+                "currency": "INR",
+                "description": product_name,
+                "customer": {
+                    "name": "Customer",
+                    "email": "customer@example.com"
+                },
+                "notify": {
+                    "sms": False,
+                    "email": False
+                },
+                "reminder_enable": False,
+                "callback_url": f"https://suresh-ai-origin.onrender.com/success?product={product}",
+                "callback_method": "get"
+            }
+            
+            # Create payment link using Razorpay API
+            payment_link = razorpay_client.payment_link.create(payment_link_data)
+            
+            payment_url = payment_link.get('short_url') or payment_link.get('link_url')
+            payment_id = payment_link.get('id')
+            
+            logging.info(f"Payment link created: {payment_id} for product {product} amount {amount}")
+            logging.info(f"Payment URL: {payment_url}")
+            
+            # Also create an order for tracking
+            order_data = {
+                "amount": amount * 100,
                 "currency": "INR",
                 "receipt": receipt
             }
-            
             order = razorpay_client.order.create(order_data)
-            logging.info(f"Razorpay order created: {order.get('id')} for product {product} amount {amount}")
+            
+            # Persist to database
+            try:
+                from utils import save_order
+                save_order(order.get('id'), order.get('amount'), order.get('currency', 'INR'), order.get('receipt'), product)
+                logging.info(f"Order persisted: {order.get('id')}")
+            except Exception as db_error:
+                logging.exception(f"Failed to persist order: {db_error}")
+            
+            # Redirect to payment URL
+            if payment_url:
+                logging.info(f"Redirecting to payment link: {payment_url}")
+                return redirect(payment_url)
+            else:
+                return jsonify({
+                    'error': 'payment_link_failed',
+                    'message': 'Could not generate payment link',
+                    'order': order
+                }), 500
+                
         except Exception as razorpay_error:
             logging.exception(f"Razorpay API error: {razorpay_error}")
             return jsonify({
                 'error': 'razorpay_api_error',
-                'message': 'Failed to create payment order',
+                'message': 'Failed to create payment link',
                 'details': str(razorpay_error)
             }), 502
-        
-        # Persist to database
-        try:
-            from utils import save_order
-            save_order(order.get('id'), order.get('amount'), order.get('currency', 'INR'), order.get('receipt'), product)
-            logging.info(f"Order persisted to DB: {order.get('id')}")
-        except Exception as db_error:
-            logging.exception(f"Failed to persist order: {db_error}")
-        
-        # Create payment link/hosted checkout URL
-        # For hosted checkout, we'll create a payment using order ID
-        order_id = order.get('id')
-        key_id = os.getenv('RAZORPAY_KEY_ID', '')
-        
-        # Razorpay hosted checkout URL format
-        checkout_url = f"https://rzp.io/{order.get('short_url')}" if order.get('short_url') else None
-        
-        if checkout_url:
-            logging.info(f"Redirecting to Razorpay hosted checkout: {checkout_url}")
-            # Store order in session for later verification
-            session['pending_order'] = {
-                'order_id': order_id,
-                'product': product,
-                'amount': amount
-            }
-            return redirect(checkout_url)
-        else:
-            # Fallback: Return order for client-side handling
-            return jsonify({
-                'success': True,
-                'order': order,
-                'redirect_url': checkout_url
-            })
     
     except Exception as e:
         logging.exception(f"Payment initiation error: {e}")
