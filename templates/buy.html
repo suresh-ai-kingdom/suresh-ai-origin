@@ -164,6 +164,8 @@
             loading.style.display = 'block';
 
             try {
+                console.log('Initiating payment for product:', currentProduct, 'amount:', productData.price);
+                
                 // Create Razorpay order
                 const response = await fetch('/create_order', {
                     method: 'POST',
@@ -177,21 +179,40 @@
                     })
                 });
 
+                console.log('Create order response status:', response.status);
+                const responseData = await response.json();
+                console.log('Create order response data:', responseData);
+
                 if (!response.ok) {
-                    throw new Error('Failed to create order');
+                    console.error('Order creation failed:', responseData);
+                    throw new Error(responseData.message || 'Failed to create order');
                 }
 
-                const order = await response.json();
+                const order = responseData;
+                console.log('Order created successfully:', order.id);
+
+                if (!order.id) {
+                    throw new Error('No order ID returned from server');
+                }
+
+                // Check if Razorpay key is available
+                if (!{{ razorpay_key_id|tojson }}) {
+                    console.error('Razorpay key not configured in template');
+                    throw new Error('Payment gateway not configured. Please contact support.');
+                }
+
+                console.log('Razorpay key available, opening checkout');
 
                 // Initialize Razorpay checkout
                 const options = {
-                    key: '{{ razorpay_key_id }}',
+                    key: {{ razorpay_key_id|tojson }},
                     amount: order.amount,
                     currency: order.currency,
                     name: 'SURESH AI ORIGIN',
                     description: productData.name,
                     order_id: order.id,
                     handler: function(response) {
+                        console.log('Payment successful:', response);
                         // Payment successful - redirect to success page
                         window.location.href = '/success?product=' + currentProduct + '&order_id=' + order.id + '&payment_id=' + response.razorpay_payment_id;
                     },
@@ -205,6 +226,7 @@
                     },
                     modal: {
                         ondismiss: function() {
+                            console.log('Checkout modal closed by user');
                             button.disabled = false;
                             button.textContent = '🔒 Pay Securely with Razorpay';
                             loading.style.display = 'none';
@@ -212,12 +234,13 @@
                     }
                 };
 
+                console.log('Razorpay options:', options);
                 const rzp = new Razorpay(options);
                 rzp.open();
 
             } catch (error) {
                 console.error('Payment error:', error);
-                alert('Failed to initiate payment. Please try again.');
+                alert('❌ ' + (error.message || 'Failed to initiate payment. Please try again.'));
                 button.disabled = false;
                 button.textContent = '🔒 Pay Securely with Razorpay';
                 loading.style.display = 'none';

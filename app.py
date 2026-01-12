@@ -528,36 +528,78 @@ def create_order():
     Coupon code is optional and will be validated to apply discount.
     Returns the Razorpay order JSON.
     """
+    # Check if Razorpay is configured
     if not razorpay_client:
-        return "Razorpay not configured", 500
-    data = request.get_json() or {}
-    amount = int(data.get("amount", 100))  # amount in rupees
-    product = data.get('product', 'starter')
-    coupon_code = data.get('coupon_code', '').strip()
+        logging.error("Razorpay payment attempt but RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not configured")
+        return jsonify({
+            'error': 'payment_gateway_not_configured',
+            'message': 'Payment processing is not available. Please contact support.',
+            'details': 'RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be configured in environment'
+        }), 503
     
-    # Apply coupon discount if provided
-    final_amount = amount
-    if coupon_code:
-        from coupon_utils import validate_coupon, calculate_discounted_amount
-        validation = validate_coupon(coupon_code)
-        if validation['valid']:
-            amount_paise = amount * 100
-            discounted_paise, _ = calculate_discounted_amount(amount_paise, validation['discount_percent'])
-            final_amount = discounted_paise // 100  # Convert back to rupees
-            logging.info("Coupon %s applied: %d rupees → %d rupees", coupon_code, amount, final_amount)
-        else:
-            logging.warning("Invalid coupon attempt: %s - %s", coupon_code, validation['message'])
-            return jsonify({'error': 'Invalid coupon code', 'message': validation['message']}), 400
-    
-    # Create order with Razorpay
-    order = razorpay_client.order.create({"amount": final_amount * 100, "currency": "INR", "receipt": f"receipt#{int(time.time())}"})
-    # Persist locally using order['id'] and amount in paise
     try:
-        from utils import save_order
-        save_order(order.get('id'), order.get('amount'), order.get('currency', 'INR'), order.get('receipt'), product)
+        data = request.get_json() or {}
+        amount = int(data.get("amount", 100))  # amount in rupees
+        product = data.get('product', 'starter')
+        coupon_code = data.get('coupon_code', '').strip()
+        
+        logging.info(f"Create order request: amount={amount} product={product}")
+        
+        # Apply coupon discount if provided
+        final_amount = amount
+        if coupon_code:
+            from coupon_utils import validate_coupon, calculate_discounted_amount
+            validation = validate_coupon(coupon_code)
+            if validation['valid']:
+                amount_paise = amount * 100
+                discounted_paise, _ = calculate_discounted_amount(amount_paise, validation['discount_percent'])
+                final_amount = discounted_paise // 100  # Convert back to rupees
+                logging.info("Coupon %s applied: %d rupees → %d rupees", coupon_code, amount, final_amount)
+            else:
+                logging.warning("Invalid coupon attempt: %s - %s", coupon_code, validation['message'])
+                return jsonify({'error': 'Invalid coupon code', 'message': validation['message']}), 400
+        
+        # Create order with Razorpay
+        try:
+            order = razorpay_client.order.create({
+                "amount": final_amount * 100,  # Razorpay expects paise
+                "currency": "INR",
+                "receipt": f"receipt#{int(time.time())}"
+            })
+            logging.info(f"Razorpay order created: {order.get('id')} amount={order.get('amount')}")
+        except Exception as razorpay_error:
+            logging.exception(f"Razorpay API error: {razorpay_error}")
+            return jsonify({
+                'error': 'razorpay_api_error',
+                'message': 'Failed to create payment order. Please try again.',
+                'details': str(razorpay_error)
+            }), 502
+        
+        # Persist locally
+        try:
+            from utils import save_order
+            save_order(order.get('id'), order.get('amount'), order.get('currency', 'INR'), order.get('receipt'), product)
+            logging.info(f"Order persisted to database: {order.get('id')}")
+        except Exception as db_error:
+            logging.exception(f"Failed to persist order: {db_error}")
+            # Still return the order even if DB save failed (order is created in Razorpay)
+        
+        return jsonify(order)
+    
+    except ValueError as ve:
+        logging.error(f"Invalid request data: {ve}")
+        return jsonify({
+            'error': 'invalid_request',
+            'message': 'Invalid request data',
+            'details': str(ve)
+        }), 400
     except Exception as e:
-        logging.exception("Failed to persist order: %s", e)
-    return jsonify(order)
+        logging.exception(f"Unexpected error in create_order: {e}")
+        return jsonify({
+            'error': 'internal_error',
+            'message': 'An error occurred while creating the order',
+            'details': str(e)
+        }), 500
 
 
 @app.route("/validate_coupon", methods=["POST"])
