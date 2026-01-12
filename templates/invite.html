@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invite & Earn – SURESH AI ORIGIN</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta property="og:title" content="Join SURESH AI ORIGIN – AI Mastery & Income Automation">
+  <meta property="og:description" content="Invite friends and earn up to 50% commissions with our tiered referral program.">
+  <meta property="og:url" content="{{ share_target }}">
+  <style>
+    .invite-hero { text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(255,0,110,.15), rgba(51,56,236,.15)); border-bottom: 2px solid rgba(255,0,110,.3); }
+    .invite-hero h1 { font-size: 2.6rem; font-weight: 800; background: linear-gradient(135deg, #FF006E, #8338EC, #00FF9F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .invite-grid { max-width: 1100px; margin: 40px auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
+    .badge { display:inline-block; background: linear-gradient(135deg,#FF006E,#8338EC); color:#fff; padding:6px 12px; border-radius:6px; font-weight:700; }
+    .input-row { display:flex; gap:10px; margin-top:12px; }
+    .input-row input { flex:1; padding:12px 14px; border: 1px solid #ddd; border-radius:8px; }
+    .btn { padding:12px 16px; border-radius:8px; background: linear-gradient(135deg,#FF006E,#8338EC); color:#fff; border:none; font-weight:700; cursor:pointer; }
+    .share-buttons { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+    .share-btn { padding:10px 14px; border-radius:8px; background:#f3f4f6; border:1px solid #e5e7eb; cursor:pointer; }
+    .small { color:#6b7280; font-size:.9rem; }
+    .list { margin:12px 0 0 18px; }
+  </style>
+</head>
+<body>
+  <div class="invite-hero">
+    <div class="badge">Invite & Earn</div>
+    <h1>Earn up to 50% commissions by inviting friends</h1>
+    <p class="small">Share your invite link and earn on every purchase. Premium tiers unlock higher revenue share.</p>
+  </div>
+
+  <div class="invite-grid">
+    <div class="card">
+      <h3>1) Your Invite Link</h3>
+      <p class="small">Use or personalize your referral code (optional). If you’re already a customer, use your receipt as code.</p>
+      <div class="input-row">
+        <input id="refInput" type="text" placeholder="Enter your referral code (e.g., RECEIPT123)" value="{{ preset_ref or '' }}">
+        <button class="btn" onclick="copyInvite()">Copy Link</button>
+      </div>
+      <p id="copyStatus" class="small" style="margin-top:8px;"></p>
+    </div>
+
+    <div class="card">
+      <h3>2) Share Everywhere</h3>
+      <p class="small">One click to share on WhatsApp, Twitter/X, LinkedIn, and Facebook.</p>
+      <div class="share-buttons">
+        <button class="share-btn" onclick="shareWhatsApp()">WhatsApp</button>
+        <button class="share-btn" onclick="shareTwitter()">Twitter/X</button>
+        <button class="share-btn" onclick="shareLinkedIn()">LinkedIn</button>
+        <button class="share-btn" onclick="shareFacebook()">Facebook</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>3) Commission Rules</h3>
+      <ul class="list">
+        <li>Base commission: 20% per referral</li>
+        <li>Pro bonus: +5% | Premium bonus: +10%</li>
+        <li>Top tiers: Rare 10%, Rarest 20%, 1% Exclusive 50%</li>
+        <li>Minimum payout: ₹1,000</li>
+        <li>Referral cookie: 30 days validity</li>
+      </ul>
+      <p class="small">Track earnings in the admin referral dashboard.</p>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:1100px; margin: 0 auto 40px;">
+    <h3>Pro Tips for Unlimited Customers</h3>
+    <ul class="list">
+      <li>Post your link in niche communities (FB Groups, Reddit, Discord, WhatsApp)</li>
+      <li>Create short reels showing results; add invite link in bio</li>
+      <li>Offer bonuses for your referrals (templates, coaching call, private group)</li>
+      <li>Run weekly challenges and showcase wins; invite link in every post</li>
+      <li>DM prospects with value, then share link (never spam)</li>
+    </ul>
+  </div>
+
+  <script>
+    const base = window.location.origin;
+    function currentRef() {
+      const v = document.getElementById('refInput').value.trim();
+      return v ? v : '';
+    }
+    function inviteUrl() {
+      const ref = currentRef();
+      return ref ? `${base}/?ref=${encodeURIComponent(ref)}` : `${base}/`;
+    }
+    function copyInvite() {
+      const url = inviteUrl();
+      navigator.clipboard.writeText(url).then(() => {
+        document.getElementById('copyStatus').textContent = `Copied: ${url}`;
+      }).catch(() => {
+        document.getElementById('copyStatus').textContent = 'Copy failed. Long-press to copy.';
+      });
+    }
+    function shareWhatsApp() {
+      const msg = encodeURIComponent(`Join SURESH AI ORIGIN – AI Mastery & Income Automation: ${inviteUrl()}`);
+      window.open(`https://wa.me/?text=${msg}`, '_blank');
+    }
+    function shareTwitter() {
+      const text = encodeURIComponent('AI Mastery & Income Automation – join now');
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(inviteUrl())}`,'_blank');
+    }
+    function shareLinkedIn() {
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(inviteUrl())}`,'_blank');
+    }
+    function shareFacebook() {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(inviteUrl())}`,'_blank');
+    }
+  </script>
+</body>
+</html>

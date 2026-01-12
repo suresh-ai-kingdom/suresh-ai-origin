@@ -699,6 +699,16 @@ def upgrade_page():
                          tiers=TIER_SYSTEM,
                          all_tiers=list(TIER_SYSTEM.keys()))
 
+@app.route("/invite")
+def invite_page():
+    """Public Invite & Earn landing page.
+    Explains referral program and provides social share shortcuts.
+    """
+    ref = request.args.get('ref')
+    base_url = request.host_url.rstrip('/')
+    share_target = f"{base_url}/?ref={ref}" if ref else f"{base_url}/"
+    return render_template("invite.html", share_target=share_target, preset_ref=ref)
+
 @app.route("/api/tier/all", methods=["GET"])
 def get_all_tiers():
     """Get all available tiers with full details."""
