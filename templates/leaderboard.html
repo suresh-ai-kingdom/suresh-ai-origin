@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Referrers Leaderboard – SURESH AI ORIGIN</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta property="og:title" content="Top Referrers Leaderboard – SURESH AI ORIGIN">
+  <meta property="og:description" content="See who's earning the most through our referral program. Join the top 1%!">
+  <style>
+    .hero-leader { text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(255,0,110,.15), rgba(51,56,236,.15)); border-bottom: 2px solid rgba(255,0,110,.3); }
+    .hero-leader h1 { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #FF006E, #8338EC, #00FF9F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stats-bar { max-width: 900px; margin: 30px auto; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .stat-box { background: white; border-radius: 12px; padding: 20px 30px; box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+    .stat-box .big { font-size: 2.2rem; font-weight: 800; color: #FF006E; }
+    .stat-box .label { color: #6b7280; font-size: .9rem; text-transform: uppercase; }
+    .leaderboard-table { max-width: 1000px; margin: 40px auto; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.12); overflow: hidden; }
+    .leaderboard-table table { width: 100%; border-collapse: collapse; }
+    .leaderboard-table th { background: linear-gradient(135deg, #FF006E, #8338EC); color: white; padding: 16px; text-align: left; font-weight: 700; }
+    .leaderboard-table td { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; }
+    .leaderboard-table tr:hover { background: #f9fafb; }
+    .rank { font-weight: 800; font-size: 1.2rem; color: #FF006E; }
+    .rank.gold { color: #FFD700; }
+    .rank.silver { color: #C0C0C0; }
+    .rank.bronze { color: #CD7F32; }
+    .cta-box { max-width: 700px; margin: 40px auto; text-align: center; padding: 40px; background: linear-gradient(135deg, rgba(255,0,110,.1), rgba(51,56,236,.1)); border-radius: 16px; }
+    .btn { display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #FF006E, #8338EC); color: white; border-radius: 8px; font-weight: 700; text-decoration: none; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="hero-leader">
+    <h1>🏆 Top Referrers Leaderboard</h1>
+    <p style="color: #6b7280; font-size: 1.1rem;">See who's earning the most by inviting friends. Will you join them?</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-box">
+      <div class="big">{{ analytics.total_referrers or 0 }}</div>
+      <div class="label">Total Referrers</div>
+    </div>
+    <div class="stat-box">
+      <div class="big">₹{{ '{:,.0f}'.format(analytics.total_commission_rupees or 0) }}</div>
+      <div class="label">Total Earned</div>
+    </div>
+    <div class="stat-box">
+      <div class="big">{{ analytics.successful_referrals or 0 }}</div>
+      <div class="label">Successful Referrals</div>
+    </div>
+  </div>
+
+  <div class="leaderboard-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Referrals</th>
+          <th>Conversion Rate</th>
+          <th>Total Earned</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if leaderboard %}
+          {% for entry in leaderboard %}
+          <tr>
+            <td>
+              <span class="rank {% if entry.rank == 1 %}gold{% elif entry.rank == 2 %}silver{% elif entry.rank == 3 %}bronze{% endif %}">
+                {% if entry.rank == 1 %}🥇{% elif entry.rank == 2 %}🥈{% elif entry.rank == 3 %}🥉{% else %}{{ entry.rank }}{% endif %}
+              </span>
+            </td>
+            <td><strong>{{ entry.referrer_name or 'Anonymous' }}</strong></td>
+            <td>{{ entry.successful_referrals }}</td>
+            <td>{{ '{:.1f}'.format(entry.conversion_rate) }}%</td>
+            <td style="color: #10b981; font-weight: 700;">₹{{ '{:,.2f}'.format(entry.total_earned_rupees) }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 40px; color: #9ca3af;">
+              No referrers yet. Be the first to earn!
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cta-box">
+    <h2 style="font-size: 1.8rem; margin-bottom: 12px;">Want to be on this leaderboard?</h2>
+    <p style="color: #6b7280; margin-bottom: 20px;">Start inviting friends and earn up to 50% commissions on every purchase.</p>
+    <a href="/invite" class="btn">Get Your Invite Link</a>
+    <a href="/" class="btn" style="background: linear-gradient(135deg, #667eea, #764ba2); margin-left: 10px;">Explore Tiers</a>
+  </div>
+
+  <script>
+    // Auto-refresh leaderboard every 30 seconds
+    setTimeout(() => location.reload(), 30000);
+  </script>
+</body>
+</html>

@@ -709,6 +709,27 @@ def invite_page():
     share_target = f"{base_url}/?ref={ref}" if ref else f"{base_url}/"
     return render_template("invite.html", share_target=share_target, preset_ref=ref)
 
+@app.route("/leaderboard")
+def leaderboard_page():
+    """Public leaderboard showing top referrers."""
+    from referrals import get_referral_leaderboard, get_referral_analytics
+    
+    leaderboard = get_referral_leaderboard(limit=50)
+    analytics = get_referral_analytics()
+    
+    return render_template("leaderboard.html", 
+                         leaderboard=leaderboard,
+                         analytics=analytics)
+
+@app.route("/whatsapp-funnel")
+def whatsapp_funnel_page():
+    """WhatsApp share templates for viral growth."""
+    ref = request.args.get('ref')
+    base_url = request.host_url.rstrip('/')
+    share_link = f"{base_url}/?ref={ref}" if ref else base_url
+    
+    return render_template("whatsapp_funnel.html", share_link=share_link)
+
 @app.route("/api/tier/all", methods=["GET"])
 def get_all_tiers():
     """Get all available tiers with full details."""

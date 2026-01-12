@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Funnel – SURESH AI ORIGIN</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .wa-hero { text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(37,211,102,.15), rgba(0,230,118,.15)); border-bottom: 2px solid rgba(37,211,102,.4); }
+    .wa-hero h1 { font-size: 2.6rem; font-weight: 800; color: #25D366; }
+    .wa-hero .icon { font-size: 4rem; margin-bottom: 20px; }
+    .templates-grid { max-width: 1100px; margin: 40px auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; padding: 0 20px; }
+    .template-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,.12); border-left: 4px solid #25D366; }
+    .template-card h3 { color: #1f2937; margin-bottom: 12px; }
+    .template-card .tier-badge { display: inline-block; background: linear-gradient(135deg, #FF006E, #8338EC); color: white; padding: 4px 10px; border-radius: 6px; font-size: .85rem; font-weight: 700; margin-bottom: 10px; }
+    .message-preview { background: #f3f4f6; padding: 14px; border-radius: 8px; margin: 12px 0; font-family: monospace; font-size: .9rem; color: #374151; white-space: pre-line; }
+    .wa-btn { display: block; width: 100%; padding: 12px; background: #25D366; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; margin-top: 10px; }
+    .wa-btn:hover { background: #128C7E; }
+    .tips-box { max-width: 1100px; margin: 40px auto 60px; padding: 30px; background: linear-gradient(135deg, rgba(255,0,110,.08), rgba(51,56,236,.08)); border-radius: 16px; }
+    .tips-box h3 { margin-bottom: 16px; }
+    .tips-box ul { margin-left: 20px; }
+    .tips-box li { margin-bottom: 10px; color: #4b5563; }
+  </style>
+</head>
+<body>
+  <div class="wa-hero">
+    <div class="icon">💬</div>
+    <h1>WhatsApp Funnel Templates</h1>
+    <p style="color: #6b7280; font-size: 1.1rem;">Copy & share these proven messages in groups, status, or DMs</p>
+  </div>
+
+  <div class="templates-grid">
+    <!-- Template 1: Starter Pack -->
+    <div class="template-card">
+      <div class="tier-badge">STARTER PACK</div>
+      <h3>Beginner-Friendly Hook</h3>
+      <div class="message-preview">🚀 Want to master AI and automate income?
+
+I just joined SURESH AI ORIGIN – 1000+ AI prompts, proven workflows, and step-by-step playbooks.
+
+Starting at just ₹99/month (or ₹990/year – save 17%)
+
+Check it out: {{ share_link }}</div>
+      <a href="#" class="wa-btn" onclick="shareWA('starter'); return false;">📤 Share on WhatsApp</a>
+    </div>
+
+    <!-- Template 2: Pro Pack -->
+    <div class="template-card">
+      <div class="tier-badge">PRO PACK</div>
+      <h3>Results-Driven Message</h3>
+      <div class="message-preview">💰 I'm using AI to automate my business...
+
+And it's working! 🔥
+
+500+ advanced prompts, team collaboration, API access – all in one place.
+
+₹499/month gets you everything you need to scale.
+
+Join me: {{ share_link }}</div>
+      <a href="#" class="wa-btn" onclick="shareWA('pro'); return false;">📤 Share on WhatsApp</a>
+    </div>
+
+    <!-- Template 3: Premium Pack -->
+    <div class="template-card">
+      <div class="tier-badge">PREMIUM PACK</div>
+      <h3>VIP Exclusive Invite</h3>
+      <div class="message-preview">👑 Exclusive invite for serious entrepreneurs:
+
+SURESH AI ORIGIN Premium – 1000+ AI prompts, 24/7 support, white-label access, unlimited projects.
+
+This is what the top 1% use to dominate.
+
+₹999/month or ₹9,990/year.
+
+Ready? {{ share_link }}</div>
+      <a href="#" class="wa-btn" onclick="shareWA('premium'); return false;">📤 Share on WhatsApp</a>
+    </div>
+
+    <!-- Template 4: Rare Pack -->
+    <div class="template-card">
+      <div class="tier-badge">RARE PACK 💎</div>
+      <h3>High-Ticket Opportunity</h3>
+      <div class="message-preview">💎 RARE opportunity for elite entrepreneurs:
+
+Custom AI model training, VIP support, dedicated account manager, AND 10% revenue share on referrals.
+
+₹2,999/month unlocks unlimited automation + passive income.
+
+This is NOT for everyone: {{ share_link }}</div>
+      <a href="#" class="wa-btn" onclick="shareWA('rare'); return false;">📤 Share on WhatsApp</a>
+    </div>
+
+    <!-- Template 5: Rarest Pack -->
+    <div class="template-card">
+      <div class="tier-badge">RAREST PACK 🔥</div>
+      <h3>Ultra-Premium Positioning</h3>
+      <div class="message-preview">🔥 Top 0.1% exclusive access:
+
+Advanced AI models, concierge service, private infrastructure, 20% revenue share, private events.
+
+₹9,999/month – for those ready to build empires.
+
+Are you ready? {{ share_link }}</div>
+      <a href="#" class="wa-btn" onclick="shareWA('rarest'); return false;">📤 Share on WhatsApp</a>
+    </div>
+
+    <!-- Template 6: 1% Exclusive -->
+    <div class="template-card">
+      <div class="tier-badge">1% EXCLUSIVE 🚀</div>
+      <h3>Top 1% Invitation Only</h3>
+      <div class="message-preview">🚀 1% EXCLUSIVE – Invitation Only
+
+Personal AI team, CEO access, 50% revenue share, equity discussions, co-dev rights, VIP global events.
+
+₹99,999/month for the top 1% who want it ALL.
+
+This changes everything: {{ share_link }}</div>
+      <a href="#" class="wa-btn" onclick="shareWA('one_percent'); return false;">📤 Share on WhatsApp</a>
+    </div>
+  </div>
+
+  <div class="tips-box">
+    <h3>🎯 Pro Tips for Maximum Conversions</h3>
+    <ul>
+      <li><strong>Personalize first:</strong> Add "Hey [Name]," before the message</li>
+      <li><strong>Show results:</strong> Share your own wins (screenshots, testimonials)</li>
+      <li><strong>Create urgency:</strong> "Limited spots" or "Offer ends soon"</li>
+      <li><strong>Bonus incentive:</strong> Offer your own bonus (free template, 1-on-1 call)</li>
+      <li><strong>Follow up:</strong> If no reply in 24 hours, send a value-packed reel or case study</li>
+      <li><strong>Group strategy:</strong> Share in FB Groups, WhatsApp Groups, Discord – but add value first</li>
+      <li><strong>Status updates:</strong> Post to WhatsApp Status daily with link in bio</li>
+    </ul>
+  </div>
+
+  <script>
+    const baseUrl = '{{ share_link }}';
+    const messages = {
+      starter: `🚀 Want to master AI and automate income?\n\nI just joined SURESH AI ORIGIN – 1000+ AI prompts, proven workflows, and step-by-step playbooks.\n\nStarting at just ₹99/month (or ₹990/year – save 17%)\n\nCheck it out: ${baseUrl}`,
+      pro: `💰 I'm using AI to automate my business...\n\nAnd it's working! 🔥\n\n500+ advanced prompts, team collaboration, API access – all in one place.\n\n₹499/month gets you everything you need to scale.\n\nJoin me: ${baseUrl}`,
+      premium: `👑 Exclusive invite for serious entrepreneurs:\n\nSURESH AI ORIGIN Premium – 1000+ AI prompts, 24/7 support, white-label access, unlimited projects.\n\nThis is what the top 1% use to dominate.\n\n₹999/month or ₹9,990/year.\n\nReady? ${baseUrl}`,
+      rare: `💎 RARE opportunity for elite entrepreneurs:\n\nCustom AI model training, VIP support, dedicated account manager, AND 10% revenue share on referrals.\n\n₹2,999/month unlocks unlimited automation + passive income.\n\nThis is NOT for everyone: ${baseUrl}`,
+      rarest: `🔥 Top 0.1% exclusive access:\n\nAdvanced AI models, concierge service, private infrastructure, 20% revenue share, private events.\n\n₹9,999/month – for those ready to build empires.\n\nAre you ready? ${baseUrl}`,
+      one_percent: `🚀 1% EXCLUSIVE – Invitation Only\n\nPersonal AI team, CEO access, 50% revenue share, equity discussions, co-dev rights, VIP global events.\n\n₹99,999/month for the top 1% who want it ALL.\n\nThis changes everything: ${baseUrl}`
+    };
+
+    function shareWA(tier) {
+      const msg = encodeURIComponent(messages[tier]);
+      window.open(`https://wa.me/?text=${msg}`, '_blank');
+    }
+  </script>
+</body>
+</html>
