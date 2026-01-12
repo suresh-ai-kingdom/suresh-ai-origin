@@ -98,7 +98,7 @@
         }
 
         .tier-card.current::before {
-            content: "✓ YOUR CURRENT TIER";
+            content: "CURRENT TIER";
             position: absolute;
             top: 15px;
             right: 15px;
@@ -160,10 +160,10 @@
         }
 
         .tier-features li::before {
-            content: "✓";
+            content: "+";
             color: #00FF9F;
             font-weight: 800;
-            font-size: 1.2em;
+            font-size: 1.05em;
         }
 
         .tier-btn-upgrade {
@@ -321,15 +321,15 @@
 </head>
 <body>
     <div class="upgrade-hero">
-        <h1>🚀 Upgrade Your Tier</h1>
-        <p>Progress from <strong>Starter → Rare → Rarest → 1%</strong> and unlock exclusive features</p>
+        <h1>Upgrade Your Tier</h1>
+        <p>Progress from <strong>Starter -> Rare -> Rarest -> 1%</strong> and unlock exclusive features</p>
     </div>
 
     <div class="tiers-container">
         <!-- Pricing Toggle -->
         <div class="pricing-toggle" id="pricingToggle">
-            <button class="toggle-btn active" onclick="setPricing('monthly')">💳 Monthly Billing</button>
-            <button class="toggle-btn" onclick="setPricing('yearly')">📅 Annual (Save 17%)</button>
+            <button class="toggle-btn active" onclick="setPricing('monthly')">Monthly Billing</button>
+            <button class="toggle-btn" onclick="setPricing('yearly')">Annual (Save 17%)</button>
         </div>
 
         <!-- Tiers Grid -->
@@ -339,25 +339,25 @@
 
         <!-- Upgrade Benefits -->
         <div class="comparison-section">
-            <h3>Why Upgrade? 📈</h3>
+            <h3>Why Upgrade?</h3>
             <div class="upgrade-benefits">
                 <div class="benefit-card">
-                    <div class="benefit-icon">⚡</div>
+                    <div class="benefit-icon">Speed</div>
                     <div class="benefit-title">More Features</div>
                     <div class="benefit-text">Unlock advanced AI tools, API access, and unlimited projects</div>
                 </div>
                 <div class="benefit-card">
-                    <div class="benefit-icon">🤝</div>
+                    <div class="benefit-icon">Partner</div>
                     <div class="benefit-title">Better Support</div>
-                    <div class="benefit-text">Priority support → 24/7 support → VIP concierge service</div>
+                    <div class="benefit-text">Priority support -> 24/7 support -> VIP concierge service</div>
                 </div>
                 <div class="benefit-card">
-                    <div class="benefit-icon">💰</div>
+                    <div class="benefit-icon">Share</div>
                     <div class="benefit-title">Revenue Sharing</div>
                     <div class="benefit-text">Earn 10-50% commissions on referrals at higher tiers</div>
                 </div>
                 <div class="benefit-card">
-                    <div class="benefit-icon">🎯</div>
+                    <div class="benefit-icon">Access</div>
                     <div class="benefit-title">Exclusive Access</div>
                     <div class="benefit-text">Get early access to new features and beta programs</div>
                 </div>
@@ -394,7 +394,7 @@
                 const savingsYearly = (monthlyPrice * 12) - yearlyPrice;
                 
                 const savingsDisplay = PRICING_MODE === 'yearly' && savingsYearly > 0 
-                    ? `<div class="savings-badge">💰 Save ₹${savingsYearly.toLocaleString()}/year</div>` 
+                    ? `<div class="savings-badge">Save ₹${savingsYearly.toLocaleString()}/year</div>` 
                     : '';
 
                 console.log(`Tier: ${key}, Mode: ${PRICING_MODE}, Price: ${price}, Monthly: ${monthlyPrice}, Yearly: ${yearlyPrice}`);
@@ -414,7 +414,7 @@
                         onclick="upgradeToTier('${key}')"
                         ${isCurrent ? 'disabled' : ''}
                     >
-                        ${isCurrent ? '✓ Current Tier' : `Upgrade to ${tier.name}`}
+                        ${isCurrent ? 'Current Tier' : `Upgrade to ${tier.name}`}
                     </button>
                 `;
                 grid.appendChild(card);
