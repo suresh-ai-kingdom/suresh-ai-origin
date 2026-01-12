@@ -350,6 +350,136 @@ body::after {
     box-shadow: 0 5px 20px rgba(255, 0, 110, 0.3);
 }
 
+/* ===== ABOUT ME SECTION - SURESH SUNAR ===== */
+.about-me {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.about-container {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 30px;
+    padding: 60px 50px;
+    box-shadow: 0 20px 60px rgba(255, 215, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.about-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+    animation: rotate-glow 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotate-glow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.about-header h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 0;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.about-header h2 .gradient {
+    background: linear-gradient(135deg, #FFD700, #FF006E, #8338EC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift-text 3s ease infinite;
+    background-size: 200% 200%;
+}
+
+@keyframes gradient-shift-text {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.about-content {
+    position: relative;
+    z-index: 1;
+}
+
+.about-text {
+    text-align: center;
+    line-height: 2;
+}
+
+.about-text p {
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 25px;
+}
+
+.about-text .intro {
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 30px;
+}
+
+.about-text .intro strong {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.about-text strong {
+    color: var(--gold);
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.about-text .highlight {
+    font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+    color: rgba(255, 255, 255, 0.9);
+    margin: 35px 0;
+    padding: 25px;
+    background: rgba(255, 215, 0, 0.05);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px;
+}
+
+.about-text .highlight strong {
+    color: var(--accent);
+    font-size: 1.1em;
+}
+
+.about-text .manifesto {
+    font-size: clamp(1.3rem, 2.8vw, 1.6rem);
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin-top: 35px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.about-text .manifesto strong {
+    background: linear-gradient(135deg, #FFD700, #00FF9F);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    font-style: italic;
+}
+
 /* ===== SECTIONS - GLASSMORPHISM CARDS ===== */
 .features, .products, .included, .referral-section, .faq, .cta {
     max-width: 1200px;
