@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>White-Label Setup – SURESH AI ORIGIN</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { background: #0a0014; color: #fff; font-family: Inter, sans-serif; }
+    .setup-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    .setup-hero { text-align: center; margin-bottom: 60px; padding: 40px 0; border-bottom: 2px solid #FFD700; }
+    .setup-hero h1 { font-size: 3rem; font-weight: 900; color: #FFD700; text-shadow: 0 0 30px #FFD700; margin-bottom: 15px; }
+    .setup-hero p { color: #999; font-size: 1.2rem; max-width: 700px; margin: 0 auto; }
+    
+    .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+    @media (max-width: 768px) { .setup-grid { grid-template-columns: 1fr; } }
+    
+    .form-section { background: linear-gradient(135deg, rgba(255,215,0,.05), rgba(255,165,0,.02)); border: 2px solid #FFD700; border-radius: 16px; padding: 30px; }
+    .form-section h2 { color: #FFD700; margin-bottom: 20px; font-size: 1.5rem; }
+    
+    .form-group { margin-bottom: 25px; }
+    .form-group label { display: block; color: #FFD700; font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; }
+    .form-group input, .form-group select, .form-group textarea { 
+      width: 100%; padding: 12px; background: rgba(0,0,0,.5); border: 1px solid #FFD700; 
+      color: #fff; border-radius: 8px; font-size: 1rem; font-family: inherit; 
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+      outline: none; border-color: #FFA500; box-shadow: 0 0 20px rgba(255,165,0,.3); 
+    }
+    
+    .color-picker-group { display: flex; gap: 15px; }
+    .color-input { flex: 1; }
+    .color-preview { width: 50px; height: 50px; border-radius: 8px; border: 2px solid #FFD700; }
+    
+    .preview-section { background: linear-gradient(135deg, rgba(0,255,159,.05), rgba(51,56,236,.05)); border: 2px solid #00FF9F; border-radius: 16px; padding: 30px; }
+    .preview-section h2 { color: #00FF9F; margin-bottom: 20px; font-size: 1.5rem; }
+    
+    .preview-box { 
+      background: #111; border-radius: 12px; padding: 20px; 
+      margin-bottom: 20px; min-height: 300px; display: flex; flex-direction: column; 
+      justify-content: center; align-items: center; text-align: center; 
+      border: 2px dashed #555;
+    }
+    .preview-brand-name { font-size: 2.5rem; font-weight: 900; margin-bottom: 15px; }
+    .preview-tagline { font-size: 1.1rem; color: #999; }
+    
+    .feature-checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+    .checklist-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255,215,0,.1); border-radius: 8px; }
+    .checklist-item input { margin: 0; }
+    
+    .btn-primary { 
+      background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; 
+      padding: 16px 40px; border: none; border-radius: 12px; font-weight: 900; 
+      font-size: 1.1rem; cursor: pointer; margin-top: 20px; width: 100%; 
+      box-shadow: 0 0 40px rgba(255,215,0,.4); transition: all 0.3s ease;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 50px rgba(255,215,0,.6); }
+    
+    .step-indicator { 
+      display: flex; justify-content: space-between; margin-bottom: 40px; 
+      gap: 10px; padding: 20px 0; border-bottom: 1px solid rgba(255,215,0,.2);
+    }
+    .step { 
+      flex: 1; text-align: center; padding: 10px; border-radius: 8px; 
+      background: rgba(255,215,0,.1); color: #FFD700; font-weight: 700;
+      opacity: 0.5; transition: all 0.3s ease;
+    }
+    .step.active { opacity: 1; background: rgba(255,215,0,.3); }
+    
+    .info-box { background: rgba(0,255,159,.1); border-left: 4px solid #00FF9F; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+    .info-box strong { color: #00FF9F; }
+    
+    .success-icon { font-size: 2rem; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="setup-container">
+    <!-- Hero -->
+    <div class="setup-hero">
+      <h1>🎨 White-Label Setup Wizard</h1>
+      <p>Rebrand the entire platform in 5 minutes. Set your own pricing. Keep 100% of revenue.</p>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div class="step active" onclick="switchStep(1)">1. Brand Identity</div>
+      <div class="step" onclick="switchStep(2)">2. Domain & Hosting</div>
+      <div class="step" onclick="switchStep(3)">3. Pricing Tiers</div>
+      <div class="step" onclick="switchStep(4)">4. Payment Gateway</div>
+      <div class="step" onclick="switchStep(5)">5. Review & Deploy</div>
+    </div>
+
+    <!-- Step 1: Brand Identity -->
+    <div class="setup-grid" id="step-1">
+      <div class="form-section">
+        <h2>Step 1: Brand Identity</h2>
+        
+        <div class="form-group">
+          <label>Platform Name</label>
+          <input type="text" id="brandName" placeholder="e.g., Rajesh AI Hub" value="Rajesh AI Hub" onchange="updatePreview()">
+        </div>
+
+        <div class="form-group">
+          <label>Tagline</label>
+          <input type="text" id="tagline" placeholder="e.g., AI Automation for Agencies" onchange="updatePreview()">
+        </div>
+
+        <div class="form-group">
+          <label>Primary Color</label>
+          <div class="color-picker-group">
+            <div class="color-input">
+              <input type="color" id="primaryColor" value="#FFD700" onchange="updatePreview()">
+            </div>
+            <div class="color-preview" id="primaryPreview" style="background: #FFD700;"></div>
+          </div>
+          <small style="color: #999; margin-top: 5px; display: block;">Used for buttons, headings, CTAs</small>
+        </div>
+
+        <div class="form-group">
+          <label>Secondary Color</label>
+          <div class="color-picker-group">
+            <div class="color-input">
+              <input type="color" id="secondaryColor" value="#00FF9F" onchange="updatePreview()">
+            </div>
+            <div class="color-preview" id="secondaryPreview" style="background: #00FF9F;"></div>
+          </div>
+          <small style="color: #999; margin-top: 5px; display: block;">Used for accents and highlights</small>
+        </div>
+
+        <div class="form-group">
+          <label>Logo URL</label>
+          <input type="text" id="logoUrl" placeholder="https://your-cdn.com/logo.png" onchange="updatePreview()">
+        </div>
+
+        <div class="info-box">
+          <strong>✓ Tip:</strong> Upload your logo to a CDN (Cloudinary, AWS S3) and paste the URL here.
+        </div>
+
+        <button class="btn-primary" onclick="switchStep(2)">Next: Domain Setup →</button>
+      </div>
+
+      <div class="preview-section">
+        <h2>Preview</h2>
+        <div class="preview-box">
+          <div class="preview-brand-name" id="previewName" style="color: #FFD700;">Rajesh AI Hub</div>
+          <div class="preview-tagline" id="previewTagline">AI Automation for Agencies</div>
+          <div style="margin-top: 30px; padding: 15px; background: rgba(255,215,0,.2); border-radius: 8px; color: #FFD700; font-weight: 700;">
+            Your Custom Logo Here
+          </div>
+        </div>
+        <small style="color: #999; text-align: center; display: block;">This is how your platform will look to customers</small>
+      </div>
+    </div>
+
+    <!-- Step 2: Domain & Hosting -->
+    <div class="setup-grid" id="step-2" style="display: none;">
+      <div class="form-section">
+        <h2>Step 2: Domain & Hosting</h2>
+        
+        <div class="info-box">
+          <strong>ℹ️ How it works:</strong> We host your platform on our infrastructure. You own the domain and DNS.
+        </div>
+
+        <div class="form-group">
+          <label>Your Custom Domain</label>
+          <input type="text" id="customDomain" placeholder="e.g., rajeshtech.com" onchange="updatePreview()">
+          <small style="color: #999; margin-top: 5px; display: block;">Already own a domain? Great! We'll provide DNS records to point it here.</small>
+        </div>
+
+        <div class="form-group">
+          <label>Want to Buy a Domain?</label>
+          <select id="domainProvider">
+            <option value="">Use your existing domain</option>
+            <option value="godaddy">Get from GoDaddy</option>
+            <option value="namecheap">Get from Namecheap</option>
+            <option value="bluehost">Get from Bluehost</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Email Support Address</label>
+          <input type="email" id="supportEmail" placeholder="support@yourdomain.com" onchange="updatePreview()">
+        </div>
+
+        <div class="info-box">
+          <strong>✓ Setup:</strong> We provide:
+          <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+            <li>SSL certificate (HTTPS)</li>
+            <li>CDN for global speed</li>
+            <li>Auto-scaling infrastructure</li>
+            <li>99.99% uptime SLA</li>
+            <li>Daily backups</li>
+          </ul>
+        </div>
+
+        <button class="btn-primary" onclick="switchStep(3)">Next: Pricing Tiers →</button>
+      </div>
+
+      <div class="preview-section">
+        <h2>What You Get</h2>
+        <div class="info-box" style="border: none;">
+          <h3 style="color: #00FF9F; margin-bottom: 15px;">🎁 Platform Setup Includes:</h3>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 10px;">✅ Custom domain (your brand)</li>
+            <li style="margin-bottom: 10px;">✅ SSL/HTTPS security</li>
+            <li style="margin-bottom: 10px;">✅ Global CDN</li>
+            <li style="margin-bottom: 10px;">✅ Auto-scaling servers</li>
+            <li style="margin-bottom: 10px;">✅ 99.99% SLA</li>
+            <li style="margin-bottom: 10px;">✅ Daily backups</li>
+            <li style="margin-bottom: 10px;">✅ Email + chat support</li>
+            <li style="margin-bottom: 10px;">✅ Monthly updates</li>
+          </ul>
+        </div>
+        <small style="color: #999; margin-top: 20px; display: block; text-align: center;">
+          <strong>Platform Cost: ₹0</strong> (We handle infrastructure)<br>
+          <strong>Your Revenue: 100%</strong> from your customers
+        </small>
+      </div>
+    </div>
+
+    <!-- Step 3: Pricing Tiers -->
+    <div class="setup-grid" id="step-3" style="display: none;">
+      <div class="form-section">
+        <h2>Step 3: Custom Pricing</h2>
+        
+        <div class="info-box">
+          <strong>📊 Pricing Strategy:</strong> Price 3-5x higher than our tiers. You keep 100% of revenue.
+        </div>
+
+        <h3 style="color: #FFD700; margin: 20px 0 15px 0; font-size: 1.1rem;">Create Your Tiers</h3>
+
+        <div class="form-group">
+          <label>Tier 1 Name</label>
+          <input type="text" id="tier1Name" placeholder="e.g., Starter Pro" value="Starter Pro">
+        </div>
+        <div class="form-group">
+          <label>Tier 1 Price (₹/month)</label>
+          <input type="number" id="tier1Price" placeholder="₹499" value="499">
+        </div>
+
+        <div class="form-group">
+          <label>Tier 2 Name</label>
+          <input type="text" id="tier2Name" placeholder="e.g., Growth Pack" value="Growth Pack">
+        </div>
+        <div class="form-group">
+          <label>Tier 2 Price (₹/month)</label>
+          <input type="number" id="tier2Price" placeholder="₹2,999" value="2999">
+        </div>
+
+        <div class="form-group">
+          <label>Tier 3 Name</label>
+          <input type="text" id="tier3Name" placeholder="e.g., Elite Suite" value="Elite Suite">
+        </div>
+        <div class="form-group">
+          <label>Tier 3 Price (₹/month)</label>
+          <input type="number" id="tier3Price" placeholder="₹9,999" value="9999">
+        </div>
+
+        <div class="info-box">
+          <strong>💰 Revenue Example:</strong> 100 customers × ₹2,999 = ₹30L/month (₹3.6Cr/year) — yours to keep!
+        </div>
+
+        <button class="btn-primary" onclick="switchStep(4)">Next: Payment Gateway →</button>
+      </div>
+
+      <div class="preview-section">
+        <h2>Your Pricing Preview</h2>
+        <div id="pricingPreview" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+          <div style="background: rgba(255,215,0,.1); padding: 15px; border-radius: 8px; border: 1px solid #FFD700;">
+            <div style="color: #FFD700; font-weight: 700; margin-bottom: 10px;">Tier 1</div>
+            <div id="tier1Preview" style="font-size: 1.5rem; font-weight: 900; color: #00FF9F;">₹499</div>
+            <small style="color: #999;">100% yours</small>
+          </div>
+          <div style="background: rgba(255,215,0,.1); padding: 15px; border-radius: 8px; border: 1px solid #FFD700;">
+            <div style="color: #FFD700; font-weight: 700; margin-bottom: 10px;">Tier 2</div>
+            <div id="tier2Preview" style="font-size: 1.5rem; font-weight: 900; color: #00FF9F;">₹2,999</div>
+            <small style="color: #999;">100% yours</small>
+          </div>
+          <div style="background: rgba(255,215,0,.1); padding: 15px; border-radius: 8px; border: 1px solid #FFD700;">
+            <div style="color: #FFD700; font-weight: 700; margin-bottom: 10px;">Tier 3</div>
+            <div id="tier3Preview" style="font-size: 1.5rem; font-weight: 900; color: #00FF9F;">₹9,999</div>
+            <small style="color: #999;">100% yours</small>
+          </div>
+        </div>
+        <div style="margin-top: 20px; padding: 15px; background: rgba(0,255,159,.1); border-radius: 8px; border-left: 4px solid #00FF9F;">
+          <strong style="color: #00FF9F;">Revenue Potential:</strong>
+          <div style="font-size: 1.3rem; margin-top: 10px; color: #fff;">
+            50 customers = <span id="revenueCalc" style="color: #FFD700; font-weight: 900;">₹75L/month</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Payment Gateway -->
+    <div class="setup-grid" id="step-4" style="display: none;">
+      <div class="form-section">
+        <h2>Step 4: Payment Gateway</h2>
+        
+        <div class="info-box">
+          <strong>💳 Payment Options:</strong> Choose your payment processor. Payments go directly to your account.
+        </div>
+
+        <div class="form-group">
+          <label>Payment Provider</label>
+          <select id="paymentProvider" onchange="updatePaymentInfo()">
+            <option value="razorpay">Razorpay (India, International)</option>
+            <option value="stripe">Stripe (Global)</option>
+            <option value="paytm">PayTM (India)</option>
+            <option value="paypal">PayPal (International)</option>
+            <option value="manual">Manual Payment (Bank Transfer)</option>
+          </select>
+        </div>
+
+        <div id="razorpayInfo">
+          <div class="form-group">
+            <label>Razorpay Key ID</label>
+            <input type="password" placeholder="Enter your Razorpay Key ID" onchange="validatePaymentInfo()">
+            <small style="color: #999; margin-top: 5px; display: block;">Find in Razorpay Dashboard → Settings → API Keys</small>
+          </div>
+          <div class="form-group">
+            <label>Razorpay Key Secret</label>
+            <input type="password" placeholder="Enter your Razorpay Key Secret" onchange="validatePaymentInfo()">
+            <small style="color: #999; margin-top: 5px; display: block;">Keep this secure! Never share publicly.</small>
+          </div>
+        </div>
+
+        <div id="stripeInfo" style="display: none;">
+          <div class="form-group">
+            <label>Stripe Public Key</label>
+            <input type="password" placeholder="pk_live_...">
+          </div>
+          <div class="form-group">
+            <label>Stripe Secret Key</label>
+            <input type="password" placeholder="sk_live_...">
+          </div>
+        </div>
+
+        <div class="info-box">
+          <strong>✓ Security:</strong> Your payment credentials are encrypted and never shared. You control your money.
+        </div>
+
+        <button class="btn-primary" onclick="switchStep(5)">Next: Review & Deploy →</button>
+      </div>
+
+      <div class="preview-section">
+        <h2>Payment Setup Tips</h2>
+        <div style="display: grid; gap: 15px;">
+          <div style="background: rgba(255,215,0,.1); padding: 15px; border-radius: 8px;">
+            <strong style="color: #FFD700;">1. Create Payment Account</strong>
+            <p style="margin: 10px 0 0 0; color: #999; font-size: 0.9rem;">Sign up at your payment provider and get API keys</p>
+          </div>
+          <div style="background: rgba(255,215,0,.1); padding: 15px; border-radius: 8px;">
+            <strong style="color: #FFD700;">2. Connect Here</strong>
+            <p style="margin: 10px 0 0 0; color: #999; font-size: 0.9rem;">Paste your keys above (encrypted automatically)</p>
+          </div>
+          <div style="background: rgba(255,215,0,.1); padding: 15px; border-radius: 8px;">
+            <strong style="color: #FFD700;">3. Money Flows to You</strong>
+            <p style="margin: 10px 0 0 0; color: #999; font-size: 0.9rem;">100% of customer payments go to your account daily</p>
+          </div>
+          <div style="background: rgba(255,215,0,.1); padding: 15px; border-radius: 8px;">
+            <strong style="color: #FFD700;">4. No Hidden Fees</strong>
+            <p style="margin: 10px 0 0 0; color: #999; font-size: 0.9rem;">Payment processor fees only (typically 2-3%)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Review & Deploy -->
+    <div class="setup-grid" id="step-5" style="display: none;">
+      <div class="form-section">
+        <h2>Step 5: Review & Deploy</h2>
+        
+        <h3 style="color: #FFD700; margin: 20px 0 15px 0; font-size: 1.1rem;">Summary</h3>
+
+        <div style="background: rgba(0,0,0,.5); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <p><strong>Platform Name:</strong> <span id="summaryName">Rajesh AI Hub</span></p>
+          <p><strong>Domain:</strong> <span id="summaryDomain">rajeshtech.com</span></p>
+          <p><strong>Tiers:</strong> <span id="summaryTiers">3 custom tiers</span></p>
+          <p><strong>Payment Provider:</strong> <span id="summaryPayment">Razorpay</span></p>
+        </div>
+
+        <div class="info-box">
+          <strong>✓ Next Steps After Deployment:</strong>
+          <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+            <li>Point your domain DNS records (we'll provide)</li>
+            <li>Customize your homepage content</li>
+            <li>Upload your products/content</li>
+            <li>Invite your first customers</li>
+            <li>Start earning 100% of revenue</li>
+          </ul>
+        </div>
+
+        <div class="info-box" style="background: rgba(0,255,159,.1); border-color: #00FF9F; margin-top: 20px;">
+          <strong style="color: #00FF9F;">🎉 Estimated Setup Time: 5-10 minutes</strong>
+          <p style="margin: 10px 0 0 0; color: #ddd;">Your platform will be live and ready to accept customers within 24 hours.</p>
+        </div>
+
+        <button class="btn-primary" onclick="deployPlatform()">✅ Deploy My White-Label Platform</button>
+      </div>
+
+      <div class="preview-section">
+        <h2>What Happens Next</h2>
+        <div style="display: grid; gap: 15px;">
+          <div style="background: rgba(0,255,159,.1); padding: 15px; border-radius: 8px; border-left: 4px solid #00FF9F;">
+            <div style="color: #00FF9F; font-weight: 700; margin-bottom: 8px;">⏱️ Within 24 Hours</div>
+            <p style="margin: 0; color: #ddd; font-size: 0.9rem;">Your white-label instance is created, configured, and ready</p>
+          </div>
+          <div style="background: rgba(0,255,159,.1); padding: 15px; border-radius: 8px; border-left: 4px solid #00FF9F;">
+            <div style="color: #00FF9F; font-weight: 700; margin-bottom: 8px;">📧 Email with Setup</div>
+            <p style="margin: 0; color: #ddd; font-size: 0.9rem;">DNS records, admin login, and quick-start guide sent</p>
+          </div>
+          <div style="background: rgba(0,255,159,.1); padding: 15px; border-radius: 8px; border-left: 4px solid #00FF9F;">
+            <div style="color: #00FF9F; font-weight: 700; margin-bottom: 8px;">🚀 Go Live</div>
+            <p style="margin: 0; color: #ddd; font-size: 0.9rem;">Point your domain → your platform is live → start selling</p>
+          </div>
+          <div style="background: rgba(0,255,159,.1); padding: 15px; border-radius: 8px; border-left: 4px solid #00FF9F;">
+            <div style="color: #00FF9F; font-weight: 700; margin-bottom: 8px;">💰 Earn 100%</div>
+            <p style="margin: 0; color: #ddd; font-size: 0.9rem;">All customer payments go to your account daily</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchStep(step) {
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById(`step-${i}`).style.display = i === step ? 'grid' : 'none';
+      }
+      // Update step indicators
+      document.querySelectorAll('.step').forEach((el, idx) => {
+        el.classList.toggle('active', idx + 1 === step);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updatePreview() {
+      const brandName = document.getElementById('brandName').value || 'Your Brand';
+      const tagline = document.getElementById('tagline').value || 'Your tagline here';
+      const primaryColor = document.getElementById('primaryColor').value;
+
+      document.getElementById('previewName').textContent = brandName;
+      document.getElementById('previewName').style.color = primaryColor;
+      document.getElementById('previewTagline').textContent = tagline;
+      document.getElementById('primaryPreview').style.background = primaryColor;
+
+      document.getElementById('summaryName').textContent = brandName;
+    }
+
+    function updatePaymentInfo() {
+      const provider = document.getElementById('paymentProvider').value;
+      document.getElementById('razorpayInfo').style.display = provider === 'razorpay' ? 'block' : 'none';
+      document.getElementById('stripeInfo').style.display = provider === 'stripe' ? 'block' : 'none';
+      document.getElementById('summaryPayment').textContent = provider.charAt(0).toUpperCase() + provider.slice(1);
+    }
+
+    function validatePaymentInfo() {
+      return true;
+    }
+
+    function deployPlatform() {
+      const data = {
+        brand_name: document.getElementById('brandName').value,
+        domain: document.getElementById('customDomain').value,
+        payment_provider: document.getElementById('paymentProvider').value,
+        tier1_name: document.getElementById('tier1Name').value,
+        tier1_price: document.getElementById('tier1Price').value,
+        tier2_name: document.getElementById('tier2Name').value,
+        tier2_price: document.getElementById('tier2Price').value,
+        tier3_name: document.getElementById('tier3Name').value,
+        tier3_price: document.getElementById('tier3Price').value,
+      };
+
+      fetch('/api/vip/white-label-deploy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(result => {
+        if (result.success) {
+          alert(`🎉 Success! Your white-label platform is deploying.\n\nYou'll receive an email at ${data.domain} with setup details.\n\nInstance ID: ${result.instance_id}`);
+          window.location.href = '/vip-dashboard';
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+      })
+      .catch(err => alert(`Deployment failed: ${err.message}`));
+    }
+
+    // Initialize preview
+    updatePreview();
+  </script>
+</body>
+</html>

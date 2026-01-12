@@ -756,6 +756,67 @@ def vip_dashboard_page():
     
     return render_template("vip_dashboard.html", revenue_data=revenue_data)
 
+@app.route("/vip/white-label-setup")
+def white_label_setup_page():
+    """White-label platform setup wizard."""
+    return render_template("white_label_setup.html")
+
+@app.route("/api/vip/white-label-deploy", methods=["POST"])
+def white_label_deploy():
+    """Deploy a new white-label instance for 1% member."""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required = ['brand_name', 'domain', 'payment_provider', 'tier1_name', 'tier1_price']
+        if not all(f in data for f in required):
+            return jsonify({"error": "missing_required_fields"}), 400
+        
+        # Generate instance ID
+        instance_id = f"wl_{int(time.time())}_{data['brand_name'][:10].replace(' ', '_')}"
+        
+        # Simulate instance creation (in production: create DB schema, provision server)
+        instance_config = {
+            'instance_id': instance_id,
+            'brand_name': data['brand_name'],
+            'domain': data['domain'],
+            'payment_provider': data['payment_provider'],
+            'tiers': [
+                {
+                    'name': data.get('tier1_name'),
+                    'price': int(data.get('tier1_price', 0))
+                },
+                {
+                    'name': data.get('tier2_name'),
+                    'price': int(data.get('tier2_price', 0))
+                },
+                {
+                    'name': data.get('tier3_name'),
+                    'price': int(data.get('tier3_price', 0))
+                }
+            ],
+            'created_at': time.time(),
+            'status': 'deploying',
+            'member_id': session.get('receipt', 'demo')
+        }
+        
+        # Log deployment
+        logging.info(f"White-label instance created: {instance_id} for {data['brand_name']}")
+        
+        # Send confirmation email (mock for now)
+        logging.info(f"Deployment email to be sent with DNS records and setup guide")
+        
+        return jsonify({
+            "success": True,
+            "instance_id": instance_id,
+            "message": f"White-label instance '{data['brand_name']}' is deploying!",
+            "config": instance_config
+        }), 200
+        
+    except Exception as e:
+        logging.exception(f"White-label deployment error: {e}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/tier/all", methods=["GET"])
 def get_all_tiers():
     """Get all available tiers with full details."""
