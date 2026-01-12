@@ -766,6 +766,11 @@ def vip_resources_page():
     """Private member resources library."""
     return render_template("vip_resources.html")
 
+@app.route("/equity-program")
+def equity_program_page():
+    """Equity and shareholder program for 1% exclusive members."""
+    return render_template("equity_program.html")
+
 @app.route("/api/vip/white-label-deploy", methods=["POST"])
 def white_label_deploy():
     """Deploy a new white-label instance for 1% member."""
