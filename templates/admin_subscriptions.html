@@ -204,7 +204,7 @@
         }
 
         .feature::before {
-            content: '✓ ';
+            content: '+ ';
             color: var(--success);
             font-weight: bold;
             margin-right: 8px;
@@ -322,7 +322,7 @@
 
     <div class="container">
         <header>
-            <h1>💳 Recurring Revenue Dashboard</h1>
+              <h1>Recurring Revenue Dashboard</h1>
             <p class="subtitle">Monthly Recurring Revenue (MRR) & Subscription Analytics - Stable Income from God's Grace</p>
         </header>
 
@@ -361,6 +361,7 @@
 
         <!-- Pricing Tiers -->
         <h2 class="section-title">📦 Subscription Tiers</h2>
+            <h2 class="section-title">Subscription Tiers</h2>
         <div class="pricing-grid">
             {% for tier_key, tier_data in pricing.items() %}
             <div class="pricing-card {% if tier_key == 'PREMIUM' %}premium{% endif %}">
@@ -386,7 +387,7 @@
         <!-- Expiring Soon Alert -->
         {% if expiring %}
         <div class="alert-box">
-            <div class="alert-title">⚠️ {{ expiring|length }} Subscriptions Expiring in Next 7 Days</div>
+              <div class="alert-title">{{ expiring|length }} Subscriptions Expiring in Next 7 Days</div>
             <p style="color: #7f1d1d; font-size: 14px;">Reach out now to ensure renewals and prevent churn!</p>
         </div>
         {% endif %}
@@ -394,12 +395,13 @@
         <!-- Upgrade Opportunities -->
         {% if upgrades %}
         <h2 class="section-title">🚀 Tier Upgrade Opportunities</h2>
+            <h2 class="section-title">Tier Upgrade Opportunities</h2>
         <div class="card">
             <p style="margin-bottom: 20px; color: #6b7280;">Customers ready to upgrade to higher tiers - potential revenue increase!</p>
             {% for opp in upgrades %}
             <div class="upgrade-card">
                 <div class="upgrade-title">
-                    {{ opp.receipt }} • {{ opp.current_tier }} → {{ opp.suggested_tier }}
+                    {{ opp.receipt }} | {{ opp.current_tier }} -> {{ opp.suggested_tier }}
                     <span style="float: right; color: #92400e;">{{ opp.days_active }} days active</span>
                 </div>
                 <div class="upgrade-value">
@@ -412,12 +414,14 @@
 
         <!-- Revenue Forecast Chart -->
         <h2 class="section-title">📈 12-Month Revenue Forecast</h2>
+            <h2 class="section-title">12-Month Revenue Forecast</h2>
         <div class="chart-container">
             <canvas id="forecastChart"></canvas>
         </div>
 
         <!-- Active Subscriptions Table -->
         <h2 class="section-title">👥 Active Subscriptions</h2>
+            <h2 class="section-title">Active Subscriptions</h2>
         <div class="table-container">
             {% if active_subscriptions %}
             <table>
@@ -452,7 +456,7 @@
             </table>
             {% else %}
             <div class="no-data">
-                📭 No active subscriptions yet. Start selling recurring plans to build stable income!
+                 No active subscriptions yet. Start selling recurring plans to build stable income.
             </div>
             {% endif %}
         </div>
@@ -460,6 +464,7 @@
         <!-- Expiring Subscriptions -->
         {% if expiring %}
         <h2 class="section-title">⏰ Expiring Soon (Next 7 Days)</h2>
+            <h2 class="section-title">Expiring Soon (Next 7 Days)</h2>
         <div class="table-container">
             <table>
                 <thead>
