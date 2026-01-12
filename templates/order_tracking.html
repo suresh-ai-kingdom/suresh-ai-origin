@@ -239,14 +239,14 @@
 <body>
     <div class="tracking-container">
         <div class="tracking-header">
-            <h1>📦 Order Tracking</h1>
+            <h1>Order Tracking</h1>
             <p>SURESH AI ORIGIN</p>
         </div>
         
         <div class="tracking-content">
             {% if error %}
                 <div class="error-message">
-                    <span class="error-icon">✕</span>
+                    <span class="error-icon">Error</span>
                     {{ error }}
                 </div>
                 <p style="color: #666; font-size: 14px; text-align: center; margin-top: 20px;">
@@ -266,9 +266,9 @@
                         <span class="detail-label">Order Status</span>
                         <span class="detail-value">
                             {% if order.status == 'paid' %}
-                                <span class="status-badge status-paid">✓ Paid</span>
+                                <span class="status-badge status-paid">Paid</span>
                             {% else %}
-                                <span class="status-badge status-unpaid">⏳ Unpaid</span>
+                                <span class="status-badge status-unpaid">Unpaid</span>
                             {% endif %}
                         </span>
                     </div>
@@ -286,20 +286,20 @@
                 {% if order.status == 'paid' %}
                     <div class="action-buttons">
                         <a href="{{ url_for('download', product=order.product) }}" class="btn btn-primary">
-                            📥 Download Product
+                            Download Product
                         </a>
                     </div>
                     <div class="status-info">
-                        ✓ Your payment has been received. Click above to download your product immediately.
+                        Your payment has been received. Click above to download your product immediately.
                     </div>
                 {% else %}
                     <div class="action-buttons">
                         <button class="btn btn-primary" disabled>
-                            📥 Download (Awaiting Payment)
+                            Download (Awaiting Payment)
                         </button>
                     </div>
                     <div class="status-info">
-                        ⏳ We're waiting for your payment confirmation. Once received, you can download your product instantly. Check your email for payment instructions.
+                        We are waiting for your payment confirmation. Once received, you can download your product instantly. Check your email for payment instructions.
                     </div>
                 {% endif %}
                 
