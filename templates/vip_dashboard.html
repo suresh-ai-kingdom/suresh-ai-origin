@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1% Exclusive Dashboard – SURESH AI ORIGIN</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .vip-hero { background: linear-gradient(135deg, #000000, #1a0033, #330066); padding: 60px 20px; text-align: center; border-bottom: 3px solid #FFD700; }
+    .vip-hero h1 { font-size: 3rem; font-weight: 900; color: #FFD700; text-shadow: 0 0 30px #FFD700; letter-spacing: 2px; }
+    .vip-badge { display: inline-block; background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; padding: 10px 24px; border-radius: 50px; font-weight: 800; margin-bottom: 20px; box-shadow: 0 0 40px #FFD700; }
+    .stats-grid { max-width: 1200px; margin: 40px auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; padding: 0 20px; }
+    .stat-card { background: linear-gradient(135deg, rgba(255,215,0,.1), rgba(255,165,0,.1)); border: 2px solid #FFD700; border-radius: 16px; padding: 24px; box-shadow: 0 0 30px rgba(255,215,0,.3); }
+    .stat-card .value { font-size: 2.5rem; font-weight: 900; color: #FFD700; margin-bottom: 8px; }
+    .stat-card .label { color: #999; font-size: .9rem; text-transform: uppercase; letter-spacing: 1px; }
+    .vip-sections { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .section-box { background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: 1px solid rgba(255,215,0,.3); border-radius: 16px; padding: 32px; margin-bottom: 24px; backdrop-filter: blur(10px); }
+    .section-box h2 { color: #FFD700; font-size: 1.8rem; margin-bottom: 16px; }
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 20px; }
+    .feature-item { background: rgba(0,0,0,.4); padding: 16px; border-radius: 10px; border-left: 3px solid #FFD700; }
+    .feature-item h4 { color: #FFD700; margin-bottom: 8px; }
+    .feature-item p { color: #aaa; font-size: .9rem; }
+    .vote-item { background: rgba(0,0,0,.3); padding: 20px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .vote-btn { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .vote-btn:hover { transform: scale(1.05); }
+    .votes-count { color: #FFD700; font-weight: 700; font-size: 1.2rem; }
+    body { background: #0a0014; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="vip-hero">
+    <div class="vip-badge">🚀 1% EXCLUSIVE ACCESS</div>
+    <h1>Your VIP Dashboard</h1>
+    <p style="color: #999; font-size: 1.1rem;">Welcome to the top 1%. Everything you need to build your AI empire.</p>
+  </div>
+
+  <!-- Revenue Dashboard -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="value">₹{{ '{:,.0f}'.format(revenue_data.monthly_earnings or 0) }}</div>
+      <div class="label">Monthly Revenue Share (50%)</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">{{ revenue_data.active_referrals or 0 }}</div>
+      <div class="label">Active Referrals</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">{{ revenue_data.lifetime_referrals or 0 }}</div>
+      <div class="label">Lifetime Referrals</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">₹{{ '{:,.0f}'.format(revenue_data.total_earned or 0) }}</div>
+      <div class="label">Total Earned (All Time)</div>
+    </div>
+  </div>
+
+  <div class="vip-sections">
+    <!-- Exclusive Features -->
+    <div class="section-box">
+      <h2>🎯 Your Exclusive Benefits</h2>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <h4>🤖 Personal AI Team</h4>
+          <p>Dedicated AI specialists building custom models for your business 24/7</p>
+        </div>
+        <div class="feature-item">
+          <h4>💰 50% Revenue Share</h4>
+          <p>Earn half of every referral's lifetime value. Passive income on steroids.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🏗️ Co-Dev Rights</h4>
+          <p>Vote on features. Your ideas become reality. Shape the platform.</p>
+        </div>
+        <div class="feature-item">
+          <h4>📱 CEO Direct Line</h4>
+          <p>WhatsApp/Telegram direct to CEO. Instant support, priority access.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🎨 White-Label Rights</h4>
+          <p>Rebrand and resell as your own. Build your AI empire.</p>
+        </div>
+        <div class="feature-item">
+          <h4>💎 Lifetime Access</h4>
+          <p>Cancel anytime, keep core features forever. No-risk commitment.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🌍 VIP Events</h4>
+          <p>Global mastermind meetups, private dinners, networking events.</p>
+        </div>
+        <div class="feature-item">
+          <h4>📊 Equity Discussions</h4>
+          <p>Path to becoming shareholder. Build with us, own with us.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Voting -->
+    <div class="section-box">
+      <h2>🗳️ Shape the Future (Co-Creation Voting)</h2>
+      <p style="color: #999; margin-bottom: 20px;">Vote on what we build next. 1% members decide the roadmap.</p>
+      
+      <div class="vote-item">
+        <div>
+          <h4 style="color: #FFD700; margin-bottom: 6px;">Advanced Voice AI Integration</h4>
+          <p style="color: #aaa; margin: 0;">Fully conversational AI that handles sales calls, support, and meetings</p>
+        </div>
+        <div style="text-align: right;">
+          <div class="votes-count">47 votes</div>
+          <button class="vote-btn" onclick="vote('voice_ai')">Vote</button>
+        </div>
+      </div>
+
+      <div class="vote-item">
+        <div>
+          <h4 style="color: #FFD700; margin-bottom: 6px;">Custom Trained ChatGPT Clone</h4>
+          <p style="color: #aaa; margin: 0;">Your own branded AI assistant trained on your data and style</p>
+        </div>
+        <div style="text-align: right;">
+          <div class="votes-count">38 votes</div>
+          <button class="vote-btn" onclick="vote('custom_gpt')">Vote</button>
+        </div>
+      </div>
+
+      <div class="vote-item">
+        <div>
+          <h4 style="color: #FFD700; margin-bottom: 6px;">AI Video Generator</h4>
+          <p style="color: #aaa; margin: 0;">Text to video in seconds. Faceless YouTube automation ready.</p>
+        </div>
+        <div style="text-align: right;">
+          <div class="votes-count">52 votes</div>
+          <button class="vote-btn" onclick="vote('video_gen')">Vote</button>
+        </div>
+      </div>
+
+      <div class="vote-item">
+        <div>
+          <h4 style="color: #FFD700; margin-bottom: 6px;">White-Label Mobile App</h4>
+          <p style="color: #aaa; margin: 0;">iOS/Android app with your branding. Sell subscriptions to your audience.</p>
+        </div>
+        <div style="text-align: right;">
+          <div class="votes-count">61 votes</div>
+          <button class="vote-btn" onclick="vote('mobile_app')">Vote</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Private Resources -->
+    <div class="section-box">
+      <h2>🔐 Private 1% Resources</h2>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <h4>📚 Playbook Library</h4>
+          <p>100+ private case studies from 7-figure AI businesses. Not available anywhere else.</p>
+          <a href="/vip/playbooks" style="color: #FFD700; font-weight: 700;">Browse Playbooks →</a>
+        </div>
+        <div class="feature-item">
+          <h4>🤖 Custom AI Models</h4>
+          <p>Pre-trained models for your niche. E-commerce, coaching, SaaS, agency, etc.</p>
+          <a href="/vip/models" style="color: #FFD700; font-weight: 700;">View Models →</a>
+        </div>
+        <div class="feature-item">
+          <h4>💬 Private Mastermind</h4>
+          <p>Telegram group with 50 other 1% members. Share wins, strategies, connections.</p>
+          <a href="/vip/mastermind" style="color: #FFD700; font-weight: 700;">Join Mastermind →</a>
+        </div>
+        <div class="feature-item">
+          <h4>🎬 Monthly Strategy Calls</h4>
+          <p>Live Zoom calls with CEO. Q&A, roadmap updates, exclusive alpha.</p>
+          <a href="/vip/calls" style="color: #FFD700; font-weight: 700;">See Schedule →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- White-Label System -->
+    <div class="section-box">
+      <h2>🎨 Build Your Own AI Empire (White-Label)</h2>
+      <p style="color: #999; margin-bottom: 20px;">Rebrand this entire platform as your own. Sell subscriptions at your price.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <h4 style="color: #FFD700; margin-bottom: 12px;">What You Can Customize:</h4>
+          <ul style="color: #aaa; line-height: 1.8;">
+            <li>Your logo, brand name, colors</li>
+            <li>Your domain (yourbrand.com)</li>
+            <li>Your payment gateway (keep 100%)</li>
+            <li>Your pricing (charge whatever you want)</li>
+            <li>Your content (add your own templates)</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color: #FFD700; margin-bottom: 12px;">What We Handle:</h4>
+          <ul style="color: #aaa; line-height: 1.8;">
+            <li>Hosting & infrastructure</li>
+            <li>Updates & new features</li>
+            <li>Security & backups</li>
+            <li>Technical support</li>
+            <li>AI model maintenance</li>
+          </ul>
+        </div>
+      </div>
+      <button class="vote-btn" style="margin-top: 20px;" onclick="window.location.href='/vip/white-label-setup'">Set Up White-Label →</button>
+    </div>
+
+    <!-- Direct CEO Access -->
+    <div class="section-box" style="background: linear-gradient(135deg, rgba(255,215,0,.15), rgba(255,165,0,.1)); border: 2px solid #FFD700;">
+      <h2>📱 Direct Line to CEO</h2>
+      <p style="color: #aaa; margin-bottom: 20px;">Skip support tickets. Talk directly to the decision maker.</p>
+      <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <a href="https://wa.me/YOUR_WHATSAPP" class="vote-btn" style="text-decoration: none; display: inline-block;">WhatsApp CEO</a>
+        <a href="https://t.me/YOUR_TELEGRAM" class="vote-btn" style="text-decoration: none; display: inline-block; background: linear-gradient(135deg, #0088cc, #006699);">Telegram CEO</a>
+        <a href="mailto:ceo@suresh-ai-origin.com" class="vote-btn" style="text-decoration: none; display: inline-block; background: linear-gradient(135deg, #ea4335, #c5221f);">Email CEO</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function vote(feature) {
+      fetch(`/api/vip/vote/${feature}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          alert(`Vote recorded! ${data.feature_name} now has ${data.total_votes} votes.`);
+          location.reload();
+        })
+        .catch(() => alert('Already voted or error occurred.'));
+    }
+  </script>
+</body>
+</html>

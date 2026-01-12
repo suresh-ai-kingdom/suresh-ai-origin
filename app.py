@@ -730,6 +730,32 @@ def whatsapp_funnel_page():
     
     return render_template("whatsapp_funnel.html", share_link=share_link)
 
+@app.route("/apply-one-percent")
+def apply_one_percent_page():
+    """Application page for 1% Exclusive tier."""
+    return render_template("apply_one_percent.html")
+
+@app.route("/vip-dashboard")
+def vip_dashboard_page():
+    """1% Exclusive VIP Dashboard with revenue tracking, voting, white-label."""
+    from referrals import get_referral_stats
+    
+    # Get user receipt from session or use demo
+    user_receipt = session.get('receipt', request.args.get('receipt', 'demo'))
+    
+    # Get referral stats
+    stats = get_referral_stats(user_receipt) or {}
+    
+    # Calculate revenue data (50% share for 1% tier)
+    revenue_data = {
+        'monthly_earnings': stats.get('pending_commission_rupees', 0) * 0.5,
+        'active_referrals': stats.get('successful_referrals', 0),
+        'lifetime_referrals': stats.get('total_referrals', 0),
+        'total_earned': stats.get('total_earned_rupees', 0) * 0.5
+    }
+    
+    return render_template("vip_dashboard.html", revenue_data=revenue_data)
+
 @app.route("/api/tier/all", methods=["GET"])
 def get_all_tiers():
     """Get all available tiers with full details."""
@@ -848,6 +874,54 @@ def compare_tiers(tier1, tier2):
             "features": TIER_SYSTEM[tier2]["features"]
         },
         "upgrade_cost": TIER_SYSTEM[tier2]["price_monthly"] - TIER_SYSTEM[tier1]["price_monthly"]
+    }), 200
+
+@app.route("/api/vip/vote/<feature>", methods=["POST"])
+def vip_vote(feature):
+    """Record 1% member vote for future feature.
+    
+    Features: voice_ai, custom_gpt, video_gen, mobile_app
+    Returns: success status and updated vote count
+    """
+    FEATURE_NAMES = {
+        'voice_ai': 'Advanced Voice AI Integration',
+        'custom_gpt': 'Custom GPT Clone Builder',
+        'video_gen': 'AI Video Generator',
+        'mobile_app': 'White-Label Mobile App'
+    }
+    
+    if feature not in FEATURE_NAMES:
+        return jsonify({"error": "invalid_feature"}), 400
+    
+    # Simple vote tracking in-memory (replace with DB for production)
+    if not hasattr(vip_vote, 'votes'):
+        vip_vote.votes = {
+            'voice_ai': 47,
+            'custom_gpt': 32,
+            'video_gen': 29,
+            'mobile_app': 41
+        }
+    
+    # Get user ID from session or use IP-based identifier
+    user_id = session.get('user_id', request.remote_addr)
+    vote_key = f"{user_id}_{feature}"
+    
+    if not hasattr(vip_vote, 'user_votes'):
+        vip_vote.user_votes = {}
+    
+    # Check if already voted
+    if vote_key in vip_vote.user_votes:
+        return jsonify({"error": "already_voted", "message": "You've already voted for this feature"}), 400
+    
+    # Record vote
+    vip_vote.votes[feature] += 1
+    vip_vote.user_votes[vote_key] = True
+    
+    return jsonify({
+        "success": True,
+        "feature": feature,
+        "feature_name": FEATURE_NAMES[feature],
+        "total_votes": vip_vote.votes[feature]
     }), 200
 
 @app.route("/create_order", methods=["POST"])
