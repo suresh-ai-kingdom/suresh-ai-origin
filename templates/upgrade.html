@@ -370,19 +370,34 @@
         const CURRENT_TIER = "{{ current_tier }}";
         let PRICING_MODE = 'monthly';
 
+        // Debug: Log tier system to console
+        console.log('TIER_SYSTEM loaded:', TIER_SYSTEM);
+
         function renderTiers() {
             const grid = document.getElementById('tiersGrid');
             grid.innerHTML = '';
 
             Object.entries(TIER_SYSTEM).forEach(([key, tier]) => {
-                const price = PRICING_MODE === 'monthly' ? tier.price_monthly : tier.price_yearly;
+                // CRITICAL FIX: Use correct pricing based on mode
+                let price;
+                if (PRICING_MODE === 'yearly') {
+                    price = tier.price_yearly || (tier.price_monthly * 12); // Fallback to monthly × 12
+                } else {
+                    price = tier.price_monthly;
+                }
+                
                 const period = PRICING_MODE === 'monthly' ? 'month' : 'year';
                 const isCurrent = key === CURRENT_TIER;
 
-                const savingsYearly = tier.price_monthly * 12 - tier.price_yearly;
+                const monthlyPrice = tier.price_monthly;
+                const yearlyPrice = tier.price_yearly || (monthlyPrice * 12);
+                const savingsYearly = (monthlyPrice * 12) - yearlyPrice;
+                
                 const savingsDisplay = PRICING_MODE === 'yearly' && savingsYearly > 0 
-                    ? `<div class="savings-badge">Save ₹${savingsYearly.toLocaleString()}</div>` 
+                    ? `<div class="savings-badge">💰 Save ₹${savingsYearly.toLocaleString()}/year</div>` 
                     : '';
+
+                console.log(`Tier: ${key}, Mode: ${PRICING_MODE}, Price: ${price}, Monthly: ${monthlyPrice}, Yearly: ${yearlyPrice}`);
 
                 const card = document.createElement('div');
                 card.className = `tier-card ${isCurrent ? 'current' : ''}`;
@@ -407,14 +422,18 @@
         }
 
         function setPricing(mode) {
+            console.log('Setting pricing mode to:', mode);
             PRICING_MODE = mode;
             
             // Update toggle buttons
             document.querySelectorAll('.toggle-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
+            
+            // Mark the clicked button as active
             event.target.classList.add('active');
 
+            // Re-render all tier cards with new pricing
             renderTiers();
         }
 
