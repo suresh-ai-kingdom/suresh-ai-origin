@@ -414,6 +414,66 @@ def buy():
     razorpay_key_id = os.getenv('RAZORPAY_KEY_ID', '')
     return render_template("buy.html", product=product, razorpay_key_id=razorpay_key_id)
 
+@app.route("/pay/<product>", methods=["POST"])
+@require_idempotency_key
+@rate_limit_feature('create_order')
+def initiate_payment(product):
+    """Fallback: Create Razorpay order and return payment URL directly.
+    
+    This endpoint can be used if JavaScript SDK fails to load.
+    Creates order server-side and returns response for client to handle.
+    """
+    if not razorpay_client:
+        return jsonify({
+            'error': 'payment_gateway_not_configured',
+            'message': 'Payment processing is not available'
+        }), 503
+    
+    try:
+        # Get amount for product
+        PRODUCT_AMOUNTS = {
+            'starter': 99,
+            'pro': 499,
+            'premium': 999
+        }
+        
+        amount = PRODUCT_AMOUNTS.get(product, 99)
+        
+        # Create Razorpay order
+        try:
+            order = razorpay_client.order.create({
+                "amount": amount * 100,  # Convert to paise
+                "currency": "INR",
+                "receipt": f"receipt#{int(time.time())}"
+            })
+            logging.info(f"Razorpay order created: {order.get('id')} for product {product}")
+        except Exception as razorpay_error:
+            logging.exception(f"Razorpay API error: {razorpay_error}")
+            return jsonify({
+                'error': 'razorpay_api_error',
+                'message': 'Failed to create payment order'
+            }), 502
+        
+        # Persist to database
+        try:
+            from utils import save_order
+            save_order(order.get('id'), order.get('amount'), order.get('currency', 'INR'), order.get('receipt'), product)
+        except Exception as db_error:
+            logging.exception(f"Failed to persist order: {db_error}")
+        
+        return jsonify({
+            'success': True,
+            'order': order,
+            'payment_url': f"https://rzp.io/{order.get('short_url')}" if order.get('short_url') else None
+        })
+    
+    except Exception as e:
+        logging.exception(f"Payment initiation error: {e}")
+        return jsonify({
+            'error': 'internal_error',
+            'message': 'An error occurred'
+        }), 500
+
 @app.route("/success")
 def success():
     """Success page - only shows download if payment verified."""
