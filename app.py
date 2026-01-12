@@ -761,6 +761,11 @@ def white_label_setup_page():
     """White-label platform setup wizard."""
     return render_template("white_label_setup.html")
 
+@app.route("/vip/resources")
+def vip_resources_page():
+    """Private member resources library."""
+    return render_template("vip_resources.html")
+
 @app.route("/api/vip/white-label-deploy", methods=["POST"])
 def white_label_deploy():
     """Deploy a new white-label instance for 1% member."""
