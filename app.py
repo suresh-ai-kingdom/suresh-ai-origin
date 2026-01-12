@@ -497,22 +497,21 @@ def start_payment(product):
         }), 503
     
     try:
-        # Get amount for product
-        PRODUCT_AMOUNTS = {
-            'starter': 99,
-            'pro': 499,
-            'premium': 999
-        }
+        # Get tier information from TIER_SYSTEM (supports all 6 tiers)
+        tier_info = TIER_SYSTEM.get(product)
         
-        PRODUCT_NAMES = {
-            'starter': 'Starter Pack - AI Prompts & Automation',
-            'pro': 'Pro Pack - Advanced AI Tools',
-            'premium': 'Premium Pack - VIP AI Suite'
-        }
+        if not tier_info:
+            return jsonify({
+                'error': 'invalid_product',
+                'message': f'Product "{product}" not found',
+                'valid_products': list(TIER_SYSTEM.keys())
+            }), 404
         
-        amount = PRODUCT_AMOUNTS.get(product, 99)
-        product_name = PRODUCT_NAMES.get(product, 'AI Pack')
+        amount = tier_info.get('price_monthly', 99)
+        product_name = tier_info.get('name', 'AI Pack')
         receipt = f"receipt#{int(time.time())}"
+        
+        logging.info(f"Payment initiated: product={product}, tier={product_name}, amount=₹{amount}")
         
         # Create Razorpay Payment Link (not just order)
         try:
