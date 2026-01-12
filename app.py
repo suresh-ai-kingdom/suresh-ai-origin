@@ -411,17 +411,16 @@ def health():
 @app.route("/buy")
 def buy():
     product = request.args.get("product", "starter")
-    razorpay_key_id = os.getenv('RAZORPAY_KEY_ID', '')
-    return render_template("buy.html", product=product, razorpay_key_id=razorpay_key_id)
+    # Use the simpler checkout that doesn't require Razorpay SDK in browser
+    return render_template("checkout_simple.html", product=product)
 
-@app.route("/pay/<product>", methods=["POST"])
-@require_idempotency_key
+@app.route("/pay/<product>", methods=["GET"])
 @rate_limit_feature('create_order')
-def initiate_payment(product):
-    """Fallback: Create Razorpay order and return payment URL directly.
+def start_payment(product):
+    """Hosted Checkout Approach - Redirects to Razorpay payment page.
     
-    This endpoint can be used if JavaScript SDK fails to load.
-    Creates order server-side and returns response for client to handle.
+    This doesn't require Razorpay SDK to load in browser.
+    Works even if CDN is blocked.
     """
     if not razorpay_client:
         return jsonify({
@@ -438,40 +437,65 @@ def initiate_payment(product):
         }
         
         amount = PRODUCT_AMOUNTS.get(product, 99)
+        receipt = f"receipt#{int(time.time())}"
         
         # Create Razorpay order
         try:
-            order = razorpay_client.order.create({
+            order_data = {
                 "amount": amount * 100,  # Convert to paise
                 "currency": "INR",
-                "receipt": f"receipt#{int(time.time())}"
-            })
-            logging.info(f"Razorpay order created: {order.get('id')} for product {product}")
+                "receipt": receipt
+            }
+            
+            order = razorpay_client.order.create(order_data)
+            logging.info(f"Razorpay order created: {order.get('id')} for product {product} amount {amount}")
         except Exception as razorpay_error:
             logging.exception(f"Razorpay API error: {razorpay_error}")
             return jsonify({
                 'error': 'razorpay_api_error',
-                'message': 'Failed to create payment order'
+                'message': 'Failed to create payment order',
+                'details': str(razorpay_error)
             }), 502
         
         # Persist to database
         try:
             from utils import save_order
             save_order(order.get('id'), order.get('amount'), order.get('currency', 'INR'), order.get('receipt'), product)
+            logging.info(f"Order persisted to DB: {order.get('id')}")
         except Exception as db_error:
             logging.exception(f"Failed to persist order: {db_error}")
         
-        return jsonify({
-            'success': True,
-            'order': order,
-            'payment_url': f"https://rzp.io/{order.get('short_url')}" if order.get('short_url') else None
-        })
+        # Create payment link/hosted checkout URL
+        # For hosted checkout, we'll create a payment using order ID
+        order_id = order.get('id')
+        key_id = os.getenv('RAZORPAY_KEY_ID', '')
+        
+        # Razorpay hosted checkout URL format
+        checkout_url = f"https://rzp.io/{order.get('short_url')}" if order.get('short_url') else None
+        
+        if checkout_url:
+            logging.info(f"Redirecting to Razorpay hosted checkout: {checkout_url}")
+            # Store order in session for later verification
+            session['pending_order'] = {
+                'order_id': order_id,
+                'product': product,
+                'amount': amount
+            }
+            return redirect(checkout_url)
+        else:
+            # Fallback: Return order for client-side handling
+            return jsonify({
+                'success': True,
+                'order': order,
+                'redirect_url': checkout_url
+            })
     
     except Exception as e:
         logging.exception(f"Payment initiation error: {e}")
         return jsonify({
             'error': 'internal_error',
-            'message': 'An error occurred'
+            'message': 'An error occurred while starting payment',
+            'details': str(e)
         }), 500
 
 @app.route("/success")

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - SURESH AI ORIGIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .checkout-container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 0, 110, 0.2);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .product-header {
+            margin-bottom: 40px;
+        }
+        
+        .product-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FF006E, #8338EC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .price {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #FF006E;
+            margin: 20px 0;
+            text-shadow: 0 0 40px rgba(255, 0, 110, 0.3);
+        }
+        
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .features li {
+            padding: 12px 0;
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            border-bottom: 1px solid rgba(255, 0, 110, 0.1);
+        }
+        
+        .features li:last-child {
+            border-bottom: none;
+        }
+        
+        .pay-button {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF006E, #8338EC);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(255, 0, 110, 0.4);
+        }
+        
+        .pay-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 60px rgba(255, 0, 110, 0.6);
+        }
+        
+        .pay-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #00D9FF;
+        }
+        
+        .security-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 159, 0.05);
+            border: 1px solid rgba(0, 255, 159, 0.2);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: #00FF9F;
+        }
+        
+        .info-badge {
+            display: inline-block;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <div class="product-header">
+            <h1 class="product-name" id="productName">{{ product|title }} Pack</h1>
+            <div class="price" id="productPrice">₹99</div>
+        </div>
+        
+        <ul class="features" id="featuresList">
+            <!-- Populated by JavaScript -->
+        </ul>
+        
+        <button class="pay-button" id="payButton" onclick="proceedToPayment()">
+            🔒 Proceed to Payment
+        </button>
+        
+        <div class="loading" id="loading">
+            <p>Redirecting to Razorpay...</p>
+        </div>
+        
+        <div class="security-info">
+            <div class="info-badge">✅ Secure Payment</div>
+            <div class="info-badge">✅ Instant Access</div>
+            <div class="info-badge">✅ 256-bit Encryption</div>
+        </div>
+    </div>
+    
+    <script>
+        const products = {
+            'starter': {
+                name: 'Starter Pack',
+                price: 99,
+                features: [
+                    '✅ 100+ AI Prompts',
+                    '✅ 10+ Automation Workflows',
+                    '✅ Email Support',
+                    '✅ Monthly Updates',
+                    '✅ Lifetime Access'
+                ]
+            },
+            'pro': {
+                name: 'Pro Pack',
+                price: 499,
+                features: [
+                    '✅ 500+ AI Prompts',
+                    '✅ 50+ Automation Workflows',
+                    '✅ Priority Support',
+                    '✅ Private Community',
+                    '✅ Weekly Updates',
+                    '✅ Lifetime Access'
+                ]
+            },
+            'premium': {
+                name: 'Premium Pack',
+                price: 999,
+                features: [
+                    '✅ 1000+ AI Prompts',
+                    '✅ 100+ Automation Workflows',
+                    '✅ 1-on-1 Coaching',
+                    '✅ VIP Community',
+                    '✅ Daily Updates',
+                    '✅ Lifetime Access'
+                ]
+            }
+        };
+        
+        const currentProduct = '{{ product }}';
+        const productData = products[currentProduct] || products['starter'];
+        
+        // Display product info
+        document.getElementById('productName').textContent = productData.name;
+        document.getElementById('productPrice').textContent = '₹' + productData.price;
+        
+        const featuresList = document.getElementById('featuresList');
+        productData.features.forEach(feature => {
+            const li = document.createElement('li');
+            li.textContent = feature;
+            featuresList.appendChild(li);
+        });
+        
+        function proceedToPayment() {
+            const button = document.getElementById('payButton');
+            const loading = document.getElementById('loading');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            
+            console.log('Starting payment for:', currentProduct);
+            
+            // Redirect to /pay/<product> endpoint
+            // This will create an order and redirect to Razorpay hosted checkout
+            window.location.href = '/pay/' + currentProduct;
+        }
+    </script>
+</body>
+</html>
