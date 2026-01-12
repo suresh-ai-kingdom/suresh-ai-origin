@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Checkout - SURESH AI ORIGIN</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         .checkout-container {
             max-width: 600px;
@@ -235,6 +234,13 @@
                 };
 
                 console.log('Razorpay options:', options);
+                
+                // Check if Razorpay is loaded
+                if (typeof Razorpay === 'undefined') {
+                    console.error('Razorpay SDK not loaded');
+                    throw new Error('Payment gateway failed to load. Please refresh the page or contact support.');
+                }
+                
                 const rzp = new Razorpay(options);
                 rzp.open();
 
@@ -246,6 +252,27 @@
                 loading.style.display = 'none';
             }
         }
+        
+        // Check if Razorpay SDK loaded successfully
+        window.addEventListener('load', function() {
+            if (typeof Razorpay === 'undefined') {
+                console.error('Razorpay SDK failed to load from CDN');
+                const button = document.getElementById('payButton');
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = '⚠️ Payment Gateway Unavailable';
+                    button.style.background = 'linear-gradient(135deg, #FF6B6B, #EE5A6F)';
+                }
+                alert('❌ Payment gateway could not be loaded. Please check your internet connection or try again later.');
+            } else {
+                console.log('Razorpay SDK loaded successfully');
+            }
+        });
+    </script>
+    
+    <!-- Load Razorpay SDK from CDN -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js" 
+            onerror="console.error('Failed to load Razorpay SDK from CDN'); alert('Payment gateway unavailable. Please check your connection.');">
     </script>
 </body>
 </html>
