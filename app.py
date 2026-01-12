@@ -411,17 +411,87 @@ def health():
 @app.route("/buy")
 def buy():
     product = request.args.get("product", "starter")
-    return render_template("buy.html", product=product)
+    razorpay_key_id = os.getenv('RAZORPAY_KEY_ID', '')
+    return render_template("buy.html", product=product, razorpay_key_id=razorpay_key_id)
 
 @app.route("/success")
 def success():
+    """Success page - only shows download if payment verified."""
     product = request.args.get("product", "starter")
-    return render_template("success.html", product=product)
+    order_id = request.args.get("order_id")
+    payment_id = request.args.get("payment_id")
+    
+    # Verify payment in database
+    order_verified = False
+    if order_id:
+        try:
+            from utils import get_order
+            order = get_order(order_id)
+            if order and order[5] == 'paid':  # status column
+                order_verified = True
+        except Exception as e:
+            logging.error(f"Error verifying order: {e}")
+    
+    return render_template(
+        "success.html",
+        product=product,
+        order_id=order_id,
+        payment_id=payment_id,
+        order_verified=order_verified
+    )
 
 @app.route("/download/<product>")
 @rate_limit_feature('download')
 def download(product):
-    # Enforce pre-logic rate limit and entitlement check before any work
+    """Download product - ONLY for verified paid orders."""
+    order_id = request.args.get('order_id')
+    
+    # First verify payment in database
+    if not order_id:
+        return jsonify({
+            'error': 'payment_required',
+            'message': 'Order ID required for download',
+            'redirect': '/#products'
+        }), 402
+    
+    try:
+        from utils import get_order
+        order = get_order(order_id)
+        
+        # Check if order exists and is paid
+        if not order:
+            return jsonify({
+                'error': 'invalid_order',
+                'message': 'Order not found'
+            }), 404
+        
+        # order tuple: (id, amount, currency, receipt, product, status, created_at, paid_at)
+        order_status = order[5]  # status column
+        order_product = order[4]  # product column
+        
+        if order_status != 'paid':
+            return jsonify({
+                'error': 'payment_pending',
+                'message': 'Payment not verified yet. Please wait a few minutes.',
+                'order_id': order_id,
+                'status': order_status
+            }), 402
+        
+        # Verify product matches
+        if order_product != product:
+            return jsonify({
+                'error': 'product_mismatch',
+                'message': 'Order product does not match download request'
+            }), 403
+        
+    except Exception as e:
+        logging.error(f"Download verification error: {e}")
+        return jsonify({
+            'error': 'verification_failed',
+            'message': 'Could not verify payment. Please contact support.'
+        }), 500
+    
+    # Now check entitlements (rate limits, etc)
     try:
         from entitlements import check_entitlement
         decision = check_entitlement('download', {
@@ -430,21 +500,22 @@ def download(product):
             'token': request.args.get('token')
         })
         if not decision.get('allow'):
-            # Fail closed with 402 Payment Required
             return jsonify({
-                'error': 'payment_required',
+                'error': 'rate_limit_exceeded',
                 'feature': 'download',
                 'product': product,
                 'reason': decision.get('reason'),
                 'upgrade_url': decision.get('upgrade_url')
-            }), 402
+            }), 429
     except Exception as _e:
         logging.exception("download entitlement check failed: %s", _e)
-        # Fail closed on uncertainty per SOP
-        return jsonify({'error': 'payment_required', 'feature': 'download', 'product': product}), 402
+    
+    # Payment verified - allow download
     filename = PRODUCTS.get(product)
     if not filename:
         return "Invalid product", 404
+    
+    logging.info(f"Download authorized: order={order_id} product={product} ip={request.remote_addr}")
     return send_from_directory(DOWNLOAD_DIR, filename, as_attachment=True)
 
 @app.route("/create_order", methods=["POST"])

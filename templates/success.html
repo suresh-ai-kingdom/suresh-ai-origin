@@ -1,16 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Success</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - SURESH AI ORIGIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .success-container {
+            max-width: 700px;
+            margin: 100px auto;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(0, 255, 159, 0.3);
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 255, 159, 0.2);
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .success-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00FF9F, #00D9FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        .download-button {
+            display: inline-block;
+            margin: 30px 0;
+            padding: 20px 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF006E, #8338EC);
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(255, 0, 110, 0.4);
+        }
+        .download-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(255, 0, 110, 0.6);
+        }
+        .order-details {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            text-align: left;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .next-steps {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(131, 56, 236, 0.1);
+            border-radius: 15px;
+            text-align: left;
+        }
+        .next-steps li {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+        .warning-box {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 0, 110, 0.1);
+            border: 1px solid rgba(255, 0, 110, 0.3);
+            border-radius: 15px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-  <h2>Payment Successful 🎉</h2>
-  <p>Your download will start shortly...</p>
+    <div class="success-container">
+        {% if order_verified %}
+            <div class="success-icon">🎉</div>
+            <h1 class="success-title">Payment Successful!</h1>
+            <p style="font-size: 1.2rem; color: #00FF9F;">Your order has been confirmed and processed.</p>
 
-  <script>
-    setTimeout(() => {
-      window.location.href = "/download/{{ product }}";
-    }, 2000);
-  </script>
+            <div class="order-details">
+                <div class="detail-row">
+                    <span><strong>Product:</strong></span>
+                    <span>{{ product|title }} Pack</span>
+                </div>
+                {% if order_id %}
+                <div class="detail-row">
+                    <span><strong>Order ID:</strong></span>
+                    <span>{{ order_id }}</span>
+                </div>
+                {% endif %}
+                {% if payment_id %}
+                <div class="detail-row">
+                    <span><strong>Payment ID:</strong></span>
+                    <span>{{ payment_id }}</span>
+                </div>
+                {% endif %}
+                <div class="detail-row">
+                    <span><strong>Status:</strong></span>
+                    <span style="color: #00FF9F;">✅ Paid</span>
+                </div>
+            </div>
+
+            <a href="/download/{{ product }}?order_id={{ order_id }}" class="download-button">
+                ⬇️ Download Your Pack Now
+            </a>
+
+            <div class="next-steps">
+                <h3 style="color: #8338EC;">📋 What's Next?</h3>
+                <ul>
+                    <li>✅ Download your pack using the button above</li>
+                    <li>✅ Extract the ZIP file to access all content</li>
+                    <li>✅ Join our VIP community for updates</li>
+                    <li>✅ Check your email for receipt and support info</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <a href="/" style="color: #00D9FF; text-decoration: none;">← Back to Homepage</a> |
+                <a href="/admin/referrals" style="color: #00D9FF; text-decoration: none;">Earn Referral Commission →</a>
+            </div>
+        {% else %}
+            <div class="warning-box">
+                <h2 style="color: #FF006E;">⚠️ Payment Not Verified</h2>
+                <p>We couldn't verify your payment. This could mean:</p>
+                <ul style="text-align: left; margin: 20px auto; max-width: 400px;">
+                    <li>Payment is still processing</li>
+                    <li>Payment was cancelled</li>
+                    <li>Invalid access to this page</li>
+                </ul>
+                <p style="margin-top: 20px;">
+                    <a href="/#products" class="download-button">Try Again</a>
+                </p>
+                <p style="margin-top: 20px; font-size: 0.9rem; color: #888;">
+                    If you completed payment, please wait a few minutes and check your email.<br>
+                    Contact support if issues persist.
+                </p>
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>
