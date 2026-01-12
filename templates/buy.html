@@ -77,6 +77,70 @@
 </head>
 <body>
     <div class="checkout-container">
+        {% if not razorpay_key_id %}
+        <!-- Configuration Missing -->
+        <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
+            <h1 style="color: #FF006E; margin-bottom: 20px;">Payment Gateway Not Configured</h1>
+            
+            <div style="background: rgba(255, 0, 110, 0.1); border: 2px solid rgba(255, 0, 110, 0.3); border-radius: 15px; padding: 30px; margin: 30px 0; text-align: left;">
+                <h3 style="color: #FF006E; margin-top: 0;">Your Razorpay keys are missing from Render!</h3>
+                
+                <p><strong>📋 Complete these steps to enable payments:</strong></p>
+                
+                <ol style="font-size: 1.1rem; line-height: 2;">
+                    <li>
+                        <strong>Go to Razorpay Dashboard:</strong><br>
+                        👉 <a href="https://dashboard.razorpay.com/" target="_blank" style="color: #00D9FF; text-decoration: underline;">https://dashboard.razorpay.com/</a>
+                    </li>
+                    
+                    <li>
+                        <strong>Copy Your API Keys:</strong><br>
+                        Click Settings → API Keys → Copy Key ID & Key Secret
+                    </li>
+                    
+                    <li>
+                        <strong>Go to Render.com:</strong><br>
+                        👉 <a href="https://render.com/" target="_blank" style="color: #00D9FF; text-decoration: underline;">https://render.com/</a>
+                    </li>
+                    
+                    <li>
+                        <strong>Add Environment Variables:</strong><br>
+                        Click your service → Environment → Add:
+                        <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border-radius: 10px; margin: 10px 0; font-family: monospace; font-size: 0.9rem;">
+RAZORPAY_KEY_ID=rzp_test_xxxxx<br>
+RAZORPAY_KEY_SECRET=xxxxx<br>
+RAZORPAY_WEBHOOK_SECRET=xxxxx
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <strong>Save & Deploy:</strong><br>
+                        Click Save → Wait 2-5 minutes for auto-deploy
+                    </li>
+                    
+                    <li>
+                        <strong>Refresh this page:</strong><br>
+                        Press Ctrl+R and try payment again
+                    </li>
+                </ol>
+            </div>
+            
+            <div style="background: rgba(0, 255, 159, 0.1); border: 2px solid rgba(0, 255, 159, 0.3); border-radius: 15px; padding: 20px; margin: 30px 0;">
+                <strong>💡 Tip:</strong> Use test keys (rzp_test_) for development<br>
+                Switch to live keys (rzp_live_) for real payments
+            </div>
+            
+            <a href="https://dashboard.razorpay.com/" target="_blank" class="btn btn-primary" style="display: inline-block; padding: 15px 40px; margin: 20px 0; text-decoration: none; color: white;">
+                ➜ Go to Razorpay Dashboard
+            </a>
+            
+            <p style="margin-top: 30px; color: #888; font-size: 0.9rem;">
+                After setting keys in Render, refresh this page (Ctrl+R)
+            </p>
+        </div>
+        {% else %}
+        <!-- Normal Checkout (Keys are configured) -->
         <div class="product-info">
             <h1 class="product-name">{{ product|title }} Pack</h1>
             <div class="price-display" id="priceDisplay">
@@ -101,6 +165,7 @@
             <span>✅ Secure Payment Gateway</span>
             <span>✅ Instant Access</span>
         </div>
+        {% endif %}
     </div>
 
     <script>
