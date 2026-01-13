@@ -9,6 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Demo Mode Warning (shows if payment gateway not configured) -->
+    {% if not razorpay_configured %}
+    <div style="position: fixed; top: 50px; left: 50%; transform: translateX(-50%); z-index: 10000; background: linear-gradient(135deg, #FFA500, #FF4500); padding: 12px 30px; border-radius: 50px; box-shadow: 0 0 40px rgba(255, 165, 0, 0.5); animation: pulse-glow 2s ease-in-out infinite;">
+        <span style="color: #fff; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.05em;">⚠️ DEMO MODE - <a href="/admin" style="color: #fff; text-decoration: underline;">Configure Razorpay</a> to Accept Real Payments</span>
+    </div>
+    {% endif %}
+    
     <!-- AI Voice Indicator -->
     <div id="voice-indicator" style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: rgba(102, 126, 234, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 50px; padding: 10px 20px; display: none; animation: pulse-glow 2s ease-in-out infinite;">
         <span style="color: #667eea; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em;">AI SPEAKING...</span>

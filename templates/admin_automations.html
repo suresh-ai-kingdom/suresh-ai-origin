@@ -122,13 +122,17 @@
         .then(r => r.json())
         .then(data => {
           if (data.success) {
-            alert('Workflow executed: ' + data.executed + ' actions');
+            const msg = `✅ Workflow Executed Successfully!\n\nActions Taken: ${data.executed}\n\nDetails: ${JSON.stringify(data.result, null, 2)}`;
+            alert(msg);
             location.reload();
           } else {
-            alert('Error: ' + data.error);
+            alert('❌ Error: ' + data.error);
           }
         })
-        .catch(e => alert('Request failed: ' + e));
+        .catch(e => {
+          alert('❌ Request failed: ' + e);
+          console.error('Workflow error:', e);
+        });
       }
     }
   </script>

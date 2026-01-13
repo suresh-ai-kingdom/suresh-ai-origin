@@ -425,7 +425,8 @@ if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    razorpay_configured = bool(razorpay_client and RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET)
+    return render_template("index.html", razorpay_configured=razorpay_configured)
 
 @app.route("/services")
 def services():
