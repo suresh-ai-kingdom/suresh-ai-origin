@@ -4,6 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    initBackgroundTextCarousel();
     initCursorTrail();
     initCustomCursor();
     init3DCardTilt();
@@ -13,6 +14,31 @@ document.addEventListener('DOMContentLoaded', function() {
     initHolographicText();
     initScanlines();
 });
+
+/**
+ * Background Text Carousel - Rare 1% Feature
+ */
+function initBackgroundTextCarousel() {
+    const texts = [
+        "SURESH AI ORIGIN · AI MASTERY & AUTOMATION PLATFORM · FOUNDED 2024",
+        "EMAIL NOTIFICATIONS · ORDER TRACKING · COUPON SYSTEM · ANALYTICS DASHBOARD",
+        "CUSTOMER INTELLIGENCE · ABANDONED RECOVERY · SUBSCRIPTIONS · REFERRAL PROGRAM",
+        "AI CONTENT GENERATION · PREDICTIVE ANALYTICS · GROWTH AUTOMATION · 24/7 SUPPORT",
+        "TOP 1% PREMIUM PLATFORM · INFINITE POSSIBILITIES · FUTURE STARTS NOW"
+    ];
+    
+    const carousel = document.createElement('div');
+    carousel.className = 'bg-text-carousel';
+    
+    texts.forEach((text, index) => {
+        const item = document.createElement('div');
+        item.className = 'bg-text-item';
+        item.textContent = text;
+        carousel.appendChild(item);
+    });
+    
+    document.body.appendChild(carousel);
+}
 
 /**
  * Cursor Trail Effect
