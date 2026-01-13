@@ -8,7 +8,8 @@
 
 **Critical Production Context:**
 -  **LIVE KEYS:** Razorpay keys are LIVE (real $ flowing). Keys rotated 1/13/2026 after GitHub exposure.
--  **REAL AI:** Gemini 2.5 Flash (not demo). 60 req/min quota, called via eal_ai_service.py.
+-  **REAL AI:** Gemini 2.5 Flash (not demo). 60 req/min quota, called via 
+eal_ai_service.py.
 -  **SECRETS:** Never commit .env with real keys. Use Render environment only.
 - **Webhook Flow:** Payment  `/webhook` handler  Order marked paid  Email  Download link.
 
@@ -22,6 +23,10 @@ FLASK_DEBUG=1 python app.py         # http://localhost:5000
 # Migrations
 PYTHONPATH=. alembic upgrade head    # Apply DB migrations
 python scripts/seed_demo.py seed     # Populate test data
+
+# Database backups
+python scripts/backup_db.py create   # Create timestamped backup
+python scripts/backup_db.py restore  # Restore most recent
 
 # Tests
 pytest -q                             # Run all (365+ tests)
@@ -108,10 +113,12 @@ def test_webhook(client, monkeypatch):
 ## Code Conventions
 
 - **Routes:** `/api/<feature>/<action>` (REST-ish) or `/admin/<feature>` (HTML dashboards)
-- **Feature flags:** `get_flag('feature_name')`  checks `FLAG_FEATURE_NAME` env var
+- **Content negotiation:** `/order/<id>` returns HTML (browser) or JSON (API with Accept header)
+- **Feature flags:** `get_flag('feature_name')` → checks `FLAG_FEATURE_NAME` env var
 - **Admin protection:** All admin routes check `session.get('admin_logged_in')`; decorator pattern available
 - **Error handling:** Flask error handlers (`@app.errorhandler(404)`) + custom exceptions where needed
 - **Logging:** Structured logs with `request_id` (via Flask `g`) for tracing across feature engines
+- **Email:** Best-effort, non-blocking; uses HTML templates from `templates/email_*.html`
 
 ## Environment Variables (Render Dashboard Only — NEVER .env in git)
 
