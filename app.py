@@ -5124,24 +5124,6 @@ def ai_playground():
                          ai_model=status['model'])
 
 
-@app.route('/api/ai/generate', methods=['POST'])
-def api_ai_generate():
-    """Generate AI response from prompt."""
-    try:
-        from real_ai_service import generate_ai_content
-        data = request.get_json() or {}
-        prompt = data.get('prompt', '')
-        
-        if not prompt:
-            return jsonify({'error': 'Prompt required'}), 400
-        
-        response = generate_ai_content(prompt)
-        return jsonify({'response': response, 'success': True}), 200
-    except Exception as e:
-        logging.error(f"AI generate error: {e}")
-        return jsonify({'error': str(e), 'success': False}), 500
-
-
 @app.route('/api/ai/chat', methods=['POST'])
 def api_ai_chat():
     """AI chat endpoint."""
