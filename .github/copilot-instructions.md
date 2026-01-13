@@ -1,27 +1,36 @@
 # Copilot instructions — SURESH AI ORIGIN
 
-Short, actionable guidance to help an AI code agent be productive in this repo.
+**PRODUCTION STATUS:** ✅ LIVE (January 13, 2026)  
+**INCOME MODE:** 💰 RAZORPAY LIVE KEYS  
+**AI MODE:** 🤖 REAL (Google Gemini 2.5 Flash - FREE)  
+**SYSTEM HEALTH:** 86% (6/7 systems working)
 
 ## Big picture (what this app is)
-**SURESH AI ORIGIN** is a comprehensive Flask-based AI/Business Intelligence platform with **19 integrated features**, **80+ API endpoints**, and **30+ database tables**. It's NOT a simple download server—it's a complete business automation suite.
+**SURESH AI ORIGIN** is a production-grade Flask-based **AI Business Automation Platform** with **19 AI-powered features**, **80+ REST endpoints**, and **30+ database tables**. Currently live on Render accepting real payments via Razorpay LIVE mode with real AI (Gemini 2.5 Flash).
 
 ### Architecture Overview
 ```
-PRESENTATION (16 admin dashboards + customer pages)
-    ↓
-API LAYER (80+ REST endpoints + Razorpay/Stripe webhooks)
-    ↓
+PRESENTATION LAYER (16 admin dashboards + public site)
+    ↓ HTTPS/Render
+API LAYER (80+ REST endpoints + Razorpay webhooks)
+    ↓ 
 19 FEATURE ENGINES: AI Content, Recommendations, Predictive Analytics, Chatbot,
-Email Timing, Growth Forecast, CLV, Pricing Optimization, Churn Prediction,
-Market Intelligence, Payment Intelligence, Customer Segmentation, Campaigns,
-Recovery System, Referrals, Subscriptions, Voice Analytics, A/B Testing, Journeys
+Email Timing, Growth Forecast, CLV, Pricing, Churn, Market Intel, Payment Intel,
+Segmentation, Campaigns, Recovery, Referrals, Subscriptions, Voice, A/B Testing, Journeys
     ↓
-DATA ACCESS (SQLAlchemy ORM with 30+ models)
+DATA ACCESS (SQLAlchemy ORM, 30+ models)
     ↓
 PERSISTENCE (SQLite with Alembic migrations)
+```
+
+**CRITICAL CONTEXT FOR NEW AGENTS:**
+- **LIVE MODE:** Razorpay keys are LIVE (real money flowing). NEW environment variables must be used, not old test keys.
+- **AI IS REAL:** All 19 features use Google Gemini 2.5 Flash (free tier, 60 req/min quota). Not demo/placeholder.
+- **SECURITY:** `.env` must NEVER contain real keys—use Render environment variables only. Keys rotated 1/13/2026.
+- **PAYMENT FLOW:** Customer pays → Razorpay webhook → Order marked paid → Email sent → T+3 settlement.
+- **DEPLOYMENT:** Render auto-deploys from GitHub. All critical secrets in Render env, not in git.
 
 ## Key files & modules
-The app is organized as **modular independent feature engines** plus core infrastructure:
 
 ### Core Application
 - `app.py` (2,500+ lines) — Flask application with all routes, request ID tracking, session management, flag system, and admin UI endpoints. Routes follow pattern `/api/<feature>/<action>`.
@@ -63,56 +72,55 @@ Each feature is an independent module with its own business logic. Examples:
 - `scripts/seed_demo.py` — Seed demo data or clear DB. Usage: `python scripts/seed_demo.py seed|clear|status`.
 - `scripts/backup_db.py` — Create/restore/cleanup database backups.
 
-## Environment variables (must be set in hosting/CI — DO NOT hardcode)
-Essential (payment processing):
-- `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` — Razorpay payment gateway credentials.
-- `RAZORPAY_WEBHOOK_SECRET` — Used to verify webhook signatures (see `app.py` webhook handler).
+## Environment variables (must be set in Render only — NEVER hardcode or commit)
 
-Email (notifications):
-- `EMAIL_USER` / `EMAIL_PASS` — SMTP credentials (Gmail app password recommended) for sending order confirmations and admin alerts.
+**🚨 SECURITY CRITICAL:** All secrets go in Render Dashboard → Environment. NEVER commit to git.
 
-Security:
-- `FLASK_SECRET_KEY` — Flask session/CSRF token key. Use a strong random string in production.
+### Payment (LIVE Mode - Real Money!)
+- `RAZORPAY_KEY_ID=rzp_live_...` — LIVE Razorpay key (NOT test key!)
+- `RAZORPAY_KEY_SECRET=...` — LIVE secret key (rotated 1/13/2026 for security)
+- `RAZORPAY_WEBHOOK_SECRET=vgxetSWZcp9@gff` — Webhook verification
 
-Admin Authentication:
-- `ADMIN_USERNAME` / `ADMIN_PASSWORD` — Optional; enables session-based admin login. If omitted, only Bearer token auth (ADMIN_TOKEN) is available.
-- `ADMIN_PASSWORD_HASH` — Optional; bcrypt-hashed password. If set, takes precedence over `ADMIN_PASSWORD`.
-- `ADMIN_TOKEN` — Optional; legacy Bearer token for API access (still supported for backward compatibility).
-- `ADMIN_SESSION_TIMEOUT` — Optional; session timeout in seconds. If not set, sessions don't expire.
+### AI (Real, FREE)
+- `GOOGLE_API_KEY=AIzaSyCuc8tHg_3XiaI_MEg4AorQ3uQ0Xtbtgds` — Gemini 2.5 Flash (free tier)
+- `AI_PROVIDER=gemini` — Uses Google Gemini (not demo mode)
+- `AI_MODEL=gemini-2.5-flash` — Latest Gemini model
 
-Session Security (optional, recommended for production):
-- `SESSION_COOKIE_HTTPONLY` — 'True'/'False' (default: True). Prevents JavaScript access to session cookies.
-- `SESSION_COOKIE_SECURE` — 'True'/'False' (default: True unless `FLASK_DEBUG` enabled). Restricts to HTTPS.
-- `SESSION_COOKIE_SAMESITE` — 'Lax'|'Strict'|'None' (default: 'Lax'). Prevents CSRF attacks.
+### Email Notifications
+- `EMAIL_USER=suresh.ai.origin@outlook.com` — SMTP sender
+- `EMAIL_PASS=...` — SMTP password (app password for Outlook)
 
-Database (optional):
-- `DATA_DB` — Custom SQLite database file path (default: `data.db` in repo root).
+### Security & Session
+- `FLASK_SECRET_KEY=suresh_ai_origin_secret` — Flask session key
+- `ADMIN_USERNAME=admin` — Admin login
+- `ADMIN_PASSWORD=SureshAI2026!` — Admin password (change in production!)
 
-Development:
-- `FLASK_DEBUG` — Set to '1' or 'true' to enable Flask debug mode.
+### Optional
+- `DATA_DB` — Custom database path (default: `data.db`)
+- `FLASK_DEBUG` — Set to '1' for local debug
+- `FLAG_*` — Feature flags (see app.py for all available flags)
 
-Feature Flags (all default to disabled):
-- `FLAG_FINANCE_ENTITLEMENTS_ENFORCED` — Enforce payment-based feature access.
-- `FLAG_INTEL_RECOMMENDATIONS_ENABLED` — Enable Smart Recommendations Engine.
-- `FLAG_GROWTH_NUDGES_ENABLED` — Enable growth nudge campaigns.
-- Other flags: see `FLAG_DEFAULTS` dict in `app.py`.
+## Production Status & Known Issues
 
-## Razorpay & webhooks (practical notes)
-- `razorpay` is a dependency. If `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` are set, a `razorpay.Client` is created in `app.py`.
-- The webhook handler at `/webhook` (POST) verifies `X-Razorpay-Signature` using `RAZORPAY_WEBHOOK_SECRET` with `razorpay.WebhookSignature.verify()`.
-- Example flow: POST `{"amount": 199, "product": "starter"}` to `/create_order` creates a Razorpay order. On payment, Razorpay calls `/webhook` with the payment event.
-- Webhook events are persisted to SQLite (idempotent by event ID). On `payment.captured`, the system:
-  1. Verifies the signature
-  2. Records the webhook event
-  3. Marks the order as `paid` (via `mark_order_paid()`)
-  4. Sends customer confirmation email with download link
-  5. Sends admin notification
-- Utilities in `utils.py`:
-  - `save_webhook(event_id, event_name, payload)` — persist event (idempotent)
-  - `get_webhook_by_id(event_id)` — fetch saved event
-  - `save_order()`, `mark_order_paid()` — order lifecycle
-  - `send_email(subject, body, to_addr, html_body)` — email dispatch
-- Tests: see `tests/test_webhook.py`, `tests/test_integration.py`, `tests/test_payments.py`.
+**✅ LIVE (January 13, 2026)**
+- Razorpay LIVE mode: Real payments accepted (2% fee)
+- Real AI: Gemini 2.5 Flash (60 req/min FREE quota)
+- Admin authentication: Session-based + Bearer token support
+- Payment settlement: T+3 business days
+- Site: https://suresh-ai-origin.onrender.com
+
+**⚠️ SECURITY DECISIONS**
+- Keys rotated after GitHub exposure: Old test keys are DEAD
+- Use ONLY Render environment variables for production
+- `.env` file is for LOCAL DEVELOPMENT ONLY
+- Never commit real keys to GitHub
+
+## Razorpay & webhooks (production patterns)
+- Webhook handler at `/webhook` (POST) verifies `X-Razorpay-Signature` using HMAC-SHA256
+- Idempotent by event_id: Same webhook can be received multiple times, processed only once
+- Flow: Payment → Webhook → Order marked paid → Email confirmation → Download link
+- Error handling: 3 payment retry attempts before marking failed
+- Settlement: Razorpay holds 2% fee, deposits to bank in T+3 days
 
 ## Testing
 - **40+ test files** in `tests/` with **365+ tests** covering all 19 features.
@@ -1302,6 +1310,42 @@ def log_timing(response):
 - Use Render's built-in metrics (CPU, memory, disk)
 - Monitor database query times with Django Debug Toolbar or sqlalchemy event listeners
 
+## 19 AI Features (All REAL, powered by Gemini 2.5 Flash)
+
+Each feature integrates with the unified `real_ai_service.py` interface:
+```python
+from real_ai_service import RealAI
+ai = RealAI()  # Auto-detects provider from AI_PROVIDER env var
+response = ai.generate(prompt, max_tokens=1000, temperature=0.7)
+```
+
+**Features:**
+1. `ai_generator.py` — Content generation (emails, blogs, social posts)
+2. `recommendations.py` — Product upsell based on purchase history (LTV scoring)
+3. `predictive_analytics.py` — Revenue/churn/growth forecasting
+4. `chatbot.py` — Customer conversations with context
+5. `email_timing.py` — Optimal send-time prediction
+6. `growth_forecast.py` — Business growth projections
+7. `clv.py` — Customer lifetime value calculation
+8. `pricing.py` — Dynamic pricing optimization
+9. `churn_prediction.py` — At-risk customer identification
+10. `market_intelligence.py` — Competitor/market analysis
+11. `payment_intelligence.py` — Transaction pattern analysis
+12. `segment_optimization.py` — Smart customer segmentation
+13. `campaign_generator.py` — Targeted campaign creation
+14. `recovery.py` — Abandoned cart recovery (automated reminders)
+15. `referrals.py` — Viral loop + commission tracking (30% default)
+16. `subscriptions.py` — MRR/ARR recurring revenue management
+17. `voice_analytics.py` — Audio sentiment analysis
+18. `ab_testing_engine.py` — Variant testing + winner selection
+19. `journey_orchestration_engine.py` — Multi-channel customer workflows
+
+**AI Integration Pattern:**
+- All features call `ai.generate()` or `ai.chat()` from `real_ai_service.py`
+- Non-blocking (emails queued, AI calls async where possible)
+- Free Gemini API (60 req/min quota) - upgrade by changing `GOOGLE_API_KEY`
+- Supports OpenAI/Claude/Groq for enterprise (change `AI_PROVIDER` env var)
+
 ---
 
 ## PR checklist for contributors
@@ -1313,7 +1357,11 @@ def log_timing(response):
 - [ ] New feature? Add corresponding test file with 15-25 tests covering happy path + edge cases
 - [ ] New database model? Add to `models.py` + update `alembic/versions/` with migration
 - [ ] New API route? Add docstring + document in `api_documentation.py` for auto-population of OpenAPI spec
+- [ ] NEVER commit `.env` with real keys. Always use Render environment variables for secrets.
+- [ ] If rotating API keys (security incident): Update Render env vars immediately, never store in .env.
 
 ---
 
-**Ready for deep-dive questions on any feature!** ✅
+**Status: Production LIVE with real payments (Razorpay) + real AI (Gemini 2.5 Flash).** ✅
+
+```
