@@ -1564,6 +1564,338 @@ button {
     }
 }
 
+/* ===== 1% RARE UPGRADES ===== */
+
+/* Cursor Trail Effect */
+.cursor-trail {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.8) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 9999;
+    animation: cursor-fade 0.8s ease-out forwards;
+    will-change: transform, opacity;
+}
+
+@keyframes cursor-fade {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+}
+
+/* Custom Cursor (Premium) */
+body {
+    cursor: none;
+}
+
+.custom-cursor {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    mix-blend-mode: difference;
+    will-change: transform;
+}
+
+.custom-cursor.hover {
+    width: 48px;
+    height: 48px;
+    background: rgba(102, 126, 234, 0.1);
+    border-color: var(--accent);
+}
+
+/* Noise Grain Overlay (Film Effect) */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.03"/></svg>');
+    pointer-events: none;
+    opacity: 0.4;
+    z-index: 9998;
+    animation: grain-shift 8s steps(10) infinite;
+}
+
+@keyframes grain-shift {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-5%, -10%); }
+    50% { transform: translate(-10%, 5%); }
+    75% { transform: translate(5%, -5%); }
+}
+
+/* 3D Card Tilt Effect */
+.card-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.card-3d:hover {
+    transform: perspective(1000px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) scale(1.02);
+}
+
+.card-3d::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08), transparent 50%);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.card-3d:hover::before {
+    opacity: 1;
+}
+
+/* Holographic Text Effect */
+.text-holographic {
+    background: linear-gradient(90deg, 
+        #FF006E 0%, 
+        #8338EC 25%, 
+        #00FF9F 50%, 
+        #00D9FF 75%, 
+        #FF006E 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: holographic-shift 3s linear infinite;
+    filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
+    will-change: background-position;
+}
+
+@keyframes holographic-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+/* Magnetic Button Effect */
+.btn-magnetic {
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.btn-magnetic:hover {
+    transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
+}
+
+/* Scanline Effect (Retro Futuristic) */
+.scanline-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        transparent 50%,
+        rgba(102, 126, 234, 0.02) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 9997;
+    animation: scanline-move 8s linear infinite;
+}
+
+@keyframes scanline-move {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100%; }
+}
+
+/* Glitch Text Effect */
+.text-glitch {
+    position: relative;
+    animation: glitch-skew 2s infinite;
+}
+
+.text-glitch::before,
+.text-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.text-glitch::before {
+    left: 2px;
+    text-shadow: -2px 0 var(--primary);
+    animation: glitch-anim-1 3s infinite linear alternate-reverse;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+}
+
+.text-glitch::after {
+    left: -2px;
+    text-shadow: 2px 0 var(--accent);
+    animation: glitch-anim-2 2s infinite linear alternate-reverse;
+    clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+}
+
+@keyframes glitch-skew {
+    0%, 100% { transform: skewX(0deg); }
+    20% { transform: skewX(2deg); }
+    40% { transform: skewX(-2deg); }
+    60% { transform: skewX(1deg); }
+    80% { transform: skewX(-1deg); }
+}
+
+@keyframes glitch-anim-1 {
+    0%, 100% { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); }
+    20% { clip-path: polygon(0 10%, 100% 10%, 100% 35%, 0 35%); }
+    40% { clip-path: polygon(0 20%, 100% 20%, 100% 50%, 0 50%); }
+}
+
+@keyframes glitch-anim-2 {
+    0%, 100% { clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%); }
+    30% { clip-path: polygon(0 60%, 100% 60%, 100% 90%, 0 90%); }
+    60% { clip-path: polygon(0 70%, 100% 70%, 100% 100%, 0 100%); }
+}
+
+/* Liquid Button Effect */
+.btn-liquid {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-liquid::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-liquid:hover::before {
+    width: 300%;
+    height: 300%;
+}
+
+/* Premium Loader */
+.premium-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #000 0%, #1a0033 50%, #000 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    animation: loader-fade-out 1s ease 2.5s forwards;
+}
+
+@keyframes loader-fade-out {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.loader-ring {
+    width: 120px;
+    height: 120px;
+    border: 4px solid transparent;
+    border-top-color: var(--primary);
+    border-right-color: var(--secondary);
+    border-radius: 50%;
+    animation: loader-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+@keyframes loader-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader-text {
+    margin-top: 30px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Parallax Layer Effect */
+.parallax-layer {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.parallax-layer-1 {
+    transform: translateZ(0) translateY(calc(var(--scroll-y, 0) * -0.1px));
+}
+
+.parallax-layer-2 {
+    transform: translateZ(0) translateY(calc(var(--scroll-y, 0) * -0.2px));
+}
+
+.parallax-layer-3 {
+    transform: translateZ(0) translateY(calc(var(--scroll-y, 0) * -0.3px));
+}
+
+/* Neon Glow Text */
+.text-neon {
+    color: var(--accent);
+    text-shadow: 
+        0 0 10px rgba(0, 255, 159, 0.8),
+        0 0 20px rgba(0, 255, 159, 0.6),
+        0 0 30px rgba(0, 255, 159, 0.4),
+        0 0 40px rgba(0, 255, 159, 0.2);
+    animation: neon-flicker 4s infinite;
+}
+
+@keyframes neon-flicker {
+    0%, 100% { opacity: 1; }
+    10% { opacity: 0.95; }
+    20% { opacity: 1; }
+    30% { opacity: 0.9; }
+    40%, 80% { opacity: 1; }
+    85% { opacity: 0.95; }
+    90% { opacity: 1; }
+}
+
+/* Depth Shadow (3D) */
+.shadow-3d {
+    box-shadow: 
+        0 1px 0 rgba(102, 126, 234, 0.4),
+        0 2px 0 rgba(102, 126, 234, 0.35),
+        0 3px 0 rgba(102, 126, 234, 0.3),
+        0 4px 0 rgba(102, 126, 234, 0.25),
+        0 5px 0 rgba(102, 126, 234, 0.2),
+        0 8px 15px rgba(0, 0, 0, 0.5);
+}
+
 /* ===== RESPONSIVE ===== */
 /* ===== MOBILE RESPONSIVE (768px and below) ===== */
 @media (max-width: 768px) {
