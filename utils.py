@@ -16,10 +16,12 @@ DB_PATH = os.path.join(os.path.dirname(__file__), 'data.db')
 
 
 def _get_db_url():
-    db_path = os.getenv('DATA_DB', None)
+    """Get database URL with proper fallback to default data.db"""
+    db_path = os.getenv('DATA_DB')
     if db_path:
         return f"sqlite:///{db_path}"
-    return None
+    # Default to data.db in current directory
+    return f"sqlite:///{DB_PATH}"
 
 
 def init_db():
