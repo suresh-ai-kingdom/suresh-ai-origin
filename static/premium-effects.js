@@ -268,10 +268,34 @@ document.addEventListener('DOMContentLoaded', initNeonGlow);
  * Performance optimization - disable on mobile
  */
 if (window.innerWidth <= 768) {
-    // Disable heavy effects on mobile
+    // Disable ALL heavy effects on mobile for performance
     document.body.style.cursor = 'auto';
+    
+    // Remove cursor effects
     const cursorElements = document.querySelectorAll('.custom-cursor, .cursor-trail');
     cursorElements.forEach(el => el.remove());
+    
+    // Disable 3D tilts
+    const cards = document.querySelectorAll('.card-3d');
+    cards.forEach(card => {
+        card.classList.remove('card-3d');
+        card.style.transform = 'none';
+    });
+    
+    // Disable parallax
+    const hero = document.querySelector('.hero');
+    if (hero) hero.style.transform = 'none';
+    
+    // Remove scanlines and noise
+    const scanlines = document.querySelector('.scanline-overlay');
+    const noise = document.querySelector('.bg-text-carousel');
+    if (scanlines) scanlines.remove();
+    if (noise) noise.style.display = 'none';
+    
+    // Simplify animations
+    document.body.style.setProperty('animation', 'none');
+    
+    console.log('Mobile performance mode: Heavy effects disabled');
 }
 
 /**

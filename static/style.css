@@ -6,16 +6,19 @@
 }
 
 :root {
-    /* BREAKTHROUGH tier colors - Top 1% */
-    --primary: #FF006E;
-    --secondary: #8338EC;
-    --accent: #00FF9F;
-    --cyan: #00D9FF;
+    /* RAREST FUTURISTIC TIER - Top 0.1% */
+    --primary: #00FFFF;
+    --secondary: #FF00FF;
+    --accent: #00FF41;
+    --cyan: #00E5FF;
     --gold: #FFD700;
+    --purple: #9D00FF;
+    --electric: #39FF14;
+    --neon-pink: #FF10F0;
     --text-dark: #000000;
-    --text-light: #ffffff;
-    --bg-dark: #000000;
-    --bg-gradient: linear-gradient(135deg, #000 0%, #1a0033 50%, #000 100%);
+    --text-light: #E0E0FF;
+    --bg-dark: #0A0A0F;
+    --bg-gradient: linear-gradient(135deg, #0A0A0F 0%, #1A0033 25%, #001A33 50%, #1A0033 75%, #0A0A0F 100%);
 }
 
 html {
@@ -131,9 +134,9 @@ body::after {
 
 /* Button Animations */
 @keyframes button-press {
-    0% { transform: scale(1); box-shadow: 0 0 40px rgba(255, 0, 110, 0.4); }
+    0% { transform: scale(1); box-shadow: 0 0 40px rgba(0, 255, 255, 0.4); }
     50% { transform: scale(0.98); }
-    100% { transform: scale(1); box-shadow: 0 0 60px rgba(255, 0, 110, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 0 60px rgba(0, 255, 255, 0.6); }
 }
 
 @keyframes button-glow {
@@ -155,12 +158,12 @@ body::after {
 /* Card Animations */
 @keyframes card-lift {
     0% { transform: translateY(0) rotateX(0deg); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
-    100% { transform: translateY(-10px) rotateX(2deg); box-shadow: 0 30px 60px rgba(255, 0, 110, 0.2); }
+    100% { transform: translateY(-10px) rotateX(2deg); box-shadow: 0 30px 60px rgba(0, 255, 255, 0.3); }
 }
 
 @keyframes card-glow {
-    0%, 100% { border-color: rgba(255, 0, 110, 0.3); background: rgba(255, 0, 110, 0.03); }
-    50% { border-color: rgba(255, 0, 110, 0.6); background: rgba(255, 0, 110, 0.08); }
+    0%, 100% { border-color: rgba(0, 255, 255, 0.3); background: rgba(0, 255, 255, 0.03); }
+    50% { border-color: rgba(0, 255, 255, 0.6); background: rgba(0, 255, 255, 0.08); }
 }
 
 /* Text Reveal Animation */
@@ -204,8 +207,8 @@ body::after {
 
 /* Pulse Glow */
 @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 110, 0.7); }
-    50% { box-shadow: 0 0 0 15px rgba(255, 0, 110, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7); }
+    50% { box-shadow: 0 0 0 15px rgba(255, 0, 255, 0); }
 }
 
 /* Input Focus Glow */
@@ -238,8 +241,8 @@ body::after {
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 255, 255, 0.2);
     padding: 15px 0;
     position: sticky;
     top: 0;
@@ -420,7 +423,7 @@ body::after {
 .stat:hover {
     transform: translateY(-8px) scale(1.05);
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 15px 50px rgba(255, 0, 110, 0.4);
+    box-shadow: 0 15px 50px rgba(0, 255, 255, 0.4), 0 0 30px rgba(255, 0, 255, 0.3);
 }
 
 .stat strong {
@@ -484,7 +487,7 @@ body::after {
 .btn-primary {
     background: var(--primary);
     color: white;
-    box-shadow: 0 0 40px var(--primary);
+    box-shadow: 0 0 40px var(--primary), 0 0 20px var(--electric);
     position: relative;
     z-index: 1;
     animation: button-glow 3s ease-in-out infinite;
@@ -492,7 +495,7 @@ body::after {
 
 .btn-primary:hover {
     transform: scale(1.08) translateY(-4px);
-    box-shadow: 0 0 80px var(--primary), 0 20px 50px rgba(255, 0, 110, 0.3);
+    box-shadow: 0 0 80px var(--primary), 0 20px 50px rgba(0, 255, 255, 0.4), 0 0 40px var(--electric);
 }
 
 .btn-primary:active {
@@ -503,7 +506,7 @@ body::after {
     background: transparent;
     border: 2px solid var(--accent);
     color: var(--accent);
-    box-shadow: 0 0 20px rgba(0, 255, 159, 0.3);
+    box-shadow: 0 0 20px var(--accent), 0 0 10px var(--electric);
 }
 
 .btn-secondary:hover {
@@ -545,7 +548,7 @@ body::after {
 .trust-badges span:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(255, 0, 110, 0.3);
+    box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3), 0 0 15px var(--electric);
 }
 
 /* ===== ABOUT ME SECTION - SURESH SUNAR ===== */
@@ -599,7 +602,7 @@ body::after {
 }
 
 .about-header h2 .gradient {
-    background: linear-gradient(135deg, #FFD700, #FF006E, #8338EC);
+    background: linear-gradient(135deg, #00FFFF, #FF00FF, #00FF41, #39FF14);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -760,7 +763,7 @@ section > p {
     animation: card-lift 0.4s ease forwards;
     border-color: var(--primary);
     background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 30px 80px rgba(255, 0, 110, 0.4), 0 0 60px var(--primary);
+    box-shadow: 0 30px 80px rgba(0, 255, 255, 0.4), 0 0 60px var(--primary), 0 0 30px var(--neon-pink);
 }
 
 .feature-card:active {
@@ -852,8 +855,8 @@ section > p {
 .price-card:hover {
     animation: card-lift 0.4s ease forwards !important;
     border-color: var(--primary);
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.25), rgba(118, 75, 162, 0.25));
-    box-shadow: 0 30px 80px rgba(255, 0, 110, 0.3), 0 0 50px rgba(102, 126, 234, 0.2);
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.25), rgba(255, 0, 255, 0.25));
+    box-shadow: 0 30px 80px rgba(0, 255, 255, 0.4), 0 0 50px rgba(255, 0, 255, 0.3), 0 0 30px var(--electric);
 }
 
 .price-card .badge {
@@ -1722,18 +1725,18 @@ body::after {
 /* Holographic Text Effect */
 .text-holographic {
     background: linear-gradient(90deg, 
-        #FF006E 0%, 
-        #8338EC 25%, 
-        #00FF9F 50%, 
-        #00D9FF 75%, 
-        #FF006E 100%
+        #00FFFF 0%, 
+        #FF00FF 25%, 
+        #00FF41 50%, 
+        #39FF14 75%, 
+        #00FFFF 100%
     );
     background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: holographic-shift 3s linear infinite;
-    filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
+    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
     will-change: background-position;
 }
 
@@ -1988,7 +1991,7 @@ body::after {
     }
 
     .nav-links a:hover {
-        background: rgba(255, 0, 110, 0.1);
+        background: rgba(0, 255, 255, 0.1);
     }
 
     .btn-nav {
@@ -2034,9 +2037,9 @@ body::after {
     .stat {
         font-size: 0.85em;
         padding: 10px 12px;
-        background: rgba(255, 0, 110, 0.08);
+        background: rgba(0, 255, 255, 0.08);
         border-radius: 8px;
-        border: 1px solid rgba(255, 0, 110, 0.2);
+        border: 1px solid rgba(0, 255, 255, 0.2);
     }
 
     .stat strong {
