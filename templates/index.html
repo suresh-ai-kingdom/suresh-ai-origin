@@ -9,6 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- AI Voice Indicator -->
+    <div id="voice-indicator" style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: rgba(102, 126, 234, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 50px; padding: 10px 20px; display: none; animation: pulse-glow 2s ease-in-out infinite;">
+        <span style="color: #667eea; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em;">AI SPEAKING...</span>
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -324,6 +329,79 @@
                 }
             });
         });
+
+        // Futuristic AI Voice Welcome
+        function speakWelcome() {
+            if ('speechSynthesis' in window) {
+                // Check if user has visited before
+                const hasVisited = sessionStorage.getItem('hasVisitedSureshAI');
+                
+                if (!hasVisited) {
+                    // Wait a moment for page to load
+                    setTimeout(() => {
+                        const utterance = new SpeechSynthesisUtterance("Welcome to Suresh's AI Origin. The future starts now.");
+                        
+                        // Configure futuristic voice settings
+                        utterance.rate = 0.95;  // Slightly slower for clarity
+                        utterance.pitch = 0.8;  // Lower pitch for authority
+                        utterance.volume = 0.7; // Not too loud
+                        
+                        // Try to get a specific voice (English, preferably female for AI feel)
+                        const voices = speechSynthesis.getVoices();
+                        const preferredVoice = voices.find(voice => 
+                            voice.lang.includes('en') && 
+                            (voice.name.includes('Google') || voice.name.includes('Microsoft') || voice.name.includes('Samantha'))
+                        );
+                        
+                        if (preferredVoice) {
+                            utterance.voice = preferredVoice;
+                        }
+                        
+                        // Show indicator when speaking starts
+                        const indicator = document.getElementById('voice-indicator');
+                        utterance.onstart = function() {
+                            if (indicator) indicator.style.display = 'block';
+                        };
+                        
+                        // Hide indicator when speaking ends
+                        utterance.onend = function() {
+                            if (indicator) {
+                                setTimeout(() => {
+                                    indicator.style.display = 'none';
+                                }, 500);
+                            }
+                        };
+                        
+                        // Speak with slight delay for dramatic effect
+                        speechSynthesis.speak(utterance);
+                        
+                        // Mark as visited for this session
+                        sessionStorage.setItem('hasVisitedSureshAI', 'true');
+                    }, 800);
+                }
+            }
+        }
+
+        // Load voices and trigger welcome
+        if ('speechSynthesis' in window) {
+            // Voices load asynchronously, wait for them
+            if (speechSynthesis.getVoices().length > 0) {
+                speakWelcome();
+            } else {
+                speechSynthesis.addEventListener('voiceschanged', speakWelcome, { once: true });
+            }
+        }
+
+        // Alternative: Click-to-hear for browsers that block autoplay
+        const hero = document.querySelector('.hero');
+        if (hero && !sessionStorage.getItem('hasVisitedSureshAI')) {
+            hero.addEventListener('click', function() {
+                if ('speechSynthesis' in window && !sessionStorage.getItem('voicePlayed')) {
+                    speakWelcome();
+                    sessionStorage.setItem('voicePlayed', 'true');
+                }
+            }, { once: true });
+        }
     </script>
     <script src="{{ url_for('static', filename='animations.js') }}"></script>
 </body>
