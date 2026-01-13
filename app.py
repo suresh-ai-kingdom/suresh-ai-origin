@@ -5110,3 +5110,104 @@ if __name__ == "__main__":
     
     app.run(debug=debug_mode)
 
+
+# ==================== REAL AI INTEGRATION ROUTES ====================
+
+@app.route('/ai-playground')
+def ai_playground():
+    """AI Playground - Test all AI features in real-time."""
+    from real_ai_service import get_ai_status
+    status = get_ai_status()
+    return render_template('ai_playground.html',
+                         ai_real=status['is_real'],
+                         ai_provider=status['provider'],
+                         ai_model=status['model'])
+
+
+@app.route('/api/ai/generate', methods=['POST'])
+def api_ai_generate():
+    """Generate AI response from prompt."""
+    try:
+        from real_ai_service import generate_ai_content
+        data = request.get_json() or {}
+        prompt = data.get('prompt', '')
+        
+        if not prompt:
+            return jsonify({'error': 'Prompt required'}), 400
+        
+        response = generate_ai_content(prompt)
+        return jsonify({'response': response, 'success': True}), 200
+    except Exception as e:
+        logging.error(f"AI generate error: {e}")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+@app.route('/api/ai/chat', methods=['POST'])
+def api_ai_chat():
+    """AI chat endpoint."""
+    try:
+        from real_ai_service import ai_chat
+        data = request.get_json() or {}
+        message = data.get('message', '')
+        
+        if not message:
+            return jsonify({'error': 'Message required'}), 400
+        
+        messages = [{'role': 'user', 'content': message}]
+        response = ai_chat(messages)
+        return jsonify({'response': response, 'success': True}), 200
+    except Exception as e:
+        logging.error(f"AI chat error: {e}")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+@app.route('/api/ai/sentiment', methods=['POST'])
+def api_ai_sentiment():
+    """Analyze sentiment of text."""
+    try:
+        from real_ai_service import analyze_text_sentiment
+        data = request.get_json() or {}
+        text = data.get('text', '')
+        
+        if not text:
+            return jsonify({'error': 'Text required'}), 400
+        
+        result = analyze_text_sentiment(text)
+        return jsonify({'result': result, 'success': True}), 200
+    except Exception as e:
+        logging.error(f"AI sentiment error: {e}")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+@app.route('/api/ai/generate-content', methods=['POST'])
+def api_ai_generate_content():
+    """Generate marketing content."""
+    try:
+        from real_ai_service import create_marketing_content
+        data = request.get_json() or {}
+        content_type = data.get('type', 'email')
+        topic = data.get('topic', '')
+        tone = data.get('tone', 'professional')
+        
+        if not topic:
+            return jsonify({'error': 'Topic required'}), 400
+        
+        content = create_marketing_content(content_type, topic, tone)
+        return jsonify({'content': content, 'success': True}), 200
+    except Exception as e:
+        logging.error(f"AI content generation error: {e}")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+@app.route('/api/ai/status')
+def api_ai_status():
+    """Get AI service status."""
+    try:
+        from real_ai_service import get_ai_status, is_ai_real
+        status = get_ai_status()
+        status['real'] = is_ai_real()
+        return jsonify(status), 200
+    except Exception as e:
+        logging.error(f"AI status error: {e}")
+        return jsonify({'error': str(e)}), 500
+

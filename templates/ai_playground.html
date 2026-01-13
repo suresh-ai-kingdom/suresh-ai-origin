@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Playground - SURESH AI ORIGIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .playground-container {
+            max-width: 1400px;
+            margin: 80px auto 40px;
+            padding: 40px 20px;
+        }
+        
+        .playground-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .playground-header h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #00FFFF, #FF00FF, #00FF41);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .ai-status-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+        
+        .ai-status-badge.real {
+            background: linear-gradient(135deg, #00FF41, #39FF14);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+        }
+        
+        .ai-status-badge.demo {
+            background: linear-gradient(135deg, #FFA500, #FF4500);
+            color: #fff;
+            box-shadow: 0 0 30px rgba(255, 165, 0, 0.5);
+        }
+        
+        .playground-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .ai-tool-card {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.3);
+            border-color: var(--primary);
+        }
+        
+        .ai-tool-card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .ai-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            color: #fff;
+            font-size: 1em;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+        
+        .ai-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .ai-select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+        
+        .ai-button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-weight: 700;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px var(--primary);
+        }
+        
+        .ai-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .ai-output {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            min-height: 100px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            display: none;
+        }
+        
+        .ai-output.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-box {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-box strong {
+            display: block;
+            font-size: 2em;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 1px solid var(--primary);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="playground-container">
+        <div class="playground-header">
+            <h1>🤖 AI Playground</h1>
+            <div class="ai-status-badge {{ 'real' if ai_real else 'demo' }}">
+                {% if ai_real %}
+                    ✅ REAL AI ACTIVE - {{ ai_provider|upper }} ({{ ai_model }})
+                {% else %}
+                    🎭 DEMO MODE - Configure AI to enable real responses
+                {% endif %}
+            </div>
+            <p style="color: rgba(255,255,255,0.7); max-width: 600px; margin: 0 auto;">
+                Test all AI features in real-time. {{ 'Powered by real AI!' if ai_real else 'Using simulated responses - add API key for real AI.' }}
+            </p>
+        </div>
+        
+        {% if not ai_real %}
+        <div style="background: linear-gradient(135deg, rgba(255, 165, 0, 0.2), rgba(255, 69, 0, 0.2)); border: 2px solid #FFA500; border-radius: 20px; padding: 25px; margin-bottom: 40px; text-align: center;">
+            <h3 style="color: #FFA500; margin-bottom: 15px;">⚠️ Demo Mode Active</h3>
+            <p style="color: rgba(255,255,255,0.8); margin-bottom: 15px;">
+                Get REAL AI responses in 2 minutes! Free with Gemini.
+            </p>
+            <a href="/AI_INTEGRATION_GUIDE.md" style="color: #00FFFF; text-decoration: underline; font-weight: 600;">
+                → Read Setup Guide
+            </a>
+        </div>
+        {% endif %}
+        
+        <div class="playground-grid">
+            <!-- Content Generator -->
+            <div class="ai-tool-card">
+                <h3>📝 Content Generator</h3>
+                <select class="ai-select" id="contentType">
+                    <option value="email">Marketing Email</option>
+                    <option value="blog">Blog Post</option>
+                    <option value="social">Social Media Post</option>
+                    <option value="ad">Ad Copy</option>
+                </select>
+                <input type="text" class="ai-input" id="contentTopic" placeholder="Topic (e.g., AI automation)">
+                <select class="ai-select" id="contentTone">
+                    <option value="professional">Professional</option>
+                    <option value="casual">Casual</option>
+                    <option value="funny">Funny</option>
+                    <option value="urgent">Urgent</option>
+                </select>
+                <button class="ai-button" onclick="generateContent()">Generate Content</button>
+                <div class="ai-output" id="contentOutput"></div>
+            </div>
+            
+            <!-- AI Chatbot -->
+            <div class="ai-tool-card">
+                <h3>💬 AI Chatbot</h3>
+                <textarea class="ai-input ai-textarea" id="chatMessage" placeholder="Ask me anything..."></textarea>
+                <button class="ai-button" onclick="sendChat()">Send Message</button>
+                <div class="ai-output" id="chatOutput"></div>
+            </div>
+            
+            <!-- Sentiment Analysis -->
+            <div class="ai-tool-card">
+                <h3>😊 Sentiment Analyzer</h3>
+                <textarea class="ai-input ai-textarea" id="sentimentText" placeholder="Enter text to analyze sentiment..."></textarea>
+                <button class="ai-button" onclick="analyzeSentiment()">Analyze Sentiment</button>
+                <div class="ai-output" id="sentimentOutput"></div>
+            </div>
+            
+            <!-- Quick AI Generator -->
+            <div class="ai-tool-card">
+                <h3>⚡ Quick Generate</h3>
+                <textarea class="ai-input ai-textarea" id="quickPrompt" placeholder="Enter any prompt..."></textarea>
+                <button class="ai-button" onclick="quickGenerate()">Generate</button>
+                <div class="ai-output" id="quickOutput"></div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="/" class="back-link">← Back to Home</a>
+            <a href="/admin" class="back-link">Admin Dashboard</a>
+        </div>
+    </div>
+    
+    <script>
+        async function generateContent() {
+            const type = document.getElementById('contentType').value;
+            const topic = document.getElementById('contentTopic').value;
+            const tone = document.getElementById('contentTone').value;
+            const output = document.getElementById('contentOutput');
+            const button = event.target;
+            
+            if (!topic) {
+                alert('Please enter a topic');
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<span class="loading-spinner"></span> Generating...';
+            output.classList.add('show');
+            output.textContent = 'AI is thinking...';
+            
+            try {
+                const response = await fetch('/api/ai/generate-content', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ type, topic, tone })
+                });
+                
+                const data = await response.json();
+                output.textContent = data.content || data.error || 'No response';
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Generate Content';
+            }
+        }
+        
+        async function sendChat() {
+            const message = document.getElementById('chatMessage').value;
+            const output = document.getElementById('chatOutput');
+            const button = event.target;
+            
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<span class="loading-spinner"></span> Thinking...';
+            output.classList.add('show');
+            output.textContent = 'AI is responding...';
+            
+            try {
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                output.textContent = `You: ${message}\n\nAI: ${data.response || data.error}`;
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Send Message';
+            }
+        }
+        
+        async function analyzeSentiment() {
+            const text = document.getElementById('sentimentText').value;
+            const output = document.getElementById('sentimentOutput');
+            const button = event.target;
+            
+            if (!text) {
+                alert('Please enter text to analyze');
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<span class="loading-spinner"></span> Analyzing...';
+            output.classList.add('show');
+            output.textContent = 'AI is analyzing...';
+            
+            try {
+                const response = await fetch('/api/ai/sentiment', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text })
+                });
+                
+                const data = await response.json();
+                const result = data.result || {};
+                output.textContent = `Sentiment: ${result.sentiment || 'Unknown'}\nConfidence: ${(result.confidence || 0) * 100}%\nEmotion: ${result.emotion || 'N/A'}\n\nSummary: ${result.summary || data.error || 'No analysis'}`;
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Analyze Sentiment';
+            }
+        }
+        
+        async function quickGenerate() {
+            const prompt = document.getElementById('quickPrompt').value;
+            const output = document.getElementById('quickOutput');
+            const button = event.target;
+            
+            if (!prompt) {
+                alert('Please enter a prompt');
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<span class="loading-spinner"></span> Generating...';
+            output.classList.add('show');
+            output.textContent = 'AI is working...';
+            
+            try {
+                const response = await fetch('/api/ai/generate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ prompt })
+                });
+                
+                const data = await response.json();
+                output.textContent = data.response || data.error || 'No response';
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Generate';
+            }
+        }
+    </script>
+</body>
+</html>

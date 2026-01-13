@@ -152,6 +152,48 @@ def check_automations():
         print(f"❌ Automation Error: {e}")
         return False
 
+def check_ai_service():
+    """Check if real AI is configured."""
+    print("\n🤖 AI SERVICE STATUS")
+    print("=" * 50)
+    
+    try:
+        from real_ai_service import get_ai_status, is_ai_real
+        
+        status = get_ai_status()
+        provider = status['provider']
+        model = status['model']
+        is_real = is_ai_real()
+        
+        if is_real:
+            print(f"✅ Provider: {provider.upper()}")
+            print(f"✅ Model: {model}")
+            print(f"✅ Status: REAL AI ACTIVE")
+            
+            # Test generation
+            try:
+                from real_ai_service import generate_ai_content
+                test_response = generate_ai_content("Say hello in 5 words", max_tokens=50)
+                if len(test_response) > 0 and "DEMO" not in test_response:
+                    print(f"✅ Test Call: SUCCESS")
+                else:
+                    print(f"⚠️  Test Call: Returns demo response")
+            except Exception as e:
+                print(f"⚠️  Test Call: {e}")
+            
+            return True
+        else:
+            print(f"⚠️  Provider: {provider} (DEMO MODE)")
+            print(f"   → No real AI configured")
+            print(f"   → Get FREE Gemini API key: https://aistudio.google.com/")
+            print(f"   → Read: AI_INTEGRATION_GUIDE.md")
+            return False
+            
+    except Exception as e:
+        print(f"❌ AI Service Error: {e}")
+        print(f"   → Install: pip install openai anthropic google-generativeai groq")
+        return False
+
 def check_crypto_wallets():
     """Check if crypto wallet addresses are configured."""
     print("\n₿ CRYPTO PAYMENT STATUS")
@@ -235,6 +277,7 @@ if __name__ == '__main__':
         'admin': check_admin_auth(),
         'database': check_database(),
         'automations': check_automations(),
+        'ai_service': check_ai_service(),
         'crypto': check_crypto_wallets(),
     }
     
