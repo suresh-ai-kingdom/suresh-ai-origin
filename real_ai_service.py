@@ -7,6 +7,10 @@ import os
 import json
 import logging
 from typing import Optional, Dict, List
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Provider detection
 AI_PROVIDER = os.getenv('AI_PROVIDER', 'demo')  # openai, claude, gemini, groq, demo

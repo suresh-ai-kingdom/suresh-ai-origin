@@ -12,4 +12,8 @@ bcrypt
 werkzeug
 requests
 pyjwt
+google-generativeai
+openai
+anthropic
+groq
 
