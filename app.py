@@ -5380,3 +5380,277 @@ def get_slow_queries():
         'queries': list(SLOW_QUERY_LOG)
     }), 200
 
+
+# ================================================================================
+# WEEK 5: Multi-Channel Marketing + Mobile API + Enterprise Features
+# ================================================================================
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Multi-Channel Marketing APIs
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route('/api/campaigns', methods=['GET', 'POST'])
+def manage_campaigns():
+    """List or create email campaigns."""
+    if request.method == 'POST':
+        from campaigns import create_campaign
+        data = request.get_json()
+        result = create_campaign(
+            name=data.get('name'),
+            template_id=data.get('template'),
+            segments=data.get('segments', []),
+            schedule=data.get('schedule', 'now')
+        )
+        return jsonify(result), 201
+    
+    # GET: list campaigns (TODO: retrieve from db)
+    return jsonify({'campaigns': []}), 200
+
+
+@app.route('/api/campaigns/<campaign_id>/send', methods=['POST'])
+def send_campaign(campaign_id):
+    """Send campaign to recipients."""
+    from campaigns import send_campaign, get_campaign_analytics
+    result = send_campaign(campaign_id)
+    analytics = get_campaign_analytics(campaign_id)
+    return jsonify({'result': result, 'analytics': analytics}), 200
+
+
+@app.route('/api/campaigns/<campaign_id>/analytics', methods=['GET'])
+def campaign_analytics(campaign_id):
+    """Get campaign performance metrics."""
+    from campaigns import get_campaign_analytics
+    analytics = get_campaign_analytics(campaign_id)
+    return jsonify(analytics), 200
+
+
+@app.route('/api/campaigns/multi-channel/send', methods=['POST'])
+def send_multi_channel_campaign():
+    """Send campaign across email, SMS, WhatsApp, and push."""
+    from multi_channel_service import MultiChannelService
+    
+    data = request.get_json()
+    service = MultiChannelService()
+    
+    result = service.send_campaign_multi_channel(
+        segment_ids=data.get('segments', []),
+        channels=data.get('channels', ['email']),  # email, sms, whatsapp, push
+        campaign_data=data.get('campaign', {})
+    )
+    
+    return jsonify(result), 202
+
+
+@app.route('/api/sms/send', methods=['POST'])
+def send_sms():
+    """Send SMS message (direct)."""
+    from multi_channel_service import TwilioService
+    
+    data = request.get_json()
+    service = TwilioService()
+    result = service.send_sms(data.get('to'), data.get('message'))
+    return jsonify(result), 200
+
+
+@app.route('/api/whatsapp/send', methods=['POST'])
+def send_whatsapp():
+    """Send WhatsApp message."""
+    from multi_channel_service import TwilioService
+    
+    data = request.get_json()
+    service = TwilioService()
+    result = service.send_whatsapp(data.get('to'), data.get('message'))
+    return jsonify(result), 200
+
+
+@app.route('/api/push/subscribe', methods=['POST'])
+def subscribe_to_push():
+    """Register device for push notifications."""
+    from push_notifications import FCMService
+    
+    data = request.get_json()
+    fcm = FCMService()
+    result = fcm.subscribe_to_topic(data.get('device_token'), data.get('topic', 'general'))
+    return jsonify(result), 200
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Mobile API v2 (JWT authenticated)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route('/api/v2/auth/login', methods=['POST'])
+def mobile_login():
+    """Mobile app login - returns JWT token."""
+    from mobile_api import generate_jwt_token
+    
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    
+    # TODO: Verify credentials against database
+    user_id = 'user_123'  # Mock
+    tier = 'pro'  # Mock
+    
+    token = generate_jwt_token(user_id, tier)
+    
+    return jsonify({
+        'token': token,
+        'user_id': user_id,
+        'tier': tier,
+        'expires_in': 604800,  # 7 days
+    }), 200
+
+
+@app.route('/api/v2/auth/signup', methods=['POST'])
+def mobile_signup():
+    """Mobile app signup."""
+    from mobile_api import generate_jwt_token
+    
+    data = request.get_json()
+    # TODO: Create user account
+    user_id = 'user_' + str(uuid4())
+    token = generate_jwt_token(user_id, 'free')
+    
+    return jsonify({
+        'token': token,
+        'user_id': user_id,
+        'tier': 'free',
+    }), 201
+
+
+@app.route('/api/v2/content/prompts', methods=['GET'])
+@admin_required  # TODO: Change to mobile_auth_required
+def get_available_prompts():
+    """List available AI prompts for mobile app."""
+    return jsonify({
+        'prompts': [
+            {'id': 'blog', 'name': 'Blog Post', 'category': 'writing'},
+            {'id': 'social', 'name': 'Social Media', 'category': 'social'},
+            {'id': 'email', 'name': 'Email Subject', 'category': 'email'},
+            {'id': 'product', 'name': 'Product Description', 'category': 'ecommerce'},
+        ]
+    }), 200
+
+
+@app.route('/api/v2/sync/push', methods=['POST'])
+@admin_required  # TODO: Change to mobile_auth_required
+def sync_push_changes():
+    """Push offline changes to server."""
+    from mobile_api import SyncQueue
+    
+    data = request.get_json()
+    queue = SyncQueue()
+    
+    # TODO: Process sync items, detect conflicts
+    return jsonify({
+        'status': 'synced',
+        'synced_count': len(data.get('changes', [])),
+        'conflicts': []
+    }), 200
+
+
+@app.route('/api/v2/sync/pull', methods=['GET'])
+@admin_required  # TODO: Change to mobile_auth_required
+def sync_pull_changes():
+    """Pull remote changes for offline sync."""
+    return jsonify({
+        'changes': [],
+        'timestamp': time.time(),
+    }), 200
+
+
+@app.route('/api/v2/analytics/usage', methods=['GET'])
+@admin_required  # TODO: Change to mobile_auth_required
+def get_mobile_usage():
+    """Get user's usage statistics."""
+    return jsonify({
+        'content_generated': 42,
+        'api_calls_this_month': 250,
+        'limit': 1000,
+        'reset_date': '2026-02-01',
+    }), 200
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Enterprise Features
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route('/api/tenants', methods=['POST'])
+@admin_required
+def create_tenant():
+    """Create new tenant (organization)."""
+    from enterprise_features import TenantManager
+    
+    data = request.get_json()
+    tenant = TenantManager.create_tenant(
+        name=data.get('name'),
+        domain=data.get('domain'),
+        owner_id=session.get('user_id')
+    )
+    return jsonify(tenant), 201
+
+
+@app.route('/api/tenants/<tenant_id>/team', methods=['POST', 'GET'])
+@admin_required
+def manage_team(tenant_id):
+    """Add/list team members with roles."""
+    from enterprise_features import TeamManager
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        member = TeamManager.add_team_member(
+            tenant_id=tenant_id,
+            email=data.get('email'),
+            role=data.get('role', 'user')
+        )
+        return jsonify(member), 201
+    
+    # GET: List team members (TODO: retrieve from db)
+    return jsonify({'members': []}), 200
+
+
+@app.route('/api/tenants/<tenant_id>/branding', methods=['GET', 'PUT'])
+@admin_required
+def manage_branding(tenant_id):
+    """Get/update white-label branding."""
+    from enterprise_features import WhiteLabelManager
+    
+    if request.method == 'PUT':
+        data = request.get_json()
+        result = WhiteLabelManager.update_branding(tenant_id, data)
+        return jsonify(result), 200
+    
+    branding = WhiteLabelManager.get_branding(tenant_id)
+    return jsonify(branding), 200
+
+
+@app.route('/api/tenants/<tenant_id>/email-template', methods=['GET'])
+def get_tenant_email_template(tenant_id):
+    """Get white-labeled email template."""
+    from enterprise_features import WhiteLabelManager
+    
+    template_id = request.args.get('template', 'default')
+    template = WhiteLabelManager.get_custom_email_template(tenant_id, template_id)
+    return template, 200, {'Content-Type': 'text/html'}
+
+
+@app.route('/admin/enterprise', methods=['GET'])
+@admin_required
+def admin_enterprise_dashboard():
+    """Enterprise management dashboard."""
+    return render_template('admin_enterprise.html')
+
+
+@app.route('/admin/campaigns', methods=['GET'])
+@admin_required
+def admin_campaigns_dashboard():
+    """Multi-channel campaigns dashboard."""
+    return render_template('admin_campaigns.html')
+
+
+@app.route('/admin/mobile-api', methods=['GET'])
+@admin_required
+def admin_mobile_api_dashboard():
+    """Mobile API analytics dashboard."""
+    return render_template('admin_mobile_api.html')
+
