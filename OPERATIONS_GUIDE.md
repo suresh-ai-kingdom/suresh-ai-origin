@@ -85,6 +85,8 @@ python comprehensive_health_check.py
 - `EMAIL_PASS` - Email app password
 - `MONITOR_INTERVAL=300` - Health check interval (seconds)
 - `ALERT_EMAIL` - Alert destination email
+- `ALERT_WEBHOOK` - Slack/Discord webhook for alerts (optional)
+- `SENTRY_DSN` - Enable Sentry error tracking (optional)
 
 ---
 

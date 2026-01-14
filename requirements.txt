@@ -16,4 +16,5 @@ google-generativeai
 openai
 anthropic
 groq
+sentry-sdk
 

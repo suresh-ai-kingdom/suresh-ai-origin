@@ -11,6 +11,17 @@ import threading
 from collections import deque
 from uuid import uuid4
 
+# Optional error tracking (enabled when SENTRY_DSN is set)
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.flask import FlaskIntegration
+    SENTRY_DSN = os.getenv("SENTRY_DSN")
+    if SENTRY_DSN:
+        sentry_sdk.init(dsn=SENTRY_DSN, integrations=[FlaskIntegration()], traces_sample_rate=0.2)
+        logging.getLogger(__name__).info("✅ Sentry initialized")
+except Exception as sentry_err:  # noqa: F841
+    logging.getLogger(__name__).warning("Sentry not initialized: %s", sentry_err)
+
 # Load .env when present (development convenience). In production, the host/CI should set env vars.
 load_dotenv()
 

@@ -21,6 +21,7 @@ ALERT_EMAIL = os.getenv('ALERT_EMAIL', 'suresh.ai.origin@outlook.com')
 EMAIL_USER = os.getenv('EMAIL_USER', 'suresh.ai.origin@outlook.com')
 EMAIL_PASS = os.getenv('EMAIL_PASS')
 CHECK_INTERVAL = int(os.getenv('MONITOR_INTERVAL', '300'))  # 5 minutes default
+ALERT_WEBHOOK = os.getenv('ALERT_WEBHOOK')  # Slack/Discord webhook URL
 
 class ProductionMonitor:
     def __init__(self):
@@ -31,6 +32,21 @@ class ProductionMonitor:
     def send_alert(self, subject, message):
         """Send email alert."""
         try:
+            # Slack/Discord webhook notification
+            if ALERT_WEBHOOK:
+                try:
+                    payload = {
+                        "text": f"🚨 SURESH AI ORIGIN ALERT: {subject}\n{message}\nTime: {datetime.now()}\nURL: {PROD_URL}"
+                    }
+                    requests.post(ALERT_WEBHOOK, json=payload, timeout=5)
+                except Exception as e:
+                    print(f"⚠️  Webhook alert failed: {e}")
+
+            # Email alert (skip if creds missing)
+            if not EMAIL_PASS:
+                print("ℹ️  EMAIL_PASS not set; skipping email alert")
+                return
+
             # Check cooldown
             alert_key = subject
             now = time.time()
