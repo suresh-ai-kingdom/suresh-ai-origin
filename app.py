@@ -5249,6 +5249,77 @@ def api_ai_generate_content():
         return jsonify({'error': str(e), 'success': False}), 500
 
 
+@app.route('/api/admin/analytics-dashboard')
+@admin_required
+def api_analytics_dashboard():
+    """Get complete analytics dashboard data."""
+    try:
+        from analytics_dashboard import (
+            get_revenue_trend, get_subscription_metrics, 
+            get_customer_segmentation, get_revenue_forecast,
+            get_ab_test_results, export_report_data
+        )
+        
+        days = request.args.get('days', 30, type=int)
+        
+        # Gather all dashboard data
+        data = {
+            'revenue_trend': get_revenue_trend(days=days, granularity='daily'),
+            'subscriptions': get_subscription_metrics(),
+            'segmentation': get_customer_segmentation(),
+            'forecast': get_revenue_forecast(days_ahead=30),
+            'ab_tests': get_ab_test_results(),
+            'total_revenue': sum(t['revenue'] for t in get_revenue_trend(days=days)),
+        }
+        
+        return jsonify({'success': True, 'data': data}), 200
+    except Exception as e:
+        logger.error(f"Analytics dashboard error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/admin/analytics-dashboard')
+@admin_required
+def analytics_dashboard():
+    """Advanced analytics dashboard page."""
+    return render_template('admin_analytics_dashboard.html')
+
+
+@app.route('/api/admin/export-report')
+@admin_required
+def api_export_report():
+    """Export analytics report as JSON/CSV/PDF."""
+    try:
+        from analytics_dashboard import export_report_data
+        import csv
+        from io import StringIO, BytesIO
+        
+        days = request.args.get('days', 30, type=int)
+        fmt = request.args.get('format', 'json').lower()
+        
+        report = export_report_data(days=days)
+        
+        if fmt == 'json':
+            return jsonify(report), 200
+        
+        elif fmt == 'csv':
+            # Convert to CSV
+            output = StringIO()
+            if 'revenue_trend' in report:
+                writer = csv.DictWriter(output, fieldnames=['date', 'revenue', 'orders'])
+                writer.writeheader()
+                writer.writerows(report['revenue_trend'])
+            
+            return output.getvalue(), 200, {'Content-Type': 'text/csv'}
+        
+        else:
+            return jsonify({'error': 'Unsupported format'}), 400
+            
+    except Exception as e:
+        logger.error(f"Export report error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/ai/status')
 def api_ai_status():
     """Get AI service status."""

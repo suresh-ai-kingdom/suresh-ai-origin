@@ -1,0 +1,417 @@
+{% extends "admin.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>📊 Advanced Analytics Dashboard</h1>
+    
+    <!-- Date Range Filter -->
+    <div class="controls">
+        <input type="date" id="start-date" value="">
+        <input type="date" id="end-date" value="">
+        <button onclick="loadDashboard()">Load</button>
+        <button onclick="exportReport('pdf')">📄 PDF</button>
+        <button onclick="exportReport('csv')">📋 CSV</button>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-value" id="kpi-revenue">₹0</div>
+            <div class="kpi-trend">↑ 12% this month</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Active Subscriptions</div>
+            <div class="kpi-value" id="kpi-subscriptions">0</div>
+            <div class="kpi-trend">↑ 3 new</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Monthly Recurring Revenue</div>
+            <div class="kpi-value" id="kpi-mrr">₹0</div>
+            <div class="kpi-trend">↑ 8% growth</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Churn Rate</div>
+            <div class="kpi-value" id="kpi-churn">0%</div>
+            <div class="kpi-trend">↓ Below average</div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="charts-row">
+        <div class="chart-container">
+            <h3>Revenue Trend</h3>
+            <canvas id="revenueChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Subscription Tiers</h3>
+            <canvas id="tiersChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="charts-row">
+        <div class="chart-container">
+            <h3>Customer Segmentation</h3>
+            <canvas id="segmentationChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Revenue Forecast (30 Days)</h3>
+            <canvas id="forecastChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Customer Segments Table -->
+    <div class="section">
+        <h3>📍 Customer Segments</h3>
+        <table id="segmentsTable">
+            <thead>
+                <tr>
+                    <th>Segment</th>
+                    <th>Count</th>
+                    <th>Total Revenue</th>
+                    <th>Avg Churn Risk</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- A/B Tests -->
+    <div class="section">
+        <h3>🧪 Active A/B Tests</h3>
+        <div id="abTestsContainer"></div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="section">
+        <h3>📥 Export Report</h3>
+        <button onclick="exportReport('pdf')" class="btn btn-primary">Download PDF</button>
+        <button onclick="exportReport('csv')" class="btn btn-primary">Download CSV</button>
+        <button onclick="exportReport('json')" class="btn btn-primary">Download JSON</button>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.controls {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.controls input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.controls button {
+    padding: 8px 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.controls button:hover {
+    background: #0056b3;
+}
+
+/* KPI Cards */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.kpi-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.kpi-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 10px;
+}
+
+.kpi-value {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.kpi-trend {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Charts */
+.charts-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.chart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chart-container h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+/* Tables */
+.section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background: #f5f5f5;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+}
+
+table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+table tr:hover {
+    background: #f9f9f9;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+let revenueChart, tiersChart, segmentationChart, forecastChart;
+
+async function loadDashboard() {
+    try {
+        // Fetch analytics data
+        const response = await fetch('/api/admin/analytics-dashboard');
+        const data = await response.json();
+        
+        if (!data.success) {
+            alert('Failed to load dashboard');
+            return;
+        }
+        
+        // Update KPI cards
+        document.getElementById('kpi-revenue').textContent = 
+            `₹${data.data.total_revenue?.toLocaleString('en-IN') || 0}`;
+        document.getElementById('kpi-subscriptions').textContent = 
+            data.data.subscriptions?.active || 0;
+        document.getElementById('kpi-mrr').textContent = 
+            `₹${data.data.subscriptions?.total_mrr?.toLocaleString('en-IN') || 0}`;
+        document.getElementById('kpi-churn').textContent = 
+            `${data.data.subscriptions?.churn_rate || 0}%`;
+        
+        // Update charts
+        updateRevenueChart(data.data.revenue_trend);
+        updateTiersChart(data.data.subscriptions?.mrr_by_tier);
+        updateSegmentationChart(data.data.segmentation);
+        updateForecastChart(data.data.forecast);
+        
+        // Update segments table
+        updateSegmentsTable(data.data.segmentation);
+        
+        // Update A/B tests
+        updateABTests(data.data.ab_tests);
+        
+    } catch (error) {
+        console.error('Dashboard error:', error);
+        alert('Error loading dashboard');
+    }
+}
+
+function updateRevenueChart(data) {
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    
+    if (revenueChart) revenueChart.destroy();
+    
+    revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.date),
+            datasets: [{
+                label: 'Revenue (₹)',
+                data: data.map(d => d.revenue),
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: true } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
+
+function updateTiersChart(tiers) {
+    const ctx = document.getElementById('tiersChart').getContext('2d');
+    
+    if (tiersChart) tiersChart.destroy();
+    
+    tiersChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(tiers).map(t => t.toUpperCase()),
+            datasets: [{
+                data: Object.values(tiers),
+                backgroundColor: [
+                    '#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe', '#43e97b'
+                ]
+            }]
+        },
+        options: { responsive: true }
+    });
+}
+
+function updateSegmentationChart(segments) {
+    const ctx = document.getElementById('segmentationChart').getContext('2d');
+    
+    if (segmentationChart) segmentationChart.destroy();
+    
+    segmentationChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(segments).map(s => s.toUpperCase()),
+            datasets: [{
+                label: 'Customer Count',
+                data: Object.values(segments).map(s => s.count),
+                backgroundColor: '#667eea'
+            }]
+        },
+        options: { responsive: true }
+    });
+}
+
+function updateForecastChart(forecast) {
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+    
+    if (forecastChart) forecastChart.destroy();
+    
+    forecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: forecast.map(f => f.date),
+            datasets: [{
+                label: 'Forecast (₹)',
+                data: forecast.map(f => f.forecast),
+                borderColor: '#43e97b',
+                borderDash: [5, 5],
+                backgroundColor: 'rgba(67, 233, 123, 0.1)',
+            }]
+        },
+        options: { responsive: true }
+    });
+}
+
+function updateSegmentsTable(segments) {
+    const tbody = document.querySelector('#segmentsTable tbody');
+    tbody.innerHTML = '';
+    
+    Object.entries(segments).forEach(([name, data]) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><strong>${name.toUpperCase()}</strong></td>
+            <td>${data.count}</td>
+            <td>₹${data.revenue.toLocaleString('en-IN')}</td>
+            <td>${data.churn_risk}%</td>
+            <td><button onclick="targetSegment('${name}')" class="btn btn-primary">Target</button></td>
+        `;
+    });
+}
+
+function updateABTests(tests) {
+    const container = document.getElementById('abTestsContainer');
+    container.innerHTML = tests.tests.map(t => `
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 10px;">
+            <h4>${t.name}</h4>
+            <p><strong>Status:</strong> ${t.status}</p>
+            <table style="width: 100%; font-size: 14px;">
+                <tr>
+                    <td>${t.variant_a.name}: ${t.variant_a.rate}% (${t.variant_a.conversions}/${t.variant_a.visitors})</td>
+                    <td>${t.variant_b.name}: ${t.variant_b.rate}% (${t.variant_b.conversions}/${t.variant_b.visitors})</td>
+                </tr>
+            </table>
+            <p style="color: green;"><strong>🏆 ${t.winner}</strong></p>
+        </div>
+    `).join('');
+}
+
+function exportReport(format) {
+    alert(`Exporting as ${format.toUpperCase()}...`);
+    // TODO: Implement CSV/PDF export
+}
+
+function targetSegment(segment) {
+    alert(`Target ${segment.toUpperCase()} segment with campaign`);
+}
+
+// Load on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    document.getElementById('start-date').valueAsDate = thirtyDaysAgo;
+    document.getElementById('end-date').valueAsDate = today;
+    
+    loadDashboard();
+});
+</script>
+
+{% endblock %}
