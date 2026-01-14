@@ -410,8 +410,8 @@ TIER_SYSTEM = {
     },
     "one_percent": {
         "name": "1% Pack",
-        "price_monthly": 99999,
-        "price_yearly": 999990,
+        "price_monthly": 99000,
+        "price_yearly": 990000,
         "position": 6,
         "badge": "🚀 1% EXCLUSIVE",
         "features": ["Everything in Rarest +", "Lifetime Premium Access", "Personal AI Team", "Custom Exclusive Features", "99.99% Uptime SLA", "CEO Access", "Revenue Sharing (50%)", "Equity Discussions", "Co-dev Rights", "VIP Global Events"],
