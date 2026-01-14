@@ -36,7 +36,8 @@ def churn_retention_workflow(days_back: int = 90) -> Dict:
         from pricing import compute_dynamic_price
         from campaign_generator import generate_campaign
         
-        at_risk = get_at_risk_customers(days_back=days_back, threshold=0.7)
+        # get_at_risk_customers doesn't accept days_back, only min_risk and limit
+        at_risk = get_at_risk_customers(min_risk=50, limit=10)
         actions = []
         
         for customer in at_risk[:10]:  # limit to 10 per run

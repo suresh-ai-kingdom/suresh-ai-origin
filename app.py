@@ -87,6 +87,36 @@ def attach_request_id():
 app.after_request(set_response_request_id)
 
 
+# Slow query tracking
+SLOW_QUERY_THRESHOLD = float(os.getenv('SLOW_QUERY_THRESHOLD', '1.0'))  # seconds
+SLOW_QUERY_LOG = deque(maxlen=100)  # Keep last 100 slow queries
+
+
+@app.before_request
+def start_request_timer():
+    """Track request start time for slow query detection."""
+    g.request_start = time.time()
+
+
+@app.after_request
+def log_slow_queries(response):
+    """Log slow requests for performance monitoring."""
+    if hasattr(g, 'request_start'):
+        duration = time.time() - g.request_start
+        if duration > SLOW_QUERY_THRESHOLD:
+            slow_entry = {
+                'request_id': g.request_id,
+                'method': request.method,
+                'path': request.path,
+                'duration': f'{duration:.3f}s',
+                'status': response.status_code,
+                'timestamp': time.time(),
+            }
+            SLOW_QUERY_LOG.append(slow_entry)
+            logger.warning(f"SLOW REQUEST | {slow_entry}")
+    return response
+
+
 def audit_log(event: str, actor: str = "system", status: str = "success", reason: str = "", **extra):
     """Structured audit helper (non-silent actions)."""
     payload = {
@@ -253,6 +283,24 @@ ADMIN_KEEPALIVE_RATE_LIMIT = int(os.getenv('ADMIN_KEEPALIVE_RATE_LIMIT', '10'))
 ADMIN_KEEPALIVE_RATE_WINDOW = int(os.getenv('ADMIN_KEEPALIVE_RATE_WINDOW', '60'))
 RATE_LIMIT_STORE = {}
 RATE_LIMIT_LOCK = threading.Lock()
+
+# Slow query tracking
+SLOW_QUERY_THRESHOLD = float(os.getenv('SLOW_QUERY_THRESHOLD', '1.0'))  # 1 second default
+SLOW_QUERY_LOG = deque(maxlen=100)  # Keep last 100 slow queries
+SLOW_QUERY_LOCK = threading.Lock()
+
+def log_slow_query(query_desc: str, duration: float, params: dict = None):
+    """Log queries that exceed the slow query threshold."""
+    if duration >= SLOW_QUERY_THRESHOLD:
+        with SLOW_QUERY_LOCK:
+            SLOW_QUERY_LOG.append({
+                'query': query_desc,
+                'duration': round(duration, 3),
+                'params': params or {},
+                'timestamp': time.time(),
+                'request_id': getattr(g, 'request_id', None)
+            })
+        logger.warning(f"SLOW_QUERY | {query_desc} | {duration:.3f}s | {params or {}}")
 
 def rate_limit_keepalive(func):
     """Rate-limit wrapper for keepalive endpoint. Uses session username or csrf token as key."""
@@ -482,10 +530,19 @@ def health():
         db_status = "error"
         return jsonify({"status": "unhealthy", "database": db_status}), 503
     
+    # Include slow query stats in health check
+    slow_count = len(SLOW_QUERY_LOG)
+    recent_slow = list(SLOW_QUERY_LOG)[-5:] if SLOW_QUERY_LOG else []
+    
     return jsonify({
         "status": "healthy",
         "database": db_status,
-        "timestamp": time.time()
+        "timestamp": time.time(),
+        "slow_queries": {
+            "count": slow_count,
+            "threshold": f"{SLOW_QUERY_THRESHOLD}s",
+            "recent": recent_slow
+        }
     }), 200
 
 @app.route("/buy")
