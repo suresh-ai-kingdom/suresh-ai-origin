@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mobile SDKs & Documentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .sdk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .sdk-card { border: 2px solid #ddd; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s; }
+        .sdk-card:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2); }
+        .sdk-icon { font-size: 48px; margin-bottom: 15px; }
+        .sdk-name { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .sdk-desc { color: #666; font-size: 14px; margin-bottom: 15px; }
+        .sdk-stats { display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin: 15px 0; }
+        .stat { text-align: center; }
+        .stat-value { font-weight: 600; color: #667eea; }
+        .stat-label { font-size: 12px; color: #999; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-secondary { background: #f0f0f0; }
+        .code-block { background: #f5f5f5; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 13px; overflow-x: auto; margin: 15px 0; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; }
+        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: 600; border-bottom: 3px solid transparent; color: #666; }
+        .tab-btn.active { border-bottom-color: #667eea; color: #667eea; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Mobile SDKs & Developer Docs</h1>
+            <p>Official SDKs for Web, iOS, Android, and Python</p>
+        </div>
+
+        <!-- SDK Showcase -->
+        <div class="card">
+            <h2>Available SDKs</h2>
+            <div class="sdk-grid" style="margin-top: 20px;">
+                <!-- Web SDK -->
+                <div class="sdk-card">
+                    <div class="sdk-icon">🌐</div>
+                    <div class="sdk-name">Web SDK</div>
+                    <div class="sdk-desc">TypeScript/JavaScript for web apps</div>
+                    <div class="sdk-stats">
+                        <div class="stat">
+                            <div class="stat-value">15.4K</div>
+                            <div class="stat-label">Downloads</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">4.8★</div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="showSDKDocs('web')">View Docs</button>
+                    <button class="btn btn-secondary" onclick="installSDK('web')">Install</button>
+                </div>
+
+                <!-- iOS SDK -->
+                <div class="sdk-card">
+                    <div class="sdk-icon">🍎</div>
+                    <div class="sdk-name">iOS SDK</div>
+                    <div class="sdk-desc">Swift for iOS applications</div>
+                    <div class="sdk-stats">
+                        <div class="stat">
+                            <div class="stat-value">8.2K</div>
+                            <div class="stat-label">Downloads</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">4.9★</div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="showSDKDocs('ios')">View Docs</button>
+                    <button class="btn btn-secondary" onclick="installSDK('ios')">Install</button>
+                </div>
+
+                <!-- Android SDK -->
+                <div class="sdk-card">
+                    <div class="sdk-icon">🤖</div>
+                    <div class="sdk-name">Android SDK</div>
+                    <div class="sdk-desc">Kotlin for Android applications</div>
+                    <div class="sdk-stats">
+                        <div class="stat">
+                            <div class="stat-value">6.8K</div>
+                            <div class="stat-label">Downloads</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">4.7★</div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="showSDKDocs('android')">View Docs</button>
+                    <button class="btn btn-secondary" onclick="installSDK('android')">Install</button>
+                </div>
+
+                <!-- Python SDK -->
+                <div class="sdk-card">
+                    <div class="sdk-icon">🐍</div>
+                    <div class="sdk-name">Python SDK</div>
+                    <div class="sdk-desc">Python for backend/scripts</div>
+                    <div class="sdk-stats">
+                        <div class="stat">
+                            <div class="stat-value">12.1K</div>
+                            <div class="stat-label">Downloads</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">4.6★</div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="showSDKDocs('python')">View Docs</button>
+                    <button class="btn btn-secondary" onclick="installSDK('python')">Install</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SDK Documentation -->
+        <div class="card">
+            <h2>Documentation</h2>
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showTab('web-tab')">Web</button>
+                <button class="tab-btn" onclick="showTab('ios-tab')">iOS</button>
+                <button class="tab-btn" onclick="showTab('android-tab')">Android</button>
+                <button class="tab-btn" onclick="showTab('python-tab')">Python</button>
+            </div>
+
+            <!-- Web Tab -->
+            <div id="web-tab" class="tab-content active">
+                <h3>Web SDK - Quick Start</h3>
+                <p style="color: #666; margin: 10px 0;">Install via npm:</p>
+                <div class="code-block">npm install @suresh-ai/sdk</div>
+
+                <p style="color: #666; margin: 10px 0;">Basic usage:</p>
+                <div class="code-block">import { SureshAIClient } from '@suresh-ai/sdk';
+
+const client = new SureshAIClient({
+  baseURL: 'https://api.suresh-ai.com',
+  apiVersion: 'v2'
+});
+
+const { token } = await client.auth.login('user@example.com', 'password');
+const content = await client.content.generate({
+  prompt: 'Write a blog post',
+  templateId: 'blog_post'
+});</div>
+
+                <p style="color: #666; margin-top: 15px;">Features:</p>
+                <ul style="margin-left: 20px; color: #666;">
+                    <li>JWT Authentication</li>
+                    <li>Offline-first with IndexedDB</li>
+                    <li>Automatic sync</li>
+                    <li>Full TypeScript support</li>
+                </ul>
+            </div>
+
+            <!-- iOS Tab -->
+            <div id="ios-tab" class="tab-content">
+                <h3>iOS SDK - Quick Start</h3>
+                <p style="color: #666; margin: 10px 0;">Install via CocoaPods:</p>
+                <div class="code-block">pod 'SureshAISDK', '~> 2.0'</div>
+
+                <p style="color: #666; margin: 10px 0;">Basic usage:</p>
+                <div class="code-block">import SureshAISDK
+
+let client = SureshAIClient(
+    baseURL: "https://api.suresh-ai.com",
+    apiVersion: "v2"
+)
+
+let response = try await client.auth.login(
+    email: "user@example.com",
+    password: "password"
+)</div>
+
+                <p style="color: #666; margin-top: 15px;">Features:</p>
+                <ul style="margin-left: 20px; color: #666;">
+                    <li>Swift async/await</li>
+                    <li>CoreData offline storage</li>
+                    <li>Push notifications</li>
+                    <li>Background sync</li>
+                </ul>
+            </div>
+
+            <!-- Android Tab -->
+            <div id="android-tab" class="tab-content">
+                <h3>Android SDK - Quick Start</h3>
+                <p style="color: #666; margin: 10px 0;">Add to build.gradle:</p>
+                <div class="code-block">implementation 'com.suresh-ai:sdk:2.0.0'</div>
+
+                <p style="color: #666; margin: 10px 0;">Basic usage:</p>
+                <div class="code-block">val client = SureshAIClient.Builder()
+    .baseURL("https://api.suresh-ai.com")
+    .apiVersion("v2")
+    .build()
+
+lifecycleScope.launch {
+    val response = client.auth.login("user@example.com", "password")
+}</div>
+
+                <p style="color: #666; margin-top: 15px;">Features:</p>
+                <ul style="margin-left: 20px; color: #666;">
+                    <li>Kotlin coroutines</li>
+                    <li>Room Database persistence</li>
+                    <li>WorkManager background sync</li>
+                    <li>Push notifications</li>
+                </ul>
+            </div>
+
+            <!-- Python Tab -->
+            <div id="python-tab" class="tab-content">
+                <h3>Python SDK - Quick Start</h3>
+                <p style="color: #666; margin: 10px 0;">Install via pip:</p>
+                <div class="code-block">pip install suresh-ai-sdk</div>
+
+                <p style="color: #666; margin: 10px 0;">Basic usage:</p>
+                <div class="code-block">from suresh_ai import SureshAIClient
+
+client = SureshAIClient(
+    base_url="https://api.suresh-ai.com",
+    api_version="v2"
+)
+
+token = client.auth.login("user@example.com", "password")
+content = client.content.generate(
+    prompt="Write a blog post",
+    template_id="blog_post"
+)</div>
+
+                <p style="color: #666; margin-top: 15px;">Features:</p>
+                <ul style="margin-left: 20px; color: #666;">
+                    <li>Async/await support</li>
+                    <li>Type hints</li>
+                    <li>Batch operations</li>
+                    <li>Request retry logic</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="card">
+            <h2>📚 Getting Started</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                <div>
+                    <h3>1. Generate API Key</h3>
+                    <p style="color: #666; font-size: 14px; margin: 10px 0;">Go to Developer Portal to create your API key for authentication.</p>
+                    <button class="btn btn-secondary" onclick="alert('Go to /developer-portal to create API key')">Create Key →</button>
+                </div>
+                <div>
+                    <h3>2. Choose Your SDK</h3>
+                    <p style="color: #666; font-size: 14px; margin: 10px 0;">Select the SDK that matches your tech stack (Web, iOS, Android, Python).</p>
+                    <button class="btn btn-secondary" onclick="alert('Choose your platform from the SDKs above')">Select SDK →</button>
+                </div>
+                <div>
+                    <h3>3. Install & Configure</h3>
+                    <p style="color: #666; font-size: 14px; margin: 10px 0;">Follow the installation instructions for your chosen SDK.</p>
+                    <button class="btn btn-secondary" onclick="alert('See documentation tabs above')">View Install →</button>
+                </div>
+                <div>
+                    <h3>4. Build Your App</h3>
+                    <p style="color: #666; font-size: 14px; margin: 10px 0;">Use the SDK to build amazing applications with AI features.</p>
+                    <button class="btn btn-secondary" onclick="alert('Check out example integrations')">See Examples →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integration Gallery -->
+        <div class="card">
+            <h2>🎨 Integration Showcase</h2>
+            <p style="color: #666; margin-bottom: 20px;">Apps built with SURESH AI SDKs</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                    <h4>📝 ContentStudio</h4>
+                    <p style="font-size: 13px; color: #666;">Web app for content generation and management</p>
+                    <p style="font-size: 12px; margin-top: 8px;"><strong>Stack:</strong> React + Web SDK</p>
+                    <button class="btn btn-secondary" onclick="alert('View on marketplace')" style="width: 100%; margin-top: 10px;">View Project</button>
+                </div>
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                    <h4>🎯 SmartCampaigns</h4>
+                    <p style="font-size: 13px; color: #666;">Campaign management tool built with iOS SDK</p>
+                    <p style="font-size: 12px; margin-top: 8px;"><strong>Stack:</strong> SwiftUI + iOS SDK</p>
+                    <button class="btn btn-secondary" onclick="alert('View on App Store')" style="width: 100%; margin-top: 10px;">View App</button>
+                </div>
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                    <h4>⚙️ AIBackend</h4>
+                    <p style="font-size: 13px; color: #666;">Backend service for AI content generation</p>
+                    <p style="font-size: 12px; margin-top: 8px;"><strong>Stack:</strong> FastAPI + Python SDK</p>
+                    <button class="btn btn-secondary" onclick="alert('View source on GitHub')" style="width: 100%; margin-top: 10px;">View Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showSDKDocs(sdk) {
+            const tabs = { web: 'web-tab', ios: 'ios-tab', android: 'android-tab', python: 'python-tab' };
+            showTab(tabs[sdk]);
+            window.scrollTo({ top: 500, behavior: 'smooth' });
+        }
+
+        function installSDK(sdk) {
+            const commands = {
+                web: 'npm install @suresh-ai/sdk',
+                ios: 'pod install SureshAISDK',
+                android: 'implementation \'com.suresh-ai:sdk:2.0.0\'',
+                python: 'pip install suresh-ai-sdk'
+            };
+            alert('Install command:\n\n' + commands[sdk]);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Developer Portal & API Marketplace</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; }
+        .header h1 { font-size: 28px; margin-bottom: 5px; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: #fa709a; color: white; }
+        .btn-secondary { background: #f0f0f0; }
+        .api-key-section { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0; font-family: monospace; }
+        .integration-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .integration-card { border: 2px solid #ddd; border-radius: 8px; padding: 20px; }
+        .integration-icon { font-size: 40px; margin-bottom: 10px; }
+        .integration-name { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .integration-desc { font-size: 14px; color: #666; margin-bottom: 15px; }
+        .integration-stats { display: flex; gap: 20px; padding: 15px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; font-size: 12px; }
+        .stat { flex: 1; }
+        .stat-value { font-weight: 600; font-size: 16px; }
+        .stat-label { color: #999; margin-top: 3px; }
+        .webhook-list { margin: 15px 0; }
+        .webhook-item { background: #f5f5f5; padding: 12px; border-radius: 5px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; }
+        .webhook-url { font-family: monospace; font-size: 12px; }
+        .webhook-status { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; }
+        .status-active { background: #c8e6c9; color: #2e7d32; }
+        .status-inactive { background: #ffccbc; color: #d84315; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; }
+        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: 600; border-bottom: 3px solid transparent; color: #666; }
+        .tab-btn.active { border-bottom-color: #fa709a; color: #fa709a; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Developer Portal & API Marketplace</h1>
+            <p>Manage API Keys • Webhooks • Integrations • SDK Documentation</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="card">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showTab('dashboard')">Dashboard</button>
+                <button class="tab-btn" onclick="showTab('api-keys')">API Keys</button>
+                <button class="tab-btn" onclick="showTab('webhooks')">Webhooks</button>
+                <button class="tab-btn" onclick="showTab('integrations')">Integrations</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <h2>Developer Dashboard</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
+                        <div style="font-size: 28px; font-weight: bold;">2,451</div>
+                        <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">API Requests Today</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
+                        <div style="font-size: 28px; font-weight: bold;">3</div>
+                        <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">Active API Keys</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px;">
+                        <div style="font-size: 28px; font-weight: bold;">5</div>
+                        <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">Webhook Subscriptions</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 8px;">
+                        <div style="font-size: 28px; font-weight: bold;">2</div>
+                        <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">Published Integrations</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 30px; margin-bottom: 15px;">Quick Links</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                    <button class="btn btn-secondary" onclick="alert('API documentation')">📖 API Docs</button>
+                    <button class="btn btn-secondary" onclick="alert('SDK downloads')">📱 SDKs</button>
+                    <button class="btn btn-secondary" onclick="alert('Code examples')">💻 Examples</button>
+                    <button class="btn btn-secondary" onclick="alert('Status page')">🔔 Status</button>
+                </div>
+            </div>
+
+            <!-- API Keys Tab -->
+            <div id="api-keys" class="tab-content">
+                <h2>API Key Management</h2>
+                
+                <button class="btn btn-primary" onclick="alert('Generate new API key')" style="margin-bottom: 20px;">+ Generate New Key</button>
+
+                <h3 style="margin: 20px 0;">Your API Keys</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f5f5f5;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Name</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Key Preview</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Scopes</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Last Used</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">Production</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd; font-family: monospace; font-size: 12px;">sk_prod_****...4242</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">read, write</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">2 hours ago</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">
+                                    <button class="btn btn-secondary" onclick="alert('Revoke key')" style="padding: 5px 10px; font-size: 12px;">Revoke</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">Development</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd; font-family: monospace; font-size: 12px;">sk_dev_****...5678</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">read</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">5 minutes ago</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">
+                                    <button class="btn btn-secondary" onclick="alert('Revoke key')" style="padding: 5px 10px; font-size: 12px;">Revoke</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 style="margin: 20px 0;">API Key Security</h3>
+                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
+                    <strong>⚠️ Security Tips:</strong>
+                    <ul style="margin: 10px 0 0 20px; font-size: 14px;">
+                        <li>Never commit API keys to version control</li>
+                        <li>Rotate keys regularly (every 90 days)</li>
+                        <li>Use different keys for different environments</li>
+                        <li>Monitor key usage for unusual activity</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Webhooks Tab -->
+            <div id="webhooks" class="tab-content">
+                <h2>Webhook Management</h2>
+
+                <button class="btn btn-primary" onclick="alert('Create new webhook')" style="margin-bottom: 20px;">+ Create Webhook</button>
+
+                <h3 style="margin: 20px 0;">Webhook Subscriptions</h3>
+                <div class="webhook-list">
+                    <div class="webhook-item">
+                        <div>
+                            <div class="webhook-url">https://example.com/webhooks/content</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 3px;">Events: content.generated, content.failed</div>
+                        </div>
+                        <div>
+                            <span class="webhook-status status-active">● Active</span>
+                            <button class="btn btn-secondary" onclick="alert('Edit webhook')" style="padding: 5px 10px; font-size: 12px; margin-left: 10px;">Edit</button>
+                        </div>
+                    </div>
+                    <div class="webhook-item">
+                        <div>
+                            <div class="webhook-url">https://api.example.com/webhooks/payments</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 3px;">Events: payment.completed, payment.failed</div>
+                        </div>
+                        <div>
+                            <span class="webhook-status status-active">● Active</span>
+                            <button class="btn btn-secondary" onclick="alert('Edit webhook')" style="padding: 5px 10px; font-size: 12px; margin-left: 10px;">Edit</button>
+                        </div>
+                    </div>
+                    <div class="webhook-item">
+                        <div>
+                            <div class="webhook-url">https://test.example.com/webhooks/events</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 3px;">Events: *</div>
+                        </div>
+                        <div>
+                            <span class="webhook-status status-inactive">● Inactive</span>
+                            <button class="btn btn-secondary" onclick="alert('Edit webhook')" style="padding: 5px 10px; font-size: 12px; margin-left: 10px;">Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 20px 0;">Webhook Events Reference</h3>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                    <ul style="margin-left: 20px; font-size: 14px;">
+                        <li><strong>content.generated</strong> - Content generation completed</li>
+                        <li><strong>content.failed</strong> - Content generation failed</li>
+                        <li><strong>payment.completed</strong> - Payment captured</li>
+                        <li><strong>payment.failed</strong> - Payment failed</li>
+                        <li><strong>subscription.created</strong> - New subscription</li>
+                        <li><strong>subscription.cancelled</strong> - Subscription cancelled</li>
+                    </ul>
+                </div>
+
+                <h3 style="margin: 20px 0;">Webhook Logs</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Event</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Status</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #ddd;">content.generated</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #ddd;"><span style="color: #4caf50;">✓ Success</span></td>
+                            <td style="padding: 12px; border-bottom: 1px solid #ddd;">2 minutes ago</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #ddd;">payment.completed</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #ddd;"><span style="color: #4caf50;">✓ Success</span></td>
+                            <td style="padding: 12px; border-bottom: 1px solid #ddd;">15 minutes ago</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Integrations Tab -->
+            <div id="integrations" class="tab-content">
+                <h2>Marketplace Integrations</h2>
+
+                <button class="btn btn-primary" onclick="alert('Submit new integration')" style="margin-bottom: 20px;">+ Submit Integration</button>
+
+                <h3 style="margin: 20px 0;">Your Published Integrations</h3>
+                <div class="integration-grid">
+                    <div class="integration-card">
+                        <div class="integration-icon">📝</div>
+                        <div class="integration-name">ContentStudio</div>
+                        <div class="integration-desc">Content management and generation platform</div>
+                        <div class="integration-stats">
+                            <div class="stat">
+                                <div class="stat-value">2.3K</div>
+                                <div class="stat-label">Installs</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">4.7★</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="alert('View details')" style="width: 100%; margin-top: 10px;">View</button>
+                    </div>
+
+                    <div class="integration-card">
+                        <div class="integration-icon">🎯</div>
+                        <div class="integration-name">CampaignHelper</div>
+                        <div class="integration-desc">Marketing campaign automation tool</div>
+                        <div class="integration-stats">
+                            <div class="stat">
+                                <div class="stat-value">1.8K</div>
+                                <div class="stat-label">Installs</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">4.5★</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="alert('View details')" style="width: 100%; margin-top: 10px;">View</button>
+                    </div>
+                </div>
+
+                <h3 style="margin: 20px 0;">Featured Integrations from Community</h3>
+                <div class="integration-grid">
+                    <div class="integration-card">
+                        <div class="integration-icon">🔗</div>
+                        <div class="integration-name">Zapier Integration</div>
+                        <div class="integration-desc">Connect to 5000+ apps via Zapier</div>
+                        <div class="integration-stats">
+                            <div class="stat">
+                                <div class="stat-value">45K</div>
+                                <div class="stat-label">Installs</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">4.8★</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="alert('Install integration')" style="width: 100%; margin-top: 10px;">Install</button>
+                    </div>
+
+                    <div class="integration-card">
+                        <div class="integration-icon">💻</div>
+                        <div class="integration-name">Make Integration</div>
+                        <div class="integration-desc">Automate workflows with Make</div>
+                        <div class="integration-stats">
+                            <div class="stat">
+                                <div class="stat-value">32K</div>
+                                <div class="stat-label">Installs</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">4.6★</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="alert('Install integration')" style="width: 100%; margin-top: 10px;">Install</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
