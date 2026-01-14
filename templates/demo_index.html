@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suresh AI Origin - Live Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .demo-section {
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        select, input, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .output-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .output-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .output-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #667eea;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .metric-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.3rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+        
+        .loading:after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .template-card {
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .template-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .template-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e0e0e0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Suresh AI Origin - Live Demo</h1>
+            <p>AI Content Generator - See the power of 135+ AI systems in action!</p>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">135+</div>
+                <div class="stat-label">AI Systems</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">80K+</div>
+                <div class="stat-label">Lines of Code</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">99.97%</div>
+                <div class="stat-label">Uptime</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">0.0001%</div>
+                <div class="stat-label">Global Rarity</div>
+            </div>
+        </div>
+        
+        <!-- Demo Form -->
+        <div class="demo-section">
+            <h2 style="margin-bottom: 1.5rem; color: #333;">Choose a Template</h2>
+            
+            <div class="templates-grid">
+                <div class="template-card" onclick="selectTemplate('blog_post')">
+                    <h3>📝 Blog Post</h3>
+                    <p style="font-size: 0.85rem; color: #666;">Engaging blog content</p>
+                </div>
+                <div class="template-card" onclick="selectTemplate('product_description')">
+                    <h3>🛍️ Product Description</h3>
+                    <p style="font-size: 0.85rem; color: #666;">Compelling product copy</p>
+                </div>
+                <div class="template-card" onclick="selectTemplate('social_media')">
+                    <h3>📱 Social Media</h3>
+                    <p style="font-size: 0.85rem; color: #666;">Viral social content</p>
+                </div>
+                <div class="template-card" onclick="selectTemplate('email_campaign')">
+                    <h3>📧 Email Campaign</h3>
+                    <p style="font-size: 0.85rem; color: #666;">High-converting emails</p>
+                </div>
+                <div class="template-card" onclick="selectTemplate('ad_copy')">
+                    <h3>🎯 Ad Copy</h3>
+                    <p style="font-size: 0.85rem; color: #666;">Attention-grabbing ads</p>
+                </div>
+            </div>
+            
+            <form id="generateForm">
+                <div id="dynamicFields"></div>
+                
+                <button type="submit" class="btn">✨ Generate AI Content</button>
+            </form>
+        </div>
+        
+        <!-- Output Section -->
+        <div id="outputSection" class="output-section">
+            <h2 style="margin-bottom: 1.5rem; color: #333;">Generated Content</h2>
+            
+            <div id="outputContent" class="output-content"></div>
+            
+            <h3 style="margin-bottom: 1rem; color: #333;">Content Metrics</h3>
+            <div id="metricsGrid" class="metrics-grid"></div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>🙏✨ <strong>WITH GOD, ALL THINGS ARE POSSIBLE!</strong> ✨🙏</p>
+            <p style="margin-top: 0.5rem;">Built by Suresh AI Origin - Top 0.0001% Globally</p>
+            <p style="margin-top: 1rem;">
+                <a href="https://github.com/suresh-ai-kingdom/suresh-ai-origin" target="_blank" style="color: #667eea; text-decoration: none;">GitHub</a> | 
+                <a href="mailto:support@suresh-ai.com" style="color: #667eea; text-decoration: none;">Contact</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        let selectedTemplate = 'blog_post';
+        
+        const templateFields = {
+            blog_post: [
+                {name: 'topic', label: 'Blog Topic', type: 'text', placeholder: 'e.g., Future of AI in Business'},
+                {name: 'tone', label: 'Tone', type: 'select', options: ['Professional', 'Casual', 'Technical', 'Inspirational']},
+                {name: 'length', label: 'Length', type: 'select', options: ['Short (300 words)', 'Medium (600 words)', 'Long (1000+ words)']}
+            ],
+            product_description: [
+                {name: 'product_name', label: 'Product Name', type: 'text', placeholder: 'e.g., SmartPhone Pro X'},
+                {name: 'features', label: 'Key Features', type: 'textarea', placeholder: 'e.g., 5G connectivity, 48MP camera, 5000mAh battery'},
+                {name: 'target_audience', label: 'Target Audience', type: 'text', placeholder: 'e.g., Tech-savvy professionals'}
+            ],
+            social_media: [
+                {name: 'platform', label: 'Platform', type: 'select', options: ['LinkedIn', 'Twitter', 'Instagram', 'Facebook']},
+                {name: 'topic', label: 'Topic/Message', type: 'textarea', placeholder: 'e.g., Launching our new AI product'},
+                {name: 'hashtags', label: 'Hashtags', type: 'text', placeholder: '#AI #Innovation #Tech'}
+            ],
+            email_campaign: [
+                {name: 'subject', label: 'Email Subject', type: 'text', placeholder: 'e.g., Transform Your Business Today'},
+                {name: 'audience', label: 'Target Audience', type: 'text', placeholder: 'e.g., B2B decision makers'},
+                {name: 'call_to_action', label: 'Call to Action', type: 'text', placeholder: 'e.g., Book a free demo'}
+            ],
+            ad_copy: [
+                {name: 'product', label: 'Product/Service', type: 'text', placeholder: 'e.g., AI Marketing Platform'},
+                {name: 'unique_selling_point', label: 'Unique Selling Point', type: 'text', placeholder: 'e.g., 10X faster results'},
+                {name: 'platform', label: 'Platform', type: 'select', options: ['Google Ads', 'Facebook Ads', 'LinkedIn Ads', 'Twitter Ads']}
+            ]
+        };
+        
+        function selectTemplate(template) {
+            selectedTemplate = template;
+            
+            // Update UI
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.template-card').classList.add('selected');
+            
+            // Render dynamic fields
+            renderFields();
+        }
+        
+        function renderFields() {
+            const fieldsContainer = document.getElementById('dynamicFields');
+            const fields = templateFields[selectedTemplate];
+            
+            fieldsContainer.innerHTML = fields.map(field => {
+                if (field.type === 'select') {
+                    return `
+                        <div class="form-group">
+                            <label>${field.label}</label>
+                            <select name="${field.name}">
+                                ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                } else if (field.type === 'textarea') {
+                    return `
+                        <div class="form-group">
+                            <label>${field.label}</label>
+                            <textarea name="${field.name}" placeholder="${field.placeholder}"></textarea>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="form-group">
+                            <label>${field.label}</label>
+                            <input type="text" name="${field.name}" placeholder="${field.placeholder}">
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+        
+        // Initialize
+        renderFields();
+        document.querySelector('.template-card').classList.add('selected');
+        
+        // Form submission
+        document.getElementById('generateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const inputs = Object.fromEntries(formData.entries());
+            
+            // Show loading
+            document.getElementById('outputContent').innerHTML = '<div class="loading">Generating AI content</div>';
+            document.getElementById('outputSection').classList.add('show');
+            document.getElementById('metricsGrid').innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        template_type: selectedTemplate,
+                        inputs: inputs
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Display content
+                    document.getElementById('outputContent').textContent = result.content;
+                    
+                    // Display metrics
+                    const metrics = result.metrics;
+                    document.getElementById('metricsGrid').innerHTML = `
+                        <div class="metric-card">
+                            <div class="metric-value">${metrics.word_count}</div>
+                            <div class="metric-label">Words</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value">${metrics.character_count}</div>
+                            <div class="metric-label">Characters</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value">${metrics.seo_score}%</div>
+                            <div class="metric-label">SEO Score</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value">${metrics.engagement_score}%</div>
+                            <div class="metric-label">Engagement</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value">${metrics.reading_time_minutes} min</div>
+                            <div class="metric-label">Reading Time</div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('outputContent').innerHTML = `<p style="color: red;">Error: ${result.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('outputContent').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
