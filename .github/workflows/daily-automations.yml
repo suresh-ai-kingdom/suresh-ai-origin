@@ -32,10 +32,13 @@ jobs:
     
     steps:
       - name: Trigger Backup
+        env:
+          PROD_URL: ${{ secrets.PROD_URL }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: |
           response=$(curl -s -w "\n%{http_code}" -X POST \
-            ${{ secrets.PROD_URL }}/api/admin/trigger-backup \
-            -H "Authorization: Bearer ${{ secrets.ADMIN_TOKEN }}" \
+            "${PROD_URL}/api/admin/trigger-backup" \
+            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
             -H "Content-Type: application/json")
           
           http_code=$(echo "$response" | tail -n1)
@@ -59,10 +62,13 @@ jobs:
     
     steps:
       - name: Trigger Workflows
+        env:
+          PROD_URL: ${{ secrets.PROD_URL }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: |
           response=$(curl -s -w "\n%{http_code}" -X POST \
-            ${{ secrets.PROD_URL }}/api/admin/trigger-automations \
-            -H "Authorization: Bearer ${{ secrets.ADMIN_TOKEN }}" \
+            "${PROD_URL}/api/admin/trigger-automations" \
+            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
             -H "Content-Type: application/json")
           
           http_code=$(echo "$response" | tail -n1)
@@ -89,8 +95,10 @@ jobs:
     
     steps:
       - name: Check Production Health
+        env:
+          PROD_URL: ${{ secrets.PROD_URL }}
         run: |
-          response=$(curl -s -w "\n%{http_code}" ${{ secrets.PROD_URL }}/health)
+          response=$(curl -s -w "\n%{http_code}" "${PROD_URL}/health")
           
           http_code=$(echo "$response" | tail -n1)
           body=$(echo "$response" | head -n-1)
