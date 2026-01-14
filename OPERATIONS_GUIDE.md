@@ -27,20 +27,20 @@ curl https://suresh-ai-origin.onrender.com/health
 
 ### Database Backups
 ```bash
-# Create manual backup
-python backup_manager.py create manual
+# Manual backup
+python scripts/backup_db.py create
 
-# Create automatic backup (with cleanup)
-python backup_manager.py auto
+# List backups
+python scripts/backup_db.py list
 
-# List all backups
-python backup_manager.py list
+# Cleanup (keep N most recent)
+python scripts/backup_db.py cleanup --keep 10
 
-# Restore from backup
-python backup_manager.py restore backups/backup_manual_20260114_001418.db
+# Restore latest (confirm prompt)
+python scripts/backup_db.py restore
 
-# Clean up old backups (30+ days)
-python backup_manager.py cleanup
+# Nightly automated backup (with integrity check + cleanup)
+python scripts/nightly_backup.py
 ```
 
 ### Performance
@@ -87,6 +87,9 @@ python comprehensive_health_check.py
 - `ALERT_EMAIL` - Alert destination email
 - `ALERT_WEBHOOK` - Slack/Discord webhook for alerts (optional)
 - `SENTRY_DSN` - Enable Sentry error tracking (optional)
+- `BACKUP_KEEP=7` - How many recent backups to keep (nightly backup)
+- `BACKUP_NOTIFY_SUCCESS=false` - Send success pings for nightly backup
+- `PROJECT_NAME="SURESH AI ORIGIN"` - Label used in backup alerts
 
 ---
 
@@ -123,8 +126,8 @@ git push origin main
 # 1. Go to Events → Find previous successful deploy
 # 2. Click "Redeploy" on that event
 # OR restore database:
-python backup_manager.py list
-python backup_manager.py restore backups/[backup_file].db
+python scripts/backup_db.py list
+python scripts/backup_db.py restore --backup backups/[backup_file].db
 ```
 
 ---
@@ -134,7 +137,7 @@ python backup_manager.py restore backups/[backup_file].db
 ### Site Down (500 errors)
 1. Check Render logs: Dashboard → Logs → Last 100 lines
 2. Check health endpoint: `curl .../health`
-3. Check database: `python backup_manager.py verify`
+3. Check database: `python scripts/nightly_backup.py` (runs backup + integrity)
 4. If database corrupt: Restore from backup
 5. If code issue: Rollback deployment in Render
 
