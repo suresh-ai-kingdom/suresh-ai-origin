@@ -1,0 +1,115 @@
+name: Daily Automations
+
+on:
+  schedule:
+    # Nightly backup at 2 AM UTC (adjust for your timezone)
+    - cron: '0 2 * * *'
+    # Daily automations at 3 AM UTC
+    - cron: '0 3 * * *'
+    # Health check every 6 hours
+    - cron: '0 */6 * * *'
+  
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Task to run'
+        required: true
+        default: 'health'
+        type: choice
+        options:
+          - health
+          - backup
+          - automations
+          - all
+
+jobs:
+  nightly-backup:
+    name: Nightly Backup
+    runs-on: ubuntu-latest
+    # Run only at 2 AM or when manually triggered with 'backup' or 'all'
+    if: github.event.schedule == '0 2 * * *' || github.event.inputs.task == 'backup' || github.event.inputs.task == 'all'
+    
+    steps:
+      - name: Trigger Backup
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            ${{ secrets.PROD_URL }}/api/admin/trigger-backup \
+            -H "Authorization: Bearer ${{ secrets.ADMIN_TOKEN }}" \
+            -H "Content-Type: application/json")
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          echo "HTTP Status: $http_code"
+          echo "Response: $body"
+          
+          if [ "$http_code" != "200" ]; then
+            echo "❌ Backup failed with status $http_code"
+            exit 1
+          fi
+          
+          echo "✅ Backup completed successfully"
+
+  daily-automations:
+    name: Daily Automations
+    runs-on: ubuntu-latest
+    # Run only at 3 AM or when manually triggered with 'automations' or 'all'
+    if: github.event.schedule == '0 3 * * *' || github.event.inputs.task == 'automations' || github.event.inputs.task == 'all'
+    
+    steps:
+      - name: Trigger Workflows
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            ${{ secrets.PROD_URL }}/api/admin/trigger-automations \
+            -H "Authorization: Bearer ${{ secrets.ADMIN_TOKEN }}" \
+            -H "Content-Type: application/json")
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          echo "HTTP Status: $http_code"
+          echo "Response: $body"
+          
+          if [ "$http_code" != "200" ]; then
+            echo "❌ Automations failed with status $http_code"
+            exit 1
+          fi
+          
+          # Parse and display results
+          total=$(echo "$body" | jq -r '.total_actions // 0')
+          echo "✅ Daily automations completed: $total actions executed"
+          echo "$body" | jq '.workflows'
+
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    # Run every 6 hours or when manually triggered with 'health' or 'all'
+    if: github.event.schedule == '0 */6 * * *' || github.event.inputs.task == 'health' || github.event.inputs.task == 'all' || github.event.inputs.task == ''
+    
+    steps:
+      - name: Check Production Health
+        run: |
+          response=$(curl -s -w "\n%{http_code}" ${{ secrets.PROD_URL }}/health)
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          echo "HTTP Status: $http_code"
+          echo "Response: $body"
+          
+          if [ "$http_code" != "200" ]; then
+            echo "❌ Health check failed with status $http_code"
+            exit 1
+          fi
+          
+          status=$(echo "$body" | jq -r '.status')
+          db_status=$(echo "$body" | jq -r '.database')
+          slow_queries=$(echo "$body" | jq -r '.slow_queries.count // 0')
+          
+          echo "✅ Health: $status | Database: $db_status | Slow queries: $slow_queries"
+          
+          if [ "$status" != "healthy" ] || [ "$db_status" != "ok" ]; then
+            echo "⚠️ System unhealthy!"
+            exit 1
+          fi

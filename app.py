@@ -5261,3 +5261,51 @@ def api_ai_status():
         logging.error(f"AI status error: {e}")
         return jsonify({'error': str(e)}), 500
 
+
+# ===== AUTOMATION TRIGGERS (for external schedulers) =====
+
+@app.route('/api/admin/trigger-backup', methods=['POST'])
+@admin_required
+def trigger_backup():
+    """Trigger nightly backup workflow (for external schedulers)."""
+    try:
+        from scripts.nightly_backup import run_once
+        result = run_once()
+        if result == 0:
+            return jsonify({'success': True, 'message': 'Backup completed successfully'}), 200
+        else:
+            return jsonify({'success': False, 'error': 'Backup failed', 'exit_code': result}), 500
+    except Exception as e:
+        logger.error(f"Backup trigger error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/trigger-automations', methods=['POST'])
+@admin_required
+def trigger_automations():
+    """Trigger daily automation workflows (for external schedulers)."""
+    try:
+        from automation_workflows import execute_all_workflows
+        days_back = int(request.args.get('days_back', os.getenv('AUTOMATION_DAYS_BACK', '30')))
+        results = execute_all_workflows(days_back=days_back)
+        return jsonify({
+            'success': True,
+            'total_actions': results.get('total_actions', 0),
+            'workflows': results.get('workflows', {}),
+            'executed_at': results.get('executed_at')
+        }), 200
+    except Exception as e:
+        logger.error(f"Automations trigger error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/slow-queries')
+@admin_required
+def get_slow_queries():
+    """Get recent slow query log."""
+    return jsonify({
+        'threshold': f"{SLOW_QUERY_THRESHOLD}s",
+        'count': len(SLOW_QUERY_LOG),
+        'queries': list(SLOW_QUERY_LOG)
+    }), 200
+
