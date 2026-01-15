@@ -6747,3 +6747,369 @@ def admin_mobile_api_dashboard():
     """Mobile API analytics dashboard."""
     return render_template('admin_mobile_api.html')
 
+
+# ==================== AI EYE OBSERVER ====================
+
+@app.route('/admin/ai-eye')
+@admin_required
+def admin_ai_eye():
+    """AI Eye - Omniscient Observer Dashboard"""
+    from ai_eye_observer import observe_all_systems
+    
+    timeframe = request.args.get('timeframe', 60, type=int)
+    
+    try:
+        observations = observe_all_systems(timeframe_minutes=timeframe)
+        return render_template('admin_ai_eye.html', data=observations, timeframe=timeframe)
+    except Exception as e:
+        logging.exception("Failed to render AI Eye dashboard: %s", e)
+        return f"Internal error: {e}", 500
+
+
+@app.route('/api/ai-eye/observe', methods=['GET'])
+@admin_required
+def api_ai_eye_observe():
+    """API: Get complete system observations"""
+    from ai_eye_observer import observe_all_systems
+    
+    timeframe = request.args.get('timeframe', 60, type=int)
+    
+    try:
+        observations = observe_all_systems(timeframe_minutes=timeframe)
+        return jsonify({'success': True, 'observations': observations}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/ai-eye/live', methods=['GET'])
+@admin_required
+def api_ai_eye_live():
+    """API: Get live dashboard data (real-time snapshot)"""
+    from ai_eye_observer import get_live_dashboard_data
+    
+    try:
+        live_data = get_live_dashboard_data()
+        return jsonify({'success': True, 'live': live_data}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/ai-eye/track-user', methods=['POST'])
+def api_ai_eye_track_user():
+    """API: Track user action (for real-time observation)"""
+    from ai_eye_observer import track_user_activity
+    
+    data = request.get_json()
+    user_id = data.get('user_id')
+    action = data.get('action')
+    metadata = data.get('metadata', {})
+    
+    if not user_id or not action:
+        return jsonify({'success': False, 'error': 'user_id and action required'}), 400
+    
+    try:
+        track_user_activity(user_id, action, metadata)
+        return jsonify({'success': True, 'message': 'Activity tracked'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/ai-eye/track-payment', methods=['POST'])
+def api_ai_eye_track_payment():
+    """API: Track payment (for real-time observation)"""
+    from ai_eye_observer import track_payment
+    
+    data = request.get_json()
+    transaction_id = data.get('transaction_id')
+    payment_data = data.get('data', {})
+    
+    if not transaction_id:
+        return jsonify({'success': False, 'error': 'transaction_id required'}), 400
+    
+    try:
+        track_payment(transaction_id, payment_data)
+        return jsonify({'success': True, 'message': 'Payment tracked'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/ai-eye/create-alert', methods=['POST'])
+@admin_required
+def api_ai_eye_create_alert():
+    """API: Create system alert"""
+    from ai_eye_observer import create_system_alert
+    
+    data = request.get_json()
+    alert_type = data.get('type')
+    severity = data.get('severity')
+    message = data.get('message')
+    alert_data = data.get('data', {})
+    
+    if not all([alert_type, severity, message]):
+        return jsonify({'success': False, 'error': 'type, severity, and message required'}), 400
+    
+    try:
+        alert = create_system_alert(alert_type, severity, message, alert_data)
+        return jsonify({'success': True, 'alert': alert}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+# =============================================================================
+# ENTERPRISE SYSTEMS ROUTES
+# =============================================================================
+
+@app.route('/admin/enterprise-systems')
+@admin_required
+def admin_enterprise_systems():
+    """Enterprise Systems Dashboard"""
+    return render_template('admin_enterprise_systems.html')
+
+
+@app.route('/api/enterprise/compliance/create-policy', methods=['POST'])
+@admin_required
+def api_create_compliance_policy():
+    """API: Create compliance policy"""
+    from enterprise_systems import get_compliance_engine
+    
+    data = request.get_json()
+    policy = get_compliance_engine().create_policy(
+        data['name'],
+        data['category'],
+        data['content'],
+        data.get('effective_date', time.time()),
+        data['owner']
+    )
+    return jsonify({'success': True, 'policy': policy}), 200
+
+
+@app.route('/api/enterprise/compliance/audit', methods=['POST'])
+@admin_required
+def api_log_compliance_audit():
+    """API: Log compliance audit"""
+    from enterprise_systems import get_compliance_engine
+    
+    data = request.get_json()
+    record = get_compliance_engine().log_compliance_check(
+        data['check_type'],
+        data['status'],
+        data.get('details', {}),
+        data['auditor']
+    )
+    return jsonify({'success': True, 'record': record}), 200
+
+
+@app.route('/api/enterprise/compliance/status', methods=['GET'])
+@admin_required
+def api_compliance_status():
+    """API: Get compliance status"""
+    from enterprise_systems import get_compliance_engine
+    status = get_compliance_engine().get_compliance_status()
+    return jsonify({'success': True, 'status': status}), 200
+
+
+@app.route('/api/enterprise/governance/create-decision', methods=['POST'])
+@admin_required
+def api_create_governance_decision():
+    """API: Create business decision"""
+    from enterprise_systems import get_governance_engine
+    
+    data = request.get_json()
+    decision = get_governance_engine().create_decision(
+        data['title'],
+        data['description'],
+        data['impact'],
+        data['proposer'],
+        data.get('deadline', time.time() + 86400)
+    )
+    return jsonify({'success': True, 'decision': decision}), 200
+
+
+@app.route('/api/enterprise/governance/approve', methods=['POST'])
+@admin_required
+def api_approve_decision():
+    """API: Approve decision"""
+    from enterprise_systems import get_governance_engine
+    
+    data = request.get_json()
+    approval = get_governance_engine().approve_decision(
+        data['decision_id'],
+        data['approver'],
+        data['approval_type'],
+        data.get('comments', '')
+    )
+    return jsonify({'success': True, 'approval': approval}), 200
+
+
+@app.route('/api/enterprise/knowledge/create-article', methods=['POST'])
+def api_create_kb_article():
+    """API: Create knowledge base article"""
+    from enterprise_systems import get_knowledge_base
+    
+    data = request.get_json()
+    article = get_knowledge_base().create_article(
+        data['title'],
+        data['content'],
+        data['category'],
+        data['author'],
+        data.get('tags', [])
+    )
+    return jsonify({'success': True, 'article': article}), 200
+
+
+@app.route('/api/enterprise/knowledge/search', methods=['GET'])
+def api_search_knowledge_base():
+    """API: Search knowledge base"""
+    from enterprise_systems import get_knowledge_base
+    
+    query = request.args.get('q', '')
+    results = get_knowledge_base().search_knowledge_base(query)
+    return jsonify({'success': True, 'results': results}), 200
+
+
+@app.route('/api/enterprise/access/create-role', methods=['POST'])
+@admin_required
+def api_create_access_role():
+    """API: Create access control role"""
+    from enterprise_systems import get_access_control
+    
+    data = request.get_json()
+    role = get_access_control().create_role(
+        data['role_name'],
+        data['permissions'],
+        data['description']
+    )
+    return jsonify({'success': True, 'role': role}), 200
+
+
+@app.route('/api/enterprise/access/assign-role', methods=['POST'])
+@admin_required
+def api_assign_role():
+    """API: Assign role to user"""
+    from enterprise_systems import get_access_control
+    
+    data = request.get_json()
+    assignment = get_access_control().assign_role(
+        data['user_id'],
+        data['role_id']
+    )
+    return jsonify({'success': True, 'assignment': assignment}), 200
+
+
+@app.route('/api/enterprise/access/check-permission', methods=['POST'])
+def api_check_permission():
+    """API: Check user permission"""
+    from enterprise_systems import get_access_control
+    
+    data = request.get_json()
+    has_permission = get_access_control().check_permission(
+        data['user_id'],
+        data['permission']
+    )
+    return jsonify({'success': True, 'has_permission': has_permission}), 200
+
+
+@app.route('/api/mobile/create-api-key', methods=['POST'])
+@admin_required
+def api_create_mobile_api_key():
+    """API: Create mobile app API key"""
+    from mobile_and_global import get_mobile_api_manager
+    
+    data = request.get_json()
+    key = get_mobile_api_manager().create_api_key(
+        data['app_name'],
+        data['app_type'],
+        data['bundle_id']
+    )
+    return jsonify({'success': True, 'api_key': key}), 200
+
+
+@app.route('/api/mobile/authenticate', methods=['POST'])
+def api_authenticate_mobile_session():
+    """API: Authenticate mobile session"""
+    from mobile_and_global import get_mobile_api_manager
+    
+    data = request.get_json()
+    session = get_mobile_api_manager().authenticate_session(
+        data['api_key'],
+        data['device_id'],
+        data['user_id']
+    )
+    return jsonify({'success': True, 'session': session}), 200
+
+
+@app.route('/api/mobile/push-notification', methods=['POST'])
+@admin_required
+def api_send_push_notification():
+    """API: Send push notification"""
+    from mobile_and_global import get_mobile_api_manager
+    
+    data = request.get_json()
+    notification = get_mobile_api_manager().send_push_notification(
+        data['device_id'],
+        data['title'],
+        data['body'],
+        data.get('data', {})
+    )
+    return jsonify({'success': True, 'notification': notification}), 200
+
+
+@app.route('/api/learning/create-course', methods=['POST'])
+@admin_required
+def api_create_learning_course():
+    """API: Create learning course"""
+    from learning_system import get_learning_management_system
+    
+    data = request.get_json()
+    course = get_learning_management_system().create_course(
+        data['title'],
+        data['description'],
+        data['instructor'],
+        data['modules'],
+        data['duration_hours']
+    )
+    return jsonify({'success': True, 'course': course}), 200
+
+
+@app.route('/api/learning/enroll', methods=['POST'])
+def api_enroll_in_course():
+    """API: Enroll user in course"""
+    from learning_system import get_learning_management_system
+    
+    data = request.get_json()
+    enrollment = get_learning_management_system().enroll_user(
+        data['user_id'],
+        data['course_id']
+    )
+    return jsonify({'success': True, 'enrollment': enrollment}), 200
+
+
+@app.route('/api/learning/track-progress', methods=['POST'])
+def api_track_learning_progress():
+    """API: Track learning progress"""
+    from learning_system import get_learning_management_system
+    
+    data = request.get_json()
+    progress = get_learning_management_system().track_learning_progress(
+        data['user_id'],
+        data['course_id'],
+        data['module_id'],
+        data['completion']
+    )
+    return jsonify({'success': True, 'progress': progress}), 200
+
+
+@app.route('/api/learning/certify', methods=['POST'])
+@admin_required
+def api_issue_certification():
+    """API: Issue certification"""
+    from learning_system import get_learning_management_system
+    
+    data = request.get_json()
+    cert = get_learning_management_system().issue_certification(
+        data['user_id'],
+        data['course_id'],
+        data['score']
+    )
+    return jsonify({'success': True, 'certification': cert}), 200
+
