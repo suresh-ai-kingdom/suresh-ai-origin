@@ -3,17 +3,49 @@ venv/
 __pycache__/
 *.pyc
 *.pyo
+
+# Environment & Secrets (CRITICAL - Never commit!)
 .env
+.env.local
+.env.production
+.deployment_secrets.json
+*.pem
+*.key
+*.crt
+
+# Databases (Contains user data)
 data.db
+test_data.db
 *.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+*.log.*
+app.log
+automation.log
+deployments.log
+
+# Test & Build
 .pytest_cache/
 .coverage
 htmlcov/
 dist/
 build/
 *.egg-info/
+
+# OS Files
 .DS_Store
 Thumbs.db
-*.log
-*.log.*
+
+# Backups
 backups/
+*.backup
+*.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

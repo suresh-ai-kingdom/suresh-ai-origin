@@ -208,16 +208,98 @@ RAZORPAY_WEBHOOK_SECRET=xxxxx
         };
 
         const currentProduct = '{{ product }}';
-        const productData = products[currentProduct] || products['starter'];
+        let productData = products[currentProduct];
 
-        // Display product info
-        document.getElementById('finalPrice').textContent = productData.price;
-        const featuresList = document.getElementById('featuresList');
-        productData.features.forEach(feature => {
-            const li = document.createElement('li');
-            li.textContent = feature;
-            featuresList.appendChild(li);
-        });
+        async function loadRobotSkuIfNeeded() {
+            if (productData) return;
+            try {
+                const resp = await fetch('/api/robot-skus/' + encodeURIComponent(currentProduct) + '/quote');
+                if (!resp.ok) throw new Error('SKU not found');
+                const sku = await resp.json();
+                const price = sku.price_monthly || 0;
+                productData = {
+                    name: (sku.name || sku.sku || 'SAi Robot').toString(),
+                    price,
+                    features: [
+                        '✅ Robot version: ' + (sku.version || ''),
+                        '✅ Tier: ' + (sku.tier || ''),
+                        '✅ Mode: ' + (sku.mode || ''),
+                        '✅ EMI months: ' + (sku.emi_months || 'n/a')
+                    ]
+                };
+            } catch (e) {
+                console.error('Robot SKU load failed', e);
+                productData = products['starter'];
+            }
+        }
+
+        async function renderProduct() {
+            await loadRobotSkuIfNeeded();
+            const priceDisplay = document.getElementById('finalPrice');
+            const featuresList = document.getElementById('featuresList');
+            featuresList.innerHTML = '';
+            priceDisplay.textContent = productData.price;
+            productData.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+        }
+
+        renderProduct();
+
+        // Contact sales modal for enterprise SKUs
+        function contactSales() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+            modal.innerHTML = `
+                <div style="background:#1a1a1a;border:2px solid #00FF9F;border-radius:12px;padding:30px;max-width:500px;width:90%;">
+                    <h2 style="color:#00FF9F;margin-top:0;">Enterprise Robot Inquiry</h2>
+                    <p style="color:#fff;">This robot requires custom configuration. Fill out the form and we'll contact you within 24 hours.</p>
+                    <input type="text" id="contact_name" placeholder="Your Name" style="width:100%;padding:10px;margin:10px 0;border:1px solid #00FF9F;background:#000;color:#fff;border-radius:4px;">
+                    <input type="email" id="contact_email" placeholder="Email" required style="width:100%;padding:10px;margin:10px 0;border:1px solid #00FF9F;background:#000;color:#fff;border-radius:4px;">
+                    <input type="text" id="contact_company" placeholder="Company (Optional)" style="width:100%;padding:10px;margin:10px 0;border:1px solid #00FF9F;background:#000;color:#fff;border-radius:4px;">
+                    <textarea id="contact_message" placeholder="Tell us about your needs..." style="width:100%;padding:10px;margin:10px 0;border:1px solid #00FF9F;background:#000;color:#fff;border-radius:4px;min-height:100px;"></textarea>
+                    <div style="display:flex;gap:10px;margin-top:20px;">
+                        <button onclick="submitContactSales()" style="flex:1;padding:12px;background:#00FF9F;color:#000;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Submit</button>
+                        <button onclick="closeContactSales()" style="flex:1;padding:12px;background:#FF006E;color:#fff;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            modal.id = 'contactSalesModal';
+            document.body.appendChild(modal);
+        }
+
+        function submitContactSales() {
+            const name = document.getElementById('contact_name').value.trim();
+            const email = document.getElementById('contact_email').value.trim();
+            const company = document.getElementById('contact_company').value.trim();
+            const message = document.getElementById('contact_message').value.trim();
+            if (!email) {
+                alert('Email is required');
+                return;
+            }
+            fetch('/api/robot-skus/contact-sales', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({sku: currentProduct, name, email, company, message})
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Thank you! We\\'ll contact you within 24 hours.');
+                    closeContactSales();
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => alert('Request failed: ' + err));
+        }
+
+        function closeContactSales() {
+            const modal = document.getElementById('contactSalesModal');
+            if (modal) modal.remove();
+        }
 
         async function initiatePayment() {
             const button = document.getElementById('payButton');
@@ -228,13 +310,23 @@ RAZORPAY_WEBHOOK_SECRET=xxxxx
             loading.style.display = 'block';
 
             try {
+                await loadRobotSkuIfNeeded();
+                
+                // Check for enterprise/contact sales SKU
+                if (productData.contact_sales || productData.price === 0) {
+                    button.disabled = false;
+                    button.textContent = 'Buy Now';
+                    loading.style.display = 'none';
+                    contactSales();
+                    return;
+                }
                 console.log('Initiating payment for product:', currentProduct, 'amount:', productData.price);
                 
                 // Check if Razorpay SDK is available
                 const razorpayAvailable = typeof Razorpay !== 'undefined';
                 console.log('Razorpay SDK available:', razorpayAvailable);
                 
-                // Create Razorpay order via /create_order endpoint
+                // Create Razorpay order via /create_order endpoint (amount locked server-side for robot SKUs)
                 const response = await fetch('/create_order', {
                     method: 'POST',
                     headers: {

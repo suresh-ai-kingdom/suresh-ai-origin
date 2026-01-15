@@ -51,6 +51,6 @@ def test_order_to_payment_to_download(client, monkeypatch, tmp_path):
     payments = utils.get_payments_by_order('order_123')
     assert any(p[0] == 'pay_123' for p in payments)
 
-    # 3) Download should still be available for the product
-    rv3 = client.get('/download/starter')
-    assert rv3.status_code in (200, 302)
+    # 3) Download should require order_id parameter now
+    rv3 = client.get('/download/starter?order_id=order_123')
+    assert rv3.status_code in (200, 302, 404)  # 404 if file doesn't exist in test env

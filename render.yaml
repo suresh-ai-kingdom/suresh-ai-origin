@@ -1,7 +1,138 @@
 services:
+  # Main Flask Application
   - type: web
     name: suresh-ai-origin
-    env: python
-    startCommand: gunicorn app:app
-    healthCheckPath: /health
-    autoDeploy: true
+    runtime: python
+    pythonVersion: 3.11
+    buildCommand: |
+      pip install --upgrade pip && \
+      pip install -r requirements.txt && \
+      python scripts/seed_demo.py seed
+    startCommand: "gunicorn -w 4 -b 0.0.0.0:$PORT app:app"
+    numInstances: 1
+    envVars:
+      # Flask Configuration
+      - key: FLASK_SECRET_KEY
+        scope: pr,dev,prod
+        sync: false
+      - key: FLASK_DEBUG
+        value: "false"
+      
+      # Database (SQLite on Render)
+      - key: DATA_DB
+        value: "/app/data/data.db"
+      
+      # Payment Integration (Razorpay - LIVE)
+      - key: RAZORPAY_KEY_ID
+        scope: pr,dev,prod
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        scope: pr,dev,prod
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        scope: pr,dev,prod
+        sync: false
+      
+      # Alternative Payment (Stripe)
+      - key: STRIPE_SECRET_KEY
+        scope: pr,dev,prod
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        scope: pr,dev,prod
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        scope: pr,dev,prod
+        sync: false
+      
+      # Email Configuration (Outlook)
+      - key: EMAIL_USER
+        scope: pr,dev,prod
+        sync: false
+      - key: EMAIL_PASS
+        scope: pr,dev,prod
+        sync: false
+      - key: EMAIL_SMTP_HOST
+        value: "smtp-mail.outlook.com"
+      - key: EMAIL_SMTP_PORT
+        value: "587"
+      
+      # AI Integration (Gemini 2.5 Flash - REAL)
+      - key: GOOGLE_API_KEY
+        scope: pr,dev,prod
+        sync: false
+      - key: AI_PROVIDER
+        value: "gemini"
+      
+      # Admin Authentication
+      - key: ADMIN_USERNAME
+        value: "admin"
+      - key: ADMIN_PASSWORD
+        scope: pr,dev,prod
+        sync: false
+      - key: ADMIN_TOKEN
+        scope: pr,dev,prod
+        sync: false
+      - key: ADMIN_SESSION_TIMEOUT
+        value: "3600"
+      
+      # Feature Flags (Phase 1 - All Enabled)
+      - key: FLAG_FINANCE_ENTITLEMENTS_ENFORCED
+        value: "true"
+      - key: FLAG_INTEL_RECOMMENDATIONS_ENABLED
+        value: "true"
+      - key: FLAG_GROWTH_NUDGES_ENABLED
+        value: "true"
+      - key: FLAG_MARKETPLACE_ENABLED
+        value: "true"
+      - key: FLAG_SATELLITE_TRACKING_ENABLED
+        value: "true"
+      - key: FLAG_CURRENCY_SYSTEM_ENABLED
+        value: "true"
+      - key: FLAG_BANK_OPERATIONS_ENABLED
+        value: "true"
+      - key: FLAG_REAL_TIME_MONITORING_ENABLED
+        value: "true"
+      
+      # Security
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SESSION_COOKIE_HTTPONLY
+        value: "true"
+      - key: SESSION_COOKIE_SAMESITE
+        value: "Lax"
+      
+      # Error Tracking (Optional - Sentry)
+      - key: SENTRY_DSN
+        scope: pr,dev,prod
+        sync: false
+      
+      # Logging
+      - key: LOG_LEVEL
+        value: "INFO"
+    
+    # Health check
+    healthCheckPath: "/health"
+    
+    # Build and deploy settings
+    maxShutdownDelay: 30
+    preDeployCommand: "PYTHONPATH=. alembic upgrade head"
+    
+    # Disk
+    disk:
+      name: suresh-data
+      mountPath: /app/data
+      sizeGB: 10
+
+  # Redis Cache (Optional - for performance)
+  - type: redis
+    name: suresh-redis
+    ipAllowList: []
+    version: "7"
+    plan: free
+
+databases:
+  # SQLite database storage
+  - name: suresh-db-primary
+    databaseName: suresh_ai_origin
+    user: suresh_user
+    plan: free

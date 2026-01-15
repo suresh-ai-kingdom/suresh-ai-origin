@@ -2,7 +2,7 @@ import os
 import sys
 import pytest
 
-# Ensure repo root is on sys.path so tests can import pp when pytest's cwd varies.
+# Ensure repo root is on sys.path so tests can import app when pytest's cwd varies.
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
@@ -10,7 +10,13 @@ if ROOT not in sys.path:
 from app import app
 
 @pytest.fixture
-def client():
+def client(monkeypatch):
+    # Clear admin auth by default to avoid test pollution
+    monkeypatch.delenv('ADMIN_USERNAME', raising=False)
+    monkeypatch.delenv('ADMIN_PASSWORD', raising=False)
+    monkeypatch.delenv('ADMIN_PASSWORD_HASH', raising=False)
+    monkeypatch.delenv('ADMIN_TOKEN', raising=False)
+    
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client

@@ -196,8 +196,12 @@ class NeuralPathfindingEngine:
         # Calculate value of optimal path
         path_value = self._calculate_path_value(optimal_sequence)
         
-        # Risk adjust
-        risk_adjusted = path_value * (1 - max(a.get('risk', 0.1) for a in optimal_sequence) * 0.5)
+        # Risk adjust - handle empty sequence
+        if optimal_sequence:
+            max_risk = max(a.get('risk', 0.1) for a in optimal_sequence)
+            risk_adjusted = path_value * (1 - max_risk * 0.5)
+        else:
+            risk_adjusted = 0.0
         
         # Generate alternatives
         alternatives = self._generate_alternative_paths(decision_tree, objective)
@@ -302,7 +306,7 @@ class CustomerLongevityPredictor:
         purchase_frequency = customer_data.get('purchase_frequency_days', 30)
         satisfaction = customer_data.get('nps', 50)
         support_tickets = customer_data.get('support_tickets', 0)
-        product_usage = customer_data.get_product_usage_hours', 10)
+        product_usage = customer_data.get('product_usage_hours', 10)
         
         # Calculate longevity score (days remaining)
         base_longevity = 365  # 1 year baseline

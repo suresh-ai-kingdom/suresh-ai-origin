@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Usage Dashboard - {{ robot_id }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: #fff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #00FF9F 0%, #00D9FF 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 255, 159, 0.3);
+        }
+        .header h1 {
+            color: #000;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #000;
+            opacity: 0.8;
+        }
+        .back-link {
+            display: inline-block;
+            color: #00FF9F;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #1a1a1a;
+            border: 2px solid #00FF9F;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-label {
+            color: #00FF9F;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #fff;
+        }
+        .stat-subtext {
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        .quota-bar {
+            background: #2a2a2a;
+            border-radius: 8px;
+            height: 30px;
+            position: relative;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .quota-fill {
+            background: linear-gradient(90deg, #00FF9F 0%, #00D9FF 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .quota-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            color: #000;
+            z-index: 1;
+        }
+        .runs-table {
+            background: #1a1a1a;
+            border: 2px solid #00FF9F;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+        .runs-table h2 {
+            background: #00FF9F;
+            color: #000;
+            padding: 15px 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 20px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        th {
+            color: #00FF9F;
+            font-weight: bold;
+        }
+        .status-success { color: #00FF9F; }
+        .status-failed { color: #FF006E; }
+        .status-started { color: #FFD700; }
+        .error {
+            background: #FF006E;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/admin/robots" class="back-link">← Back to Robots</a>
+        
+        {% if error %}
+        <div class="error">
+            <h2>Error Loading Usage</h2>
+            <p>{{ error }}</p>
+        </div>
+        {% else %}
+        <div class="header">
+            <h1>🤖 Robot Usage Dashboard</h1>
+            <p><strong>Robot ID:</strong> {{ usage.robot_id }} | <strong>Version:</strong> {{ usage.version }} | <strong>Tier:</strong> {{ usage.tier }}</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Runs</div>
+                <div class="stat-value">{{ usage.usage.total_runs }}</div>
+                <div class="stat-subtext">This billing period</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Success Rate</div>
+                <div class="stat-value">
+                    {% if usage.usage.total_runs > 0 %}
+                    {{ ((usage.usage.success_runs / usage.usage.total_runs) * 100) | round(1) }}%
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </div>
+                <div class="stat-subtext">{{ usage.usage.success_runs }} / {{ usage.usage.total_runs }} runs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Duration</div>
+                <div class="stat-value">{{ (usage.usage.total_duration_ms / 1000) | round(1) }}s</div>
+                <div class="stat-subtext">Compute time used</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cost Estimate</div>
+                <div class="stat-value">₹{{ usage.usage.total_cost_estimate | round(2) }}</div>
+                <div class="stat-subtext">This billing period</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Daily Quota ({{ usage.quota.today_runs }} / {{ usage.quota.limit_per_day }})</div>
+            <div class="quota-bar">
+                <div class="quota-fill" style="width: {{ (usage.quota.today_runs / usage.quota.limit_per_day * 100) | round(1) }}%;"></div>
+                <div class="quota-text">{{ usage.quota.remaining_today }} remaining today</div>
+            </div>
+        </div>
+
+        <div class="runs-table">
+            <h2>📊 Recent Runs</h2>
+            {% if runs and runs|length > 0 %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Run ID</th>
+                        <th>Job Type</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                        <th>Cost</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for run in runs %}
+                    <tr>
+                        <td>{{ run.id[:8] }}...</td>
+                        <td>{{ run.job_type }}</td>
+                        <td class="status-{{ run.status }}">{{ run.status }}</td>
+                        <td>{{ (run.duration_ms / 1000) | round(2) if run.duration_ms else 'N/A' }}s</td>
+                        <td>₹{{ run.cost_estimate | round(2) if run.cost_estimate else '0.00' }}</td>
+                        <td>{{ run.created_at | int }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="padding: 20px; text-align: center; color: #888;">No runs recorded yet</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -3,6 +3,8 @@ import os
 import logging
 import time
 import functools
+import json
+import hashlib
 from dotenv import load_dotenv
 import razorpay
 from werkzeug.security import check_password_hash
@@ -23,7 +25,10 @@ except Exception as sentry_err:  # noqa: F841
     logging.getLogger(__name__).warning("Sentry not initialized: %s", sentry_err)
 
 # Load .env when present (development convenience). In production, the host/CI should set env vars.
-load_dotenv()
+# Skip in test mode to avoid polluting tests with dev credentials
+import sys
+if 'pytest' not in sys.modules:
+    load_dotenv()
 
 # Validate environment configuration at startup
 from config_validator import validate_config
@@ -420,6 +425,90 @@ TIER_SYSTEM = {
     }
 }
 
+# SAi robots catalog (representative SKUs/pricing)
+ROBOT_SKUS = [
+    {
+        "sku": "sai-v1-starter-sub",
+        "name": "SAi-v1 Core Ops",
+        "version": "sai-v1",
+        "tier": "starter",
+        "mode": "subscription",
+        "price_monthly": 4999,
+        "price_yearly": 0,
+        "notes": "Core automation, email triage, webhooks"
+    },
+    {
+        "sku": "sai-v2-support-growth-sub",
+        "name": "SAi-v2 Support Desk",
+        "version": "sai-v2",
+        "tier": "growth",
+        "mode": "subscription",
+        "price_monthly": 14999,
+        "price_yearly": 0,
+        "notes": "Ticket triage, SLA alerts, CSAT surveys"
+    },
+    {
+        "sku": "sai-v3-sales-scale-sub",
+        "name": "SAi-v3 Sales Scout",
+        "version": "sai-v3",
+        "tier": "scale",
+        "mode": "subscription",
+        "price_monthly": 39999,
+        "price_yearly": 0,
+        "notes": "Lead enrich, outreach sequences, booking"
+    },
+    {
+        "sku": "sai-v5-marketing-scale-sub",
+        "name": "SAi-v5 Marketing Pilot",
+        "version": "sai-v5",
+        "tier": "scale",
+        "mode": "subscription",
+        "price_monthly": 39999,
+        "price_yearly": 0,
+        "notes": "Ads, A/B, social posting"
+    },
+    {
+        "sku": "sai-v6-analytics-scale-sub",
+        "name": "SAi-v6 Analytics Pro",
+        "version": "sai-v6",
+        "tier": "scale",
+        "mode": "subscription",
+        "price_monthly": 39999,
+        "price_yearly": 0,
+        "notes": "Dashboards, anomaly alerts, cohorts"
+    },
+    {
+        "sku": "sai-v8-devops-enterprise-sub",
+        "name": "SAi-v8 DevOps Ghost",
+        "version": "sai-v8",
+        "tier": "enterprise",
+        "mode": "subscription",
+        "price_monthly": 0,
+        "price_yearly": 0,
+        "notes": "Health checks, logs, rollback suggestions (custom)"
+    },
+    {
+        "sku": "sai-v1-starter-emi-12",
+        "name": "SAi-v1 Core Ops (EMI)",
+        "version": "sai-v1",
+        "tier": "starter",
+        "mode": "emi",
+        "price_monthly": 4999,
+        "emi_months": 12,
+        "notes": "EMI-to-own after 12 months"
+    },
+    {
+        "sku": "sai-v3-sales-emi-12",
+        "name": "SAi-v3 Sales Scout (EMI)",
+        "version": "sai-v3",
+        "tier": "scale",
+        "mode": "emi",
+        "price_monthly": 39999,
+        "emi_months": 12,
+        "notes": "EMI-to-own after 12 months"
+    }
+]
+
 PLAN_LIMITS = {
     "free": {
         "attribution_runs": 100,
@@ -662,12 +751,17 @@ def success():
     
     # Verify payment in database
     order_verified = False
+    robot_token = None
     if order_id:
         try:
             from utils import get_order
             order = get_order(order_id)
             if order and order[5] == 'paid':  # status column
                 order_verified = True
+                # If product is a robot SKU, auto-provision it
+                sku_item = _find_robot_sku(product)
+                if sku_item:
+                    robot_token = _provision_robot_for_order(order_id, product, sku_item)
         except Exception as e:
             logging.error(f"Error verifying order: {e}")
     
@@ -676,16 +770,138 @@ def success():
         product=product,
         order_id=order_id,
         payment_id=payment_id,
-        order_verified=order_verified
+        order_verified=order_verified,
+        robot_token=robot_token
     )
+
+
+def _provision_robot_for_order(order_id: str, product_sku: str, sku_item: dict):
+    """Auto-provision a robot after payment success. Returns token or None."""
+    try:
+        from models import Robot, RobotLicense, RobotToken
+        session = _get_robot_session()
+        try:
+            # Check if already provisioned for this order
+            existing = session.query(Robot).filter(Robot.id.like(f"{order_id}_%")).first()
+            if existing:
+                # Already provisioned, find token
+                token_row = session.query(RobotToken).filter_by(robot_id=existing.id).first()
+                if token_row:
+                    return None  # Token already issued, don't re-issue (it's hashed)
+                # Fall through to issue token if missing
+            else:
+                # Create robot
+                robot_id = f"{order_id}_{str(uuid4())[:8]}"
+                now = time.time()
+                skills = []
+                limits = {"runs_per_day": 100}
+                version = sku_item.get('version', 'sai-v1')
+                tier = sku_item.get('tier', 'starter')
+                robot = Robot(
+                    id=robot_id,
+                    version=version,
+                    persona_name=None,
+                    tier=tier,
+                    skills=json.dumps(skills),
+                    limits=json.dumps(limits),
+                    status='active',
+                    created_at=now,
+                    updated_at=now,
+                )
+                session.add(robot)
+                session.flush()
+                # Issue license
+                mode = sku_item.get('mode', 'subscription')
+                term_months = sku_item.get('emi_months') or 12
+                end_at = now + (term_months * 30 * 86400)
+                license_row = RobotLicense(
+                    id=str(uuid4()),
+                    robot_id=robot.id,
+                    mode=mode,
+                    term_months=term_months,
+                    start_at=now,
+                    end_at=end_at,
+                    emi_plan=sku_item.get('emi_plan'),
+                    transferable=0,
+                    status='active',
+                    created_at=now,
+                    updated_at=now,
+                )
+                session.add(license_row)
+                session.flush()
+                existing = robot
+            # Issue token
+            raw_token = secrets.token_urlsafe(32)
+            token_hash = hashlib.sha256(raw_token.encode('utf-8')).hexdigest()
+            token_row = RobotToken(
+                id=str(uuid4()),
+                robot_id=existing.id,
+                token_hash=token_hash,
+                roles='read,run',
+                quota=json.dumps({"runs_per_day": 100}),
+                created_at=time.time(),
+            )
+            session.add(token_row)
+            session.commit()
+            logging.info(f"Robot provisioned for order {order_id}: {existing.id}")
+            # Email token to customer
+            try:
+                from utils import send_email
+                email_subject = f"Your SAi Robot Access Token - Order {order_id}"
+                email_body = f"""Your SAi Robot has been provisioned!
+
+Robot ID: {existing.id}
+Version: {version}
+Tier: {tier}
+
+Access Token (copy and store securely):
+{raw_token}
+
+⚠️ Important: Store this token securely. It grants access to your robot and won't be shown again.
+
+Never commit this token to version control or share it publicly.
+
+Thank you for your purchase!
+- SURESH AI ORIGIN Team"""
+                email_html = f"""<html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+<h2 style="color: #00FF9F;">🤖 Your SAi Robot is Ready!</h2>
+<p>Your SAi Robot has been successfully provisioned.</p>
+<div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+<p><strong>Robot ID:</strong> {existing.id}</p>
+<p><strong>Version:</strong> {version}</p>
+<p><strong>Tier:</strong> {tier}</p>
+</div>
+<h3>Access Token</h3>
+<p style="color: #FF006E;">⚠️ Store this token securely - it won't be shown again!</p>
+<div style="background: #000; color: #00FF9F; padding: 15px; border-radius: 8px; font-family: monospace; word-break: break-all;">
+{raw_token}
+</div>
+<p style="margin-top: 20px; font-size: 0.9em; color: #666;">Never commit this token to version control or share it publicly.</p>
+<p style="margin-top: 30px;">Thank you for your purchase!<br><strong>SURESH AI ORIGIN Team</strong></p>
+</body></html>"""
+                send_email(email_subject, email_body, "customer@example.com", email_html)
+                logging.info(f"Robot token emailed for order {order_id}")
+            except Exception as email_err:
+                logging.error(f"Failed to email robot token: {email_err}")
+            return raw_token
+        finally:
+            session.close()
+    except Exception as e:
+        logging.exception(f"Robot provisioning failed for order {order_id}: {e}")
+        return None
 
 @app.route("/download/<product>")
 @rate_limit_feature('download')
 def download(product):
     """Download product - ONLY for verified paid orders."""
+    # First check if product exists
+    filename = PRODUCTS.get(product)
+    if not filename:
+        return "Invalid product", 404
+    
     order_id = request.args.get('order_id')
     
-    # First verify payment in database
+    # Then verify payment in database
     if not order_id:
         return jsonify({
             'error': 'payment_required',
@@ -750,10 +966,6 @@ def download(product):
         logging.exception("download entitlement check failed: %s", _e)
     
     # Payment verified - allow download
-    filename = PRODUCTS.get(product)
-    if not filename:
-        return "Invalid product", 404
-    
     logging.info(f"Download authorized: order={order_id} product={product} ip={request.remote_addr}")
     return send_from_directory(DOWNLOAD_DIR, filename, as_attachment=True)
 
@@ -1085,8 +1297,15 @@ def create_order():
     
     try:
         data = request.get_json() or {}
-        amount = int(data.get("amount", 100))  # amount in rupees
         product = data.get('product', 'starter')
+        # If product is a robot SKU, lock price from catalog to avoid client tampering
+        sku_item = _find_robot_sku(product)
+        if sku_item:
+            amount = int(sku_item.get('price_monthly', 0))
+            if amount <= 0:
+                return jsonify({'error': 'unpriced_sku', 'message': 'Contact sales for this SKU'}), 400
+        else:
+            amount = int(data.get("amount", 100))  # amount in rupees
         coupon_code = data.get('coupon_code', '').strip()
         
         logging.info(f"Create order request: amount={amount} product={product}")
@@ -4666,15 +4885,16 @@ def intelligence_dashboard():
 def neural_paradox_solver():
     """V2.6: Solve impossible business paradoxes using quantum logic."""
     try:
-        from neural_fusion_engine import solve_business_paradox
+        from rare_services_engine import ParadoxSolverAI
+        solver = ParadoxSolverAI()
         data = request.get_json()
         paradox = data.get('paradox', '')
         context = data.get('context', {})
         
-        solution = solve_business_paradox(paradox, context)
+        solution = solver.solve_paradox(paradox, context)
         return jsonify({
             'status': 'success',
-            'paradox_resolution': solution,
+            'paradox_resolution': solution.__dict__ if hasattr(solution, '__dict__') else solution,
             'api_version': 'v2.6'
         })
     except Exception as e:
@@ -4688,9 +4908,11 @@ def neural_probability_field():
     try:
         from neural_fusion_engine import calculate_probability_field
         data = request.get_json()
-        scenario = data.get('scenario', {})
+        scenario = data.get('scenario', 'default')
+        variables = data.get('variables', {})
+        historical = data.get('historical', None)
         
-        field = calculate_probability_field(scenario)
+        field = calculate_probability_field(scenario, variables, historical)
         return jsonify({
             'status': 'success',
             'probability_field': field,
@@ -4708,8 +4930,9 @@ def neural_black_swan_detector():
         from neural_fusion_engine import detect_black_swans
         data = request.get_json()
         market_data = data.get('market_data', {})
+        historical = data.get('historical', [])
         
-        swans = detect_black_swans(market_data)
+        swans = detect_black_swans(market_data, historical)
         return jsonify({
             'status': 'success',
             'black_swan_alerts': swans,
@@ -4746,8 +4969,13 @@ def neural_emotional_ai():
         from neural_fusion_engine import analyze_emotions
         data = request.get_json()
         interaction_data = data.get('interaction_data', {})
+        interactions = data.get('interactions', [])
         
-        emotions = analyze_emotions(interaction_data)
+        # If interaction_data is provided as dict, convert to list format
+        if not interactions and interaction_data:
+            interactions = [interaction_data]
+        
+        emotions = analyze_emotions(interactions)
         return jsonify({
             'status': 'success',
             'emotional_analysis': emotions,
@@ -4765,8 +4993,10 @@ def neural_viral_coefficient():
         from neural_fusion_engine import calculate_viral_coefficient
         data = request.get_json()
         user_behavior = data.get('user_behavior', {})
+        product_data = data.get('product', user_behavior)
+        users_data = data.get('users', [user_behavior] if user_behavior else [])
         
-        viral = calculate_viral_coefficient(user_behavior)
+        viral = calculate_viral_coefficient(product_data, users_data)
         return jsonify({
             'status': 'success',
             'viral_metrics': viral,
@@ -4806,10 +5036,16 @@ def neural_adaptive_pricing():
         base_price = data.get('base_price', 100)
         factors = data.get('factors', {})
         
-        price = calculate_adaptive_price(base_price, factors)
+        # Convert to expected format
+        product = {'base_price': base_price}
+        market = factors if isinstance(factors, dict) else {}
+        customer = data.get('customer', None)
+        
+        result = calculate_adaptive_price(product, market, customer)
         return jsonify({
             'status': 'success',
-            'adaptive_price': price,
+            'adaptive_price': result.get('recommended_price', base_price),
+            'result': result,
             'api_version': 'v2.6'
         })
     except Exception as e:
@@ -5074,6 +5310,312 @@ def consciousness_10year_future():
     except Exception as e:
         logging.error(f"10-year future error: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ==================== GLOBAL CALLING SYSTEM ====================
+
+@app.route('/api/calling/initiate', methods=['POST'])
+def api_calling_initiate():
+    """Initiate call (auto-route to best method)."""
+    try:
+        from global_calling_system import GlobalCallingManager
+        data = request.get_json() or {}
+        
+        to_number = data.get('to_number')
+        from_number = data.get('from_number', '+91-SURESH-AI')
+        purpose = data.get('purpose', 'general')
+        location = data.get('location')  # [lat, lon]
+        prefer_ai = data.get('prefer_ai', False)
+        
+        if not to_number:
+            return jsonify({'error': 'to_number required'}), 400
+        
+        manager = GlobalCallingManager()
+        route = manager.smart_call_routing(
+            to_number=to_number,
+            from_number=from_number,
+            purpose=purpose,
+            location=tuple(location) if location else None,
+            prefer_ai=prefer_ai
+        )
+        
+        return jsonify({
+            'success': True,
+            'routing': route,
+            'to_number': to_number,
+            'from_number': from_number
+        }), 200
+    except Exception as e:
+        logging.exception(f"Calling initiate error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/calling/voip', methods=['POST'])
+def api_calling_voip():
+    """Initiate VoIP call over internet."""
+    try:
+        from global_calling_system import InternetCallingService
+        import json
+        from models import get_session, CallRecord as CallRecordModel
+        
+        data = request.get_json() or {}
+        service = InternetCallingService()
+        
+        call = service.initiate_voip_call(
+            from_number=data.get('from_number', '+91-9876543210'),
+            to_number=data.get('to_number'),
+            caller_name=data.get('caller_name', 'SURESH AI ORIGIN'),
+            record_call=data.get('record_call', True),
+            transcribe=data.get('transcribe', True)
+        )
+        
+        # Save to database
+        session = get_session()
+        record = CallRecordModel(
+            id=str(uuid4()),
+            call_id=call.call_id,
+            category=call.category.value,
+            provider=call.provider.value,
+            from_number=call.from_number,
+            to_number=call.to_number,
+            status=call.status.value,
+            duration_seconds=call.duration_seconds,
+            cost_rupees=call.cost_rupees,
+            recording_url=call.recording_url,
+            transcript=call.transcript,
+            ai_sentiment=call.ai_sentiment,
+            started_at=call.started_at,
+            ended_at=call.ended_at,
+            metadata=json.dumps(call.metadata),
+            created_at=time.time()
+        )
+        session.add(record)
+        session.commit()
+        session.close()
+        
+        return jsonify({
+            'success': True,
+            'call_id': call.call_id,
+            'status': call.status.value,
+            'category': 'internet_voip',
+            'cost_estimate_rupees': 1.0
+        }), 201
+    except Exception as e:
+        logging.exception(f"VoIP call error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/calling/ai', methods=['POST'])
+def api_calling_ai():
+    """Initiate AI-powered automated call."""
+    try:
+        from global_calling_system import AICallingService
+        import json
+        from models import get_session, CallRecord as CallRecordModel
+        
+        data = request.get_json() or {}
+        service = AICallingService()
+        
+        call = service.initiate_ai_call(
+            to_number=data.get('to_number'),
+            script=data.get('script', 'Hello from SURESH AI ORIGIN!'),
+            voice_model=data.get('voice_model', 'natural-female-en'),
+            language=data.get('language', 'en-US'),
+            collect_response=data.get('collect_response', True),
+            sentiment_analysis=data.get('sentiment_analysis', True)
+        )
+        
+        # Save to database
+        session = get_session()
+        record = CallRecordModel(
+            id=str(uuid4()),
+            call_id=call.call_id,
+            category=call.category.value,
+            provider=call.provider.value,
+            from_number=call.from_number,
+            to_number=call.to_number,
+            status=call.status.value,
+            duration_seconds=call.duration_seconds,
+            cost_rupees=call.cost_rupees,
+            recording_url=call.recording_url,
+            transcript=call.transcript,
+            ai_sentiment=call.ai_sentiment,
+            started_at=call.started_at,
+            ended_at=call.ended_at,
+            metadata=json.dumps(call.metadata),
+            created_at=time.time()
+        )
+        session.add(record)
+        session.commit()
+        session.close()
+        
+        return jsonify({
+            'success': True,
+            'call_id': call.call_id,
+            'status': call.status.value,
+            'category': 'ai_automated',
+            'cost_estimate_rupees': 2.0
+        }), 201
+    except Exception as e:
+        logging.exception(f"AI call error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/calling/human', methods=['POST'])
+def api_calling_human():
+    """Connect to human agent."""
+    try:
+        from global_calling_system import HumanCallingService
+        data = request.get_json() or {}
+        service = HumanCallingService()
+        
+        result = service.connect_human_agent(
+            customer_number=data.get('customer_number'),
+            agent_skill=data.get('agent_skill', 'general'),
+            language=data.get('language', 'en-US'),
+            priority=data.get('priority', 'normal')
+        )
+        
+        return jsonify({
+            'success': True,
+            **result
+        }), 200
+    except Exception as e:
+        logging.exception(f"Human agent error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/calling/satellite', methods=['POST'])
+def api_calling_satellite():
+    """Initiate satellite call (100% global coverage)."""
+    try:
+        from global_calling_system import SatelliteCallingService
+        import json
+        from models import get_session, CallRecord as CallRecordModel
+        
+        data = request.get_json() or {}
+        service = SatelliteCallingService()
+        
+        call = service.initiate_satellite_call(
+            to_number=data.get('to_number'),
+            location_lat=data.get('location_lat', 0.0),
+            location_lon=data.get('location_lon', 0.0),
+            provider=data.get('provider', 'iridium'),
+            emergency=data.get('emergency', False)
+        )
+        
+        # Save to database
+        session = get_session()
+        record = CallRecordModel(
+            id=str(uuid4()),
+            call_id=call.call_id,
+            category=call.category.value,
+            provider=call.provider.value,
+            from_number=call.from_number,
+            to_number=call.to_number,
+            status=call.status.value,
+            duration_seconds=call.duration_seconds,
+            cost_rupees=call.cost_rupees,
+            recording_url=call.recording_url,
+            transcript=call.transcript,
+            ai_sentiment=call.ai_sentiment,
+            started_at=call.started_at,
+            ended_at=call.ended_at,
+            metadata=json.dumps(call.metadata),
+            created_at=time.time()
+        )
+        session.add(record)
+        session.commit()
+        session.close()
+        
+        return jsonify({
+            'success': True,
+            'call_id': call.call_id,
+            'status': call.status.value,
+            'category': 'satellite',
+            'cost_estimate_rupees': 100.0
+        }), 201
+    except Exception as e:
+        logging.exception(f"Satellite call error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/calling/coverage', methods=['GET'])
+def api_calling_coverage():
+    """Get global coverage report."""
+    try:
+        from global_calling_system import GlobalCallingManager
+        manager = GlobalCallingManager()
+        coverage = manager.get_global_coverage_report()
+        return jsonify({
+            'success': True,
+            **coverage
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/calling/campaign/create', methods=['POST'])
+@admin_required
+def api_calling_campaign_create():
+    """Create bulk calling campaign."""
+    try:
+        from global_calling_system import AICallingService
+        from models import get_session, CallingCampaign
+        data = request.get_json() or {}
+        
+        service = AICallingService()
+        campaign = service.create_ai_campaign(
+            campaign_name=data.get('name'),
+            target_numbers=data.get('target_numbers', []),
+            script_template=data.get('script'),
+            schedule_time=data.get('schedule_time')
+        )
+        
+        # Save to database
+        session = get_session()
+        record = CallingCampaign(
+            id=str(uuid4()),
+            name=campaign['name'],
+            category='ai_automated',
+            script_template=data.get('script', ''),
+            total_numbers=campaign['total_numbers'],
+            status=campaign['status'],
+            scheduled_at=campaign['schedule_time'],
+            created_at=time.time()
+        )
+        session.add(record)
+        session.commit()
+        session.close()
+        
+        return jsonify({
+            'success': True,
+            **campaign
+        }), 201
+    except Exception as e:
+        logging.exception(f"Campaign create error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/admin/calling')
+@admin_required
+def admin_calling_dashboard():
+    """Global calling system admin dashboard."""
+    try:
+        from models import get_session, CallRecord as CallRecordModel
+        session = get_session()
+        
+        # Get recent calls
+        calls = session.query(CallRecordModel).order_by(
+            CallRecordModel.started_at.desc()
+        ).limit(50).all()
+        
+        session.close()
+        
+        return render_template('admin_calling.html', calls=calls)
+    except Exception as e:
+        logging.exception(f"Calling dashboard error: {e}")
+        return f"Error: {str(e)}", 500
 
 
 # ==================== HEALTH CHECK ENDPOINT ====================
@@ -5569,6 +6111,557 @@ def get_mobile_usage():
         'limit': 1000,
         'reset_date': '2026-02-01',
     }), 200
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SAi Robots provisioning & licensing
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _get_robot_session():
+    from utils import _get_db_url, init_db
+    from models import get_engine, get_session
+    init_db()
+    return get_session(get_engine(_get_db_url()))
+
+
+def _serialize_robot(robot):
+    skills = []
+    limits = {}
+    try:
+        if robot.skills:
+            skills = json.loads(robot.skills)
+        if robot.limits:
+            limits = json.loads(robot.limits)
+    except Exception:
+        skills = []
+        limits = {}
+    return {
+        "id": robot.id,
+        "version": robot.version,
+        "persona_name": robot.persona_name,
+        "tier": robot.tier,
+        "skills": skills,
+        "limits": limits,
+        "status": robot.status,
+        "created_at": robot.created_at,
+        "updated_at": robot.updated_at,
+    }
+
+
+def _find_robot_sku(sku: str):
+    for item in ROBOT_SKUS:
+        if item.get('sku') == sku:
+            return item
+    return None
+
+
+@app.route('/api/robot-skus', methods=['GET'])
+def api_robot_skus():
+    """Public catalog listing of SAi robot SKUs for checkout."""
+    return jsonify({'skus': ROBOT_SKUS}), 200
+
+
+@app.route('/api/robot-skus/<sku>/quote', methods=['GET'])
+def api_robot_sku_quote(sku):
+    """Return price quote for a specific robot SKU."""
+    item = _find_robot_sku(sku)
+    if not item:
+        return jsonify({'error': 'sku_not_found'}), 404
+    price = item.get('price_monthly', 0)
+    needs_contact_sales = (price == 0 or item.get('tier') == 'enterprise')
+    return jsonify({
+        'sku': item.get('sku'),
+        'price_monthly': price,
+        'emi_months': item.get('emi_months'),
+        'mode': item.get('mode'),
+        'tier': item.get('tier'),
+        'version': item.get('version'),
+        'contact_sales': needs_contact_sales
+    }), 200
+
+
+@app.route('/api/robot-skus/contact-sales', methods=['POST'])
+def api_robot_contact_sales():
+    """Handle enterprise/custom SKU contact sales requests."""
+    data = request.get_json() or {}
+    sku = data.get('sku')
+    name = data.get('name', '')
+    email = data.get('email', '')
+    company = data.get('company', '')
+    message = data.get('message', '')
+    if not sku or not email:
+        return jsonify({'error': 'sku and email required'}), 400
+    try:
+        from utils import send_email
+        subject = f"Enterprise SKU Inquiry: {sku}"
+        body = f"""New enterprise SKU inquiry:
+
+SKU: {sku}
+Name: {name}
+Email: {email}
+Company: {company}
+
+Message:
+{message}
+
+Please follow up within 24 hours."""
+        send_email(subject, body, os.getenv('ADMIN_EMAIL', 'admin@example.com'))
+        logging.info(f"Contact sales request for {sku} from {email}")
+        return jsonify({'success': True, 'message': 'Request submitted. We\'ll contact you within 24 hours.'}), 200
+    except Exception as e:
+        logging.exception(f"Contact sales request failed: {e}")
+        return jsonify({'error': 'request_failed'}), 500
+
+
+@app.route('/api/robots', methods=['GET', 'POST'])
+@admin_required
+def api_robots():
+    from models import Robot
+    session = _get_robot_session()
+    try:
+        if request.method == 'POST':
+            data = request.get_json() or {}
+            version = data.get('version')
+            if not version:
+                return jsonify({'error': 'version is required'}), 400
+            skills = data.get('skills') or []
+            if not isinstance(skills, list):
+                return jsonify({'error': 'skills must be a list'}), 400
+            limits = data.get('limits') or {}
+            if not isinstance(limits, dict):
+                return jsonify({'error': 'limits must be an object'}), 400
+            robot_id = data.get('id') or str(uuid4())
+            now = time.time()
+            robot = Robot(
+                id=robot_id,
+                version=str(version),
+                persona_name=data.get('persona_name'),
+                tier=str(data.get('tier', 'starter')),
+                skills=json.dumps(skills),
+                limits=json.dumps(limits),
+                status=data.get('status', 'provisioned'),
+                created_at=now,
+                updated_at=now,
+            )
+            session.add(robot)
+            session.commit()
+            return jsonify({'id': robot.id, 'status': robot.status}), 201
+
+        robots = session.query(Robot).order_by(Robot.created_at.desc()).all()
+        return jsonify({'robots': [_serialize_robot(r) for r in robots]}), 200
+    finally:
+        session.close()
+
+
+@app.route('/api/robots/<robot_id>', methods=['GET'])
+@admin_required
+def api_robot_detail(robot_id):
+    from models import Robot
+    session = _get_robot_session()
+    try:
+        robot = session.query(Robot).filter_by(id=robot_id).first()
+        if not robot:
+            return jsonify({'error': 'robot not found'}), 404
+        return jsonify(_serialize_robot(robot)), 200
+    finally:
+        session.close()
+
+
+@app.route('/api/robots/<robot_id>/license', methods=['POST'])
+@admin_required
+def api_robot_license(robot_id):
+    from models import Robot, RobotLicense
+    session = _get_robot_session()
+    try:
+        robot = session.query(Robot).filter_by(id=robot_id).first()
+        if not robot:
+            return jsonify({'error': 'robot not found'}), 404
+        data = request.get_json() or {}
+        mode = data.get('mode')
+        if not mode:
+            return jsonify({'error': 'mode is required'}), 400
+        term_months = data.get('term_months')
+        start_at = time.time()
+        end_at = None
+        if term_months:
+            try:
+                months = int(term_months)
+                end_at = start_at + (months * 30 * 86400)
+            except Exception:
+                return jsonify({'error': 'term_months must be an integer'}), 400
+        license_row = RobotLicense(
+            id=str(uuid4()),
+            robot_id=robot.id,
+            mode=str(mode),
+            term_months=term_months if term_months is None else int(term_months),
+            start_at=start_at,
+            end_at=end_at,
+            emi_plan=data.get('emi_plan'),
+            transferable=1 if data.get('transferable') else 0,
+            status=data.get('status', 'active'),
+            created_at=start_at,
+            updated_at=start_at,
+        )
+        session.add(license_row)
+        session.commit()
+        return jsonify({'license_id': license_row.id, 'mode': license_row.mode, 'end_at': license_row.end_at}), 201
+    finally:
+        session.close()
+
+
+@app.route('/api/robots/<robot_id>/token', methods=['POST'])
+@admin_required
+def api_robot_token(robot_id):
+    from models import Robot, RobotToken
+    session = _get_robot_session()
+    try:
+        robot = session.query(Robot).filter_by(id=robot_id).first()
+        if not robot:
+            return jsonify({'error': 'robot not found'}), 404
+        data = request.get_json() or {}
+        raw_token = secrets.token_urlsafe(32)
+        token_hash = hashlib.sha256(raw_token.encode('utf-8')).hexdigest()
+        token_row = RobotToken(
+            id=str(uuid4()),
+            robot_id=robot.id,
+            token_hash=token_hash,
+            roles=','.join(data.get('roles', [])) if isinstance(data.get('roles'), list) else data.get('roles'),
+            quota=json.dumps(data.get('quota') or {}),
+            created_at=time.time(),
+        )
+        session.add(token_row)
+        session.commit()
+        return jsonify({'token_id': token_row.id, 'token': raw_token}), 201
+    finally:
+        session.close()
+
+
+@app.route('/api/robots/<robot_id>/skills', methods=['POST'])
+@admin_required
+def api_robot_skills(robot_id):
+    from models import Robot
+    session = _get_robot_session()
+    try:
+        robot = session.query(Robot).filter_by(id=robot_id).first()
+        if not robot:
+            return jsonify({'error': 'robot not found'}), 404
+        data = request.get_json() or {}
+        skills = data.get('skills')
+        if skills is None or not isinstance(skills, list):
+            return jsonify({'error': 'skills must be a list'}), 400
+        robot.skills = json.dumps(skills)
+        robot.updated_at = time.time()
+        session.add(robot)
+        session.commit()
+        return jsonify({'id': robot.id, 'skills': skills}), 200
+    finally:
+        session.close()
+
+
+@app.route('/api/robots/<robot_id>/run', methods=['POST'])
+def api_robot_run(robot_id):
+    """Trigger a robot run and track it. Requires valid robot token in Authorization header."""
+    from models import Robot, RobotRun, RobotToken, RobotWebhook
+    # Verify token
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'unauthorized', 'message': 'Bearer token required'}), 401
+    raw_token = auth_header[7:]
+    token_hash = hashlib.sha256(raw_token.encode('utf-8')).hexdigest()
+    session = _get_robot_session()
+    try:
+        token_row = session.query(RobotToken).filter_by(robot_id=robot_id, token_hash=token_hash).first()
+        if not token_row:
+            return jsonify({'error': 'unauthorized', 'message': 'Invalid token'}), 401
+        robot = session.query(Robot).filter_by(id=robot_id).first()
+        if not robot or robot.status != 'active':
+            return jsonify({'error': 'robot_unavailable'}), 503
+        # Check quota
+        limits = {}
+        try:
+            limits = json.loads(robot.limits or '{}')
+        except Exception:
+            limits = {}
+        quota_limit = limits.get('runs_per_day', 100)
+        today_start = time.time() - (time.time() % 86400)
+        today_runs = session.query(RobotRun).filter(
+            RobotRun.robot_id == robot_id,
+            RobotRun.created_at >= today_start
+        ).count()
+        if today_runs >= quota_limit:
+            _trigger_robot_webhook(robot_id, 'quota_exceeded', {'robot_id': robot_id, 'quota_limit': quota_limit, 'today_runs': today_runs})
+            return jsonify({'error': 'quota_exceeded', 'message': f'Daily quota of {quota_limit} runs exceeded'}), 429
+        # Create run record
+        data = request.get_json() or {}
+        job_type = data.get('job_type', 'generic')
+        run_id = str(uuid4())
+        run_row = RobotRun(
+            id=run_id,
+            robot_id=robot_id,
+            job_type=job_type,
+            status='started',
+            duration_ms=None,
+            cost_estimate=None,
+            created_at=time.time()
+        )
+        session.add(run_row)
+        session.commit()
+        logging.info(f"Robot run started: {run_id} for {robot_id}")
+        _trigger_robot_webhook(robot_id, 'run_started', {'robot_id': robot_id, 'run_id': run_id, 'job_type': job_type})
+        return jsonify({'run_id': run_id, 'status': 'started', 'robot_id': robot_id}), 201
+    finally:
+        session.close()
+
+
+@app.route('/api/robots/<robot_id>/run/<run_id>', methods=['PATCH'])
+def api_robot_run_update(robot_id, run_id):
+    """Update run status (success/failed) and duration. Requires valid robot token."""
+    from models import RobotRun, RobotToken
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'unauthorized'}), 401
+    raw_token = auth_header[7:]
+    token_hash = hashlib.sha256(raw_token.encode('utf-8')).hexdigest()
+    session = _get_robot_session()
+    try:
+        token_row = session.query(RobotToken).filter_by(robot_id=robot_id, token_hash=token_hash).first()
+        if not token_row:
+            return jsonify({'error': 'unauthorized'}), 401
+        run_row = session.query(RobotRun).filter_by(id=run_id, robot_id=robot_id).first()
+        if not run_row:
+            return jsonify({'error': 'run_not_found'}), 404
+        data = request.get_json() or {}
+        status = data.get('status')
+        if status:
+            run_row.status = status
+        if 'duration_ms' in data:
+            run_row.duration_ms = data['duration_ms']
+        if 'cost_estimate' in data:
+            run_row.cost_estimate = data['cost_estimate']
+        session.add(run_row)
+        session.commit()
+        logging.info(f"Robot run updated: {run_id} status={status}")
+        if status in ['success', 'failed']:
+            _trigger_robot_webhook(robot_id, f'run_{status}', {'robot_id': robot_id, 'run_id': run_id, 'status': status, 'duration_ms': run_row.duration_ms})
+        return jsonify({'run_id': run_id, 'status': run_row.status}), 200
+    finally:
+        session.close()
+
+
+def _trigger_robot_webhook(robot_id: str, event: str, payload: dict):
+    """Trigger outbound webhooks for robot events."""
+    from models import RobotWebhook
+    session = _get_robot_session()
+    try:
+        webhooks = session.query(RobotWebhook).filter_by(robot_id=robot_id, direction='outbound').all()
+        for wh in webhooks:
+            try:
+                import requests
+                signature = hashlib.sha256((wh.secret or '' + json.dumps(payload)).encode('utf-8')).hexdigest()
+                requests.post(wh.url, json=payload, headers={'X-Robot-Signature': signature}, timeout=5)
+                logging.info(f"Webhook triggered for {robot_id} event {event}")
+            except Exception as e:
+                logging.error(f"Webhook delivery failed for {robot_id}: {e}")
+    finally:
+        session.close()
+
+
+@app.route('/api/robots/<robot_id>/usage', methods=['GET'])
+@admin_required
+def api_robot_usage(robot_id):
+    """Get usage stats for a robot: runs, quota consumed, billing period."""
+    from models import Robot, RobotLicense, RobotRun
+    session = _get_robot_session()
+    try:
+        robot = session.query(Robot).filter_by(id=robot_id).first()
+        if not robot:
+            return jsonify({'error': 'robot_not_found'}), 404
+        # Get license for billing period
+        license_row = session.query(RobotLicense).filter_by(robot_id=robot_id, status='active').first()
+        period_start = license_row.start_at if license_row else time.time()
+        period_end = license_row.end_at if license_row else time.time() + 86400
+        # Count runs in current billing period
+        runs = session.query(RobotRun).filter(
+            RobotRun.robot_id == robot_id,
+            RobotRun.created_at >= period_start,
+            RobotRun.created_at <= period_end
+        ).all()
+        total_runs = len(runs)
+        success_runs = len([r for r in runs if r.status == 'success'])
+        failed_runs = len([r for r in runs if r.status == 'failed'])
+        total_duration_ms = sum([r.duration_ms or 0 for r in runs])
+        total_cost = sum([r.cost_estimate or 0 for r in runs])
+        # Parse limits
+        limits = {}
+        try:
+            limits = json.loads(robot.limits or '{}')
+        except Exception:
+            limits = {}
+        quota_limit = limits.get('runs_per_day', 100)
+        # Calculate today's runs
+        today_start = time.time() - (time.time() % 86400)
+        today_runs = session.query(RobotRun).filter(
+            RobotRun.robot_id == robot_id,
+            RobotRun.created_at >= today_start
+        ).count()
+        quota_remaining = max(0, quota_limit - today_runs)
+        return jsonify({
+            'robot_id': robot_id,
+            'version': robot.version,
+            'tier': robot.tier,
+            'status': robot.status,
+            'billing_period': {
+                'start': period_start,
+                'end': period_end,
+                'mode': license_row.mode if license_row else None
+            },
+            'usage': {
+                'total_runs': total_runs,
+                'success_runs': success_runs,
+                'failed_runs': failed_runs,
+                'total_duration_ms': total_duration_ms,
+                'total_cost_estimate': total_cost
+            },
+            'quota': {
+                'limit_per_day': quota_limit,
+                'today_runs': today_runs,
+                'remaining_today': quota_remaining
+            }
+        }), 200
+    finally:
+        session.close()
+
+
+@app.route('/admin/robots/<robot_id>/usage', methods=['GET'])
+@admin_required
+def admin_robot_usage_page(robot_id):
+    """Render robot usage dashboard HTML page."""
+    from models import Robot, RobotRun
+    session = _get_robot_session()
+    try:
+        # Get usage data
+        result = api_robot_usage(robot_id)
+        if result[1] != 200:
+            return render_template('admin_robot_usage.html', error='Failed to load usage data'), 500
+        usage = result[0].get_json()
+        # Get recent runs
+        runs = session.query(RobotRun).filter_by(robot_id=robot_id).order_by(RobotRun.created_at.desc()).limit(20).all()
+        return render_template('admin_robot_usage.html', usage=usage, runs=runs, error=None)
+    except Exception as e:
+        logging.exception(f"Robot usage page error: {e}")
+        return render_template('admin_robot_usage.html', usage=None, runs=[], error=str(e)), 500
+    finally:
+        session.close()
+
+
+@app.route('/admin/robots', methods=['GET'])
+@admin_required
+def admin_robots_dashboard():
+    """Simple robots admin view (no template dependency)."""
+    from models import Robot
+    session = _get_robot_session()
+    try:
+        robots = session.query(Robot).order_by(Robot.created_at.desc()).all()
+        rows = []
+        for r in robots:
+            data = _serialize_robot(r)
+            rows.append(f"<tr><td>{data['id']}</td><td>{data['version']}</td><td>{data['tier']}</td><td>{data['status']}</td><td>{len(data.get('skills', []))}</td><td>{data.get('persona_name') or ''}</td><td><a href='/admin/robots/{data['id']}/usage' style='color:#00FF9F;'>View Usage</a></td></tr>")
+        page = """
+                <h2>SAi Robots</h2>
+                <p>Lightweight admin view. Use the forms below to create a robot, issue a license, mint a token, or update skills.</p>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;">
+                    <div style="border:1px solid #ddd;padding:12px;border-radius:6px;">
+                        <h3>Create Robot</h3>
+                        <label>Version/SKU: <input id="robot_version" value="sai-v1" /></label><br>
+                        <label>Tier: <input id="robot_tier" value="starter" /></label><br>
+                        <label>Persona: <input id="robot_persona" placeholder="Arjun" /></label><br>
+                        <label>Skills (JSON array): <input id="robot_skills" value='["core_ops"]' /></label><br>
+                        <label>Limits (JSON object): <input id="robot_limits" value='{"runs_per_day":100}' /></label><br>
+                        <button onclick="createRobot()">Create</button>
+                    </div>
+
+                    <div style="border:1px solid #ddd;padding:12px;border-radius:6px;">
+                        <h3>Issue License</h3>
+                        <label>Robot ID: <input id="lic_robot_id" /></label><br>
+                        <label>Mode: <input id="lic_mode" value="subscription" /></label><br>
+                        <label>Term months: <input id="lic_term" value="12" /></label><br>
+                        <label>EMI plan: <input id="lic_emi" placeholder="12m" /></label><br>
+                        <label>Transferable (0/1): <input id="lic_transfer" value="0" /></label><br>
+                        <button onclick="issueLicense()">Issue</button>
+                    </div>
+
+                    <div style="border:1px solid #ddd;padding:12px;border-radius:6px;">
+                        <h3>Mint Token</h3>
+                        <label>Robot ID: <input id="tok_robot_id" /></label><br>
+                        <label>Roles (comma): <input id="tok_roles" value="read,run" /></label><br>
+                        <label>Quota (JSON): <input id="tok_quota" value='{"runs_per_day":100}' /></label><br>
+                        <button onclick="mintToken()">Mint</button>
+                    </div>
+
+                    <div style="border:1px solid #ddd;padding:12px;border-radius:6px;">
+                        <h3>Update Skills</h3>
+                        <label>Robot ID: <input id="skill_robot_id" /></label><br>
+                        <label>Skills (JSON array): <input id="skill_list" value='["core_ops","support"]' /></label><br>
+                        <button onclick="updateSkills()">Update</button>
+                    </div>
+                </div>
+
+                <h3 style="margin-top:16px;">Robots</h3>
+                <table border="1" cellpadding="6" cellspacing="0">
+                    <thead><tr><th>ID</th><th>Version</th><th>Tier</th><th>Status</th><th>#Skills</th><th>Persona</th><th>Actions</th></tr></thead>
+                    <tbody>{rows}</tbody>
+                </table>
+                <p>Catalog: GET /api/robot-skus, GET /api/robot-skus/&lt;sku&gt;/quote</p>
+
+                <script>
+                async function createRobot(){
+                    const payload = {
+                        version: document.getElementById('robot_version').value,
+                        tier: document.getElementById('robot_tier').value,
+                        persona_name: document.getElementById('robot_persona').value,
+                        skills: JSON.parse(document.getElementById('robot_skills').value || '[]'),
+                        limits: JSON.parse(document.getElementById('robot_limits').value || '{}')
+                    };
+                    const r = await fetch('/api/robots', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+                    alert('Create robot status: '+r.status+' '+await r.text());
+                    location.reload();
+                }
+                async function issueLicense(){
+                    const id = document.getElementById('lic_robot_id').value;
+                    const payload = {
+                        mode: document.getElementById('lic_mode').value,
+                        term_months: document.getElementById('lic_term').value,
+                        emi_plan: document.getElementById('lic_emi').value,
+                        transferable: document.getElementById('lic_transfer').value === '1'
+                    };
+                    const r = await fetch('/api/robots/'+id+'/license', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+                    alert('Issue license status: '+r.status+' '+await r.text());
+                }
+                async function mintToken(){
+                    const id = document.getElementById('tok_robot_id').value;
+                    const payload = {
+                        roles: document.getElementById('tok_roles').value.split(',').map(s=>s.trim()).filter(Boolean),
+                        quota: JSON.parse(document.getElementById('tok_quota').value || '{}')
+                    };
+                    const r = await fetch('/api/robots/'+id+'/token', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+                    alert('Mint token status: '+r.status+' '+await r.text());
+                }
+                async function updateSkills(){
+                    const id = document.getElementById('skill_robot_id').value;
+                    const payload = {
+                        skills: JSON.parse(document.getElementById('skill_list').value || '[]')
+                    };
+                    const r = await fetch('/api/robots/'+id+'/skills', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+                    alert('Update skills status: '+r.status+' '+await r.text());
+                    location.reload();
+                }
+                </script>
+                """.format(rows="".join(rows))
+        return page, 200, {'Content-Type': 'text/html'}
+    finally:
+        session.close()
 
 
 # ─────────────────────────────────────────────────────────────────────────────

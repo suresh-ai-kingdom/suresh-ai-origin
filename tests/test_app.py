@@ -30,6 +30,12 @@ def test_download_invalid(client):
 
 
 def test_download_valid(client):
+    """Valid product but no payment should return 402 payment required"""
     product = next(iter(PRODUCTS))
     rv = client.get(f"/download/{product}")
-    assert rv.status_code in (200, 302)
+    # Without order_id, should require payment
+    assert rv.status_code == 402
+    
+    # With order_id but not paid, should also require payment
+    rv2 = client.get(f"/download/{product}?order_id=test_unpaid")
+    assert rv2.status_code in (402, 404)  # 404 if order not found, 402 if not paid

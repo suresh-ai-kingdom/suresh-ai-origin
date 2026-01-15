@@ -1,0 +1,12 @@
+Date,Platform,Followers,Followers_Change,Posts_Today,Likes,Comments,Shares,Video_Views,Engagement_Rate_Pct,Email_Subscribers,New_Email_Subs,Demo_Requests,Signups,MRR_USD,Notes
+2026-01-14,ALL,0,0,0,0,0,0,0,0.0,0,0,0,0,0,"Start of day (baseline)"
+2026-01-14,LinkedIn,0,0,0,0,0,0,0,0.0,,,0,0,0,"Add after posting"
+2026-01-14,YouTube,0,0,0,0,0,0,0,0.0,,,0,0,0,"Add after posting"
+2026-01-14,TikTok,0,0,0,0,0,0,0,0.0,,,0,0,0,"Add after posting"
+2026-01-14,Discord,0,0,0,0,0,0,0,0.0,,,0,0,0,"Members count"
+2026-01-14,Email,0,0,0,0,0,0,0,0.0,0,0,0,0,0,"Newsletter baseline"
+2026-01-15,ALL,0,0,0,0,0,0,0,0.0,0,0,0,0,0,"Duplicate these rows daily"
+
+# Weekly_Rollup (enter every Friday)
+Week_Start,Week_End,Followers_Total,Followers_Change,Email_Total,Email_Change,Views_Total,Engagement_Avg_Pct,Posts_Count,Top_Post_Link,Learning_1,Learning_2,Learning_3,Next_Week_Focus
+2026-01-14,2026-01-20,0,0,0,0,0,0.0,0,,"","","",""

@@ -546,3 +546,115 @@ class Recommendation(Base):
     clicked = Column(Integer, default=0)  # 0 or 1
     outcome = Column(String, nullable=True)  # "completed", "abandoned", "in_progress"
     user = relationship('UserProfile', back_populates='recommendations')
+
+
+# ============================================================================
+# Robots (SAi) provisioning and licensing
+# ============================================================================
+
+
+class Robot(Base):
+    __tablename__ = 'robots'
+    id = Column(String, primary_key=True)
+    version = Column(String, index=True)
+    persona_name = Column(String, nullable=True)
+    tier = Column(String, index=True)
+    skills = Column(Text)  # JSON array of skills/skill packs
+    limits = Column(Text)  # JSON object of quotas/limits
+    status = Column(String, default='provisioned', index=True)
+    created_at = Column(Float)
+    updated_at = Column(Float)
+    licenses = relationship('RobotLicense', back_populates='robot', cascade="all, delete-orphan")
+    tokens = relationship('RobotToken', back_populates='robot', cascade="all, delete-orphan")
+    webhooks = relationship('RobotWebhook', back_populates='robot', cascade="all, delete-orphan")
+    runs = relationship('RobotRun', back_populates='robot', cascade="all, delete-orphan")
+
+
+class RobotLicense(Base):
+    __tablename__ = 'robot_licenses'
+    id = Column(String, primary_key=True)
+    robot_id = Column(String, ForeignKey('robots.id'), index=True)
+    mode = Column(String, index=True)  # subscription, rental, emi, perpetual
+    term_months = Column(Integer, nullable=True)
+    start_at = Column(Float)
+    end_at = Column(Float, nullable=True)
+    emi_plan = Column(String, nullable=True)  # e.g., "6m", "9m", "12m"
+    transferable = Column(Integer, default=0)  # 0/1
+    status = Column(String, default='active', index=True)
+    created_at = Column(Float)
+    updated_at = Column(Float)
+    robot = relationship('Robot', back_populates='licenses')
+
+
+class RobotToken(Base):
+    __tablename__ = 'robot_tokens'
+    id = Column(String, primary_key=True)
+    robot_id = Column(String, ForeignKey('robots.id'), index=True)
+    token_hash = Column(String, unique=True, index=True)  # Store only hash, never raw token
+    roles = Column(String, nullable=True)  # comma-separated roles/scopes
+    quota = Column(Text, nullable=True)  # JSON limits
+    created_at = Column(Float)
+    robot = relationship('Robot', back_populates='tokens')
+
+
+class RobotWebhook(Base):
+    __tablename__ = 'robot_webhooks'
+    id = Column(String, primary_key=True)
+    robot_id = Column(String, ForeignKey('robots.id'), index=True)
+    direction = Column(String, index=True)  # inbound/outbound
+    url = Column(Text)
+    secret = Column(String, nullable=True)
+    created_at = Column(Float)
+    robot = relationship('Robot', back_populates='webhooks')
+
+
+class RobotRun(Base):
+    __tablename__ = 'robot_runs'
+    id = Column(String, primary_key=True)
+    robot_id = Column(String, ForeignKey('robots.id'), index=True)
+    job_type = Column(String, index=True)
+    status = Column(String, index=True)
+    duration_ms = Column(Integer, nullable=True)
+    cost_estimate = Column(Float, nullable=True)
+    created_at = Column(Float)
+    robot = relationship('Robot', back_populates='runs')
+
+
+class CallRecord(Base):
+    """Global calling system - call records."""
+    __tablename__ = 'call_records'
+    id = Column(String, primary_key=True)
+    call_id = Column(String, nullable=False, unique=True, index=True)
+    category = Column(String, nullable=False, index=True)  # internet_voip, ai_automated, human_agent, system_api, satellite
+    provider = Column(String, nullable=False)  # twilio, vonage, starlink, etc.
+    from_number = Column(String, nullable=False)
+    to_number = Column(String, nullable=False, index=True)
+    status = Column(String, nullable=False, index=True)  # initiated, ringing, answered, completed, failed
+    duration_seconds = Column(Integer, default=0)
+    cost_rupees = Column(Float, default=0.0)
+    recording_url = Column(String)
+    transcript = Column(Text)
+    ai_sentiment = Column(String)
+    started_at = Column(Float, nullable=False, index=True)
+    ended_at = Column(Float)
+    call_metadata = Column(Text)  # JSON string (renamed from 'metadata' to avoid SQLAlchemy conflict)
+    created_at = Column(Float, nullable=False)
+
+
+class CallingCampaign(Base):
+    """Bulk calling campaigns."""
+    __tablename__ = 'calling_campaigns'
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    category = Column(String, nullable=False, index=True)
+    script_template = Column(Text)
+    total_numbers = Column(Integer, nullable=False)
+    completed_calls = Column(Integer, default=0)
+    successful_calls = Column(Integer, default=0)
+    failed_calls = Column(Integer, default=0)
+    total_cost_rupees = Column(Float, default=0.0)
+    status = Column(String, nullable=False, index=True)  # scheduled, running, paused, completed
+    scheduled_at = Column(Float)
+    started_at = Column(Float)
+    completed_at = Column(Float)
+    created_at = Column(Float, nullable=False)
