@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - SURESH AI ORIGIN | 48 AI Systems Under ₹10K/Month</title>
+    <meta name="description" content="Replace 20+ SaaS tools with one AI-powered platform. Plans starting at ₹4,999/month. 14-day free trial, no credit card required.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            font-weight: 800;
+            text-shadow: 2px 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .header .tagline {
+            font-size: 1.5em;
+            opacity: 0.95;
+            margin-bottom: 15px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.85;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .savings-banner {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            color: white;
+            margin: -20px auto 60px;
+            max-width: 800px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .savings-banner h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .savings-banner p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .pricing-card.featured {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.05);
+            border: 3px solid #FFD700;
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.08) translateY(-10px);
+        }
+
+        .badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #FFD700;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85em;
+            text-transform: uppercase;
+        }
+
+        .plan-name {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .pricing-card.featured .plan-name {
+            color: white;
+        }
+
+        .price {
+            font-size: 3.5em;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .pricing-card.featured .price {
+            color: #FFD700;
+        }
+
+        .price-period {
+            font-size: 0.5em;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        .savings {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .pricing-card.featured .savings {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .features {
+            list-style: none;
+            margin: 30px 0;
+        }
+
+        .features li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: flex-start;
+            color: #555;
+        }
+
+        .pricing-card.featured .features li {
+            border-bottom-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .features li:before {
+            content: "✓";
+            color: #10B981;
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-right: 12px;
+        }
+
+        .pricing-card.featured .features li:before {
+            color: #FFD700;
+        }
+
+        .cta-button {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+
+        .cta-button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .cta-button.primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .cta-button.featured {
+            background: white;
+            color: #667eea;
+        }
+
+        .cta-button.featured:hover {
+            background: #FFD700;
+            color: #333;
+            transform: scale(1.05);
+        }
+
+        .trial-note {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        .comparison-section {
+            background: white;
+            border-radius: 20px;
+            padding: 60px;
+            margin-bottom: 60px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .comparison-section h2 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .comparison-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .column h3 {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .column.traditional {
+            border-right: 2px dashed #ddd;
+            padding-right: 40px;
+        }
+
+        .column.traditional h3 {
+            color: #EF4444;
+        }
+
+        .column.suresh h3 {
+            color: #10B981;
+        }
+
+        .tool-list {
+            list-style: none;
+        }
+
+        .tool-list li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tool-name {
+            font-weight: 600;
+        }
+
+        .tool-price {
+            color: #EF4444;
+            font-weight: 700;
+        }
+
+        .total {
+            font-size: 1.5em;
+            font-weight: 800;
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .total.expensive {
+            color: #EF4444;
+        }
+
+        .total.affordable {
+            color: #10B981;
+        }
+
+        .faq-section {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            color: white;
+        }
+
+        .faq-section h2 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .faq-item {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .faq-question {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .faq-answer {
+            font-size: 1.1em;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-table {
+                grid-template-columns: 1fr;
+            }
+
+            .column.traditional {
+                border-right: none;
+                border-bottom: 2px dashed #ddd;
+                padding-right: 0;
+                padding-bottom: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 PRICING 🚀</h1>
+            <div class="tagline">Replace 20+ SaaS Tools with ONE Platform</div>
+            <div class="subtitle">48 AI Systems. Unlimited Automation. One Price.</div>
+        </div>
+
+        <div class="savings-banner">
+            <h2>💰 Save ₹15 Lakh/Year on Software</h2>
+            <p>Stop paying for multiple tools. Get everything in one platform.</p>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- BASIC PLAN -->
+            <div class="pricing-card">
+                <div class="plan-name">Basic</div>
+                <div class="price">
+                    ₹4,999
+                    <span class="price-period">/month</span>
+                </div>
+                <div class="savings">Save ₹5 lakh/year vs buying tools separately</div>
+                <ul class="features">
+                    <li>20 AI Systems Access</li>
+                    <li>Chatbot + Recommendations</li>
+                    <li>Customer Analytics</li>
+                    <li>Email Automation</li>
+                    <li>Basic Recovery System</li>
+                    <li>1000 AI Requests/Month</li>
+                    <li>Email Support</li>
+                    <li>2 Team Members</li>
+                </ul>
+                <button class="cta-button primary" onclick="startCheckout('basic', 4999)">Start 14-Day Free Trial</button>
+                <div class="trial-note">No credit card required</div>
+            </div>
+
+            <!-- PROFESSIONAL PLAN (FEATURED) -->
+            <div class="pricing-card featured">
+                <div class="badge">🔥 BEST VALUE</div>
+                <div class="plan-name">Professional</div>
+                <div class="price">
+                    ₹9,999
+                    <span class="price-period">/month</span>
+                </div>
+                <div class="savings">Save ₹12 lakh/year vs buying tools separately</div>
+                <ul class="features">
+                    <li>ALL 48 AI Systems</li>
+                    <li>AI Eye Observer (Omniscient Monitoring)</li>
+                    <li>Predictive Analytics + Forecasting</li>
+                    <li>Advanced Recovery + Attribution</li>
+                    <li>A/B Testing + Optimization</li>
+                    <li>10,000 AI Requests/Month</li>
+                    <li>Priority Support (4-hour response)</li>
+                    <li>10 Team Members</li>
+                    <li>Custom Integrations</li>
+                    <li>White-Label Option</li>
+                </ul>
+                <button class="cta-button featured" onclick="startCheckout('professional', 9999)">Start 14-Day Free Trial</button>
+                <div class="trial-note">Most popular plan</div>
+            </div>
+
+            <!-- ENTERPRISE PLAN -->
+            <div class="pricing-card">
+                <div class="plan-name">Enterprise</div>
+                <div class="price">
+                    ₹19,999
+                    <span class="price-period">/month</span>
+                </div>
+                <div class="savings">Save ₹18 lakh/year + compliance included</div>
+                <ul class="features">
+                    <li>Everything in Professional</li>
+                    <li>7 Enterprise Systems (Compliance, Governance)</li>
+                    <li>Mobile + Global Expansion</li>
+                    <li>Learning Management System</li>
+                    <li>Dedicated Account Manager</li>
+                    <li>Unlimited AI Requests</li>
+                    <li>1-hour Priority Support</li>
+                    <li>Unlimited Team Members</li>
+                    <li>Custom Development</li>
+                    <li>SLA Guarantee (99.9% uptime)</li>
+                </ul>
+                <button class="cta-button primary" onclick="startCheckout('enterprise', 19999)">Start 14-Day Free Trial</button>
+                <div class="trial-note">For scaling businesses</div>
+            </div>
+
+            <!-- LIFETIME PLAN -->
+            <div class="pricing-card">
+                <div class="badge">⚡ LIMITED</div>
+                <div class="plan-name">Lifetime</div>
+                <div class="price">
+                    ₹2,49,999
+                    <span class="price-period">one-time</span>
+                </div>
+                <div class="savings">ROI in 13 months. Unlimited forever.</div>
+                <ul class="features">
+                    <li>Everything in Enterprise</li>
+                    <li>Lifetime Access (No recurring fees)</li>
+                    <li>All Future Updates FREE</li>
+                    <li>Priority Feature Requests</li>
+                    <li>Lifetime Support</li>
+                    <li>Source Code Access</li>
+                    <li>Reseller Rights</li>
+                    <li>Founding Member Badge</li>
+                </ul>
+                <button class="cta-button primary" onclick="startCheckout('lifetime', 249999)">Get Lifetime Access</button>
+                <div class="trial-note">Only 50 spots available</div>
+            </div>
+        </div>
+
+        <!-- COMPARISON SECTION -->
+        <div class="comparison-section">
+            <h2>💸 Traditional Software Stack vs SURESH AI ORIGIN</h2>
+            <div class="comparison-table">
+                <div class="column traditional">
+                    <h3>❌ Traditional (20+ Tools)</h3>
+                    <ul class="tool-list">
+                        <li><span class="tool-name">Intercom (Chatbot)</span><span class="tool-price">₹20k/mo</span></li>
+                        <li><span class="tool-name">Segment (Analytics)</span><span class="tool-price">₹15k/mo</span></li>
+                        <li><span class="tool-name">Mailchimp (Email)</span><span class="tool-price">₹8k/mo</span></li>
+                        <li><span class="tool-name">Optimizely (A/B Test)</span><span class="tool-price">₹50k/mo</span></li>
+                        <li><span class="tool-name">Salesforce (CRM)</span><span class="tool-price">₹25k/mo</span></li>
+                        <li><span class="tool-name">Zapier (Automation)</span><span class="tool-price">₹10k/mo</span></li>
+                        <li><span class="tool-name">Tableau (BI)</span><span class="tool-price">₹30k/mo</span></li>
+                        <li><span class="tool-name">DataDog (Monitoring)</span><span class="tool-price">₹40k/mo</span></li>
+                        <li><span class="tool-name">+ 12 more tools...</span><span class="tool-price">₹80k/mo</span></li>
+                    </ul>
+                    <div class="total expensive">Total: ₹2,78,000/month = ₹33.36 Lakh/year</div>
+                </div>
+
+                <div class="column suresh">
+                    <h3>✅ SURESH AI ORIGIN (One Platform)</h3>
+                    <ul class="tool-list">
+                        <li><span class="tool-name">48 AI Systems</span><span class="tool-price" style="color: #10B981;">Included</span></li>
+                        <li><span class="tool-name">Chatbot + Recommendations</span><span class="tool-price" style="color: #10B981;">Included</span></li>
+                        <li><span class="tool-name">Email + SMS Automation</span><span class="tool-price" style="color: #10B981;">Included</span></li>
+                        <li><span class="tool-name">A/B Testing + Optimization</span><span class="tool-price" style="color: #10B981;">Included</span></li>
+                        <li><span class="tool-name">Customer Analytics + CLV</span><span class="tool-price" style="color: #10B981;">Included</span></li>
+                        <li><span class="tool-name">Workflow Automation</span><span class="tool-price" style="color: #10B981;">Included</span></li>
+                        <li><span class="tool-name">Executive Dashboard</span><span class="tool-price" style="color: #10B981;">Included</span></li>
+                        <li><span class="tool-name">AI Eye Observer</span><span class="tool-price" style="color: #10B981;">Included</span></li>
+                        <li><span class="tool-name">+ 40 more features...</span><span class="tool-price" style="color: #10B981;">Included</span></li>
+                    </ul>
+                    <div class="total affordable">Total: ₹9,999/month = ₹1.2 Lakh/year</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ SECTION -->
+        <div class="faq-section">
+            <h2>❓ Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">Is the 14-day free trial really free?</div>
+                <div class="faq-answer">Yes! No credit card required. Full access to all features. Cancel anytime.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I upgrade or downgrade later?</div>
+                <div class="faq-answer">Absolutely. Switch plans anytime. Pro-rated billing automatically handled.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Do you offer refunds?</div>
+                <div class="faq-answer">Yes. 30-day money-back guarantee. If you're not satisfied, full refund—no questions asked.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">How is this different from ChatGPT/Claude?</div>
+                <div class="faq-answer">We USE AI (Gemini 2.5 Flash) but provide 48 complete business systems—chatbot, analytics, recovery, payments, automation. It's a complete business platform, not just a chatbot.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What payment methods do you accept?</div>
+                <div class="faq-answer">Razorpay (UPI, Cards, NetBanking, Wallets) + Stripe (International cards). Invoices available for enterprise.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Is my data secure?</div>
+                <div class="faq-answer">Yes. Enterprise-grade security: AES-256 encryption, GDPR compliant, ISO 27001 standards, regular backups.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I resell this to my clients?</div>
+                <div class="faq-answer">Yes! White-label available on Professional+. Lifetime plan includes reseller rights.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startCheckout(plan, amount) {
+            // Redirect to checkout with plan details
+            window.location.href = `/checkout?plan=${plan}&amount=${amount}`;
+        }
+    </script>
+</body>
+</html>

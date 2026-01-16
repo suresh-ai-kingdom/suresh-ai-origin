@@ -634,6 +634,99 @@ def health():
         }
     }), 200
 
+@app.route("/pricing")
+def pricing_page():
+    """Public pricing page showing all tiers."""
+    return render_template("pricing.html")
+
+@app.route("/checkout")
+def checkout_page():
+    """Checkout page with Razorpay integration."""
+    return render_template("checkout.html")
+
+@app.route("/api/create-order", methods=["POST"])
+@rate_limit_feature('create_order')
+def create_order_endpoint():
+    """Create Razorpay order for subscription payment OR start free trial."""
+    data = request.json
+    plan = data.get('plan', 'professional')
+    amount = int(data.get('amount', 9999))
+    name = data.get('name', '')
+    email = data.get('email', '')
+    phone = data.get('phone', '')
+    is_trial = data.get('is_trial', False)  # Flag for free trial
+    
+    # Handle free trial (no payment required)
+    if is_trial:
+        from free_trial import create_trial_user
+        result = create_trial_user(email=email, name=name, phone=phone, plan=plan)
+        return jsonify(result), 200 if result['success'] else 400
+    
+    # Handle paid subscription
+    if not razorpay_client:
+        return jsonify({
+            'success': False,
+            'error': 'Payment gateway not configured'
+        }), 503
+    
+    try:
+        # Create Razorpay order
+        order_data = {
+            "amount": amount * 100,  # Convert to paise
+            "currency": "INR",
+            "receipt": f"{plan}_{int(time.time())}",
+            "notes": {
+                "plan": plan,
+                "customer_name": name,
+                "customer_email": email,
+                "customer_phone": phone
+            }
+        }
+        
+        order = razorpay_client.order.create(data=order_data)
+        
+        # Save order to database
+        from utils import save_order
+        save_order(
+            order_id=order['id'],
+            amount_paise=amount * 100,
+            currency='INR',
+            receipt=order_data['receipt'],
+            customer_email=email,
+            customer_name=name,
+            customer_phone=phone
+        )
+        
+        logging.info(f"Order created: {order['id']} for plan {plan}, amount ₹{amount}")
+        
+        return jsonify({
+            'success': True,
+            'order_id': order['id'],
+            'amount': amount * 100,
+            'currency': 'INR',
+            'razorpay_key': os.getenv('RAZORPAY_KEY_ID'),
+            'plan': plan
+        }), 200
+        
+    except Exception as e:
+        logging.exception(f"Order creation error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route("/api/trial/status/<trial_id>")
+def trial_status(trial_id):
+    """Check trial status and days remaining."""
+    from free_trial import check_trial_status
+    result = check_trial_status(trial_id)
+    return jsonify(result), 200 if result['success'] else 404
+
+@app.route("/trial-success")
+def trial_success_page():
+    """Trial activation success page."""
+    return render_template("trial_success.html")
+
 @app.route("/buy")
 def buy():
     product = request.args.get("product", "starter")

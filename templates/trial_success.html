@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Activated! 🎉 - SURESH AI ORIGIN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .success-container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #10B981;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            font-size: 1.3em;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .trial-info {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .trial-info h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 700;
+        }
+
+        .steps {
+            text-align: left;
+            margin: 30px 0;
+        }
+
+        .steps h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #10B981;
+        }
+
+        .step-number {
+            font-weight: 800;
+            color: #10B981;
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 1.3em;
+            font-weight: 700;
+            margin: 20px 10px;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .email-note {
+            background: #FFF3CD;
+            border: 2px solid #FFC107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .email-note strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">🎉</div>
+        <h1>Trial Activated!</h1>
+        <p class="message">Your 14-day free trial has started. You now have full access to all 48 AI systems!</p>
+
+        <div class="trial-info">
+            <h3>📋 Your Trial Details</h3>
+            <div class="info-item">
+                <span class="info-label">Trial ID:</span>
+                <span class="info-value" id="trial-id">Loading...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email:</span>
+                <span class="info-value" id="email">Loading...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Duration:</span>
+                <span class="info-value">14 Days</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Expires:</span>
+                <span class="info-value" id="expires">Loading...</span>
+            </div>
+        </div>
+
+        <div class="email-note">
+            <strong>📧 Check Your Email!</strong><br>
+            We've sent login credentials and getting started guide to <span id="email-2">your email</span>.
+        </div>
+
+        <div class="steps">
+            <h3>🚀 Next Steps:</h3>
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Check your email</strong> for login credentials
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Login to admin dashboard</strong> and explore features
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Set up your first automation</strong> or chatbot
+            </div>
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Integrate your business data</strong> for personalization
+            </div>
+        </div>
+
+        <a href="/admin" class="cta-button">Go to Dashboard</a>
+        <a href="/pricing" class="cta-button" style="background: white; color: #667eea; border: 2px solid #667eea;">View Pricing</a>
+    </div>
+
+    <script>
+        // Get trial details from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const trialId = urlParams.get('trial_id') || 'N/A';
+        const email = urlParams.get('email') || 'your email';
+
+        // Update UI
+        document.getElementById('trial-id').textContent = trialId;
+        document.getElementById('email').textContent = email;
+        document.getElementById('email-2').textContent = email;
+
+        // Calculate expiry date (14 days from now)
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 14);
+        const formattedDate = expiryDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        document.getElementById('expires').textContent = formattedDate;
+    </script>
+</body>
+</html>
