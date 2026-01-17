@@ -16,7 +16,7 @@ import json
 from datetime import datetime, timedelta
 from utils import get_session, get_engine, _get_db_url
 from models import Customer, Subscription
-from real_ai_service import get_ai_engine
+from real_ai_service import generate_ai_content
 import logging
 
 logger = logging.getLogger(__name__)
@@ -43,8 +43,6 @@ def generate_destiny_blueprint(business_data: dict) -> dict:
     - Product roadmap
     - Revenue milestones
     """
-    ai = get_ai_engine()
-    
     prompt = f"""
     You are a business destiny oracle. Generate an EXACT 24-month blueprint to ₹1 crore revenue.
     
@@ -88,7 +86,7 @@ def generate_destiny_blueprint(business_data: dict) -> dict:
     """
     
     try:
-        destiny = ai.generate(prompt)
+        destiny = generate_ai_content(prompt)
         
         return {
             'success': True,
@@ -118,7 +116,7 @@ def analyze_universal_business(business_context: dict) -> dict:
     - Revenue optimization
     - Scaling strategy
     """
-    ai = get_ai_engine()
+    
     
     prompt = f"""
     You are UNIVERSAL BUSINESS CONSCIOUSNESS - you instantly understand ANY business.
@@ -157,7 +155,7 @@ def analyze_universal_business(business_context: dict) -> dict:
     """
     
     try:
-        analysis = ai.generate(prompt)
+        analysis = generate_ai_content(prompt)
         
         return {
             'success': True,
@@ -186,7 +184,7 @@ def calculate_perfect_timing(decisions: list) -> dict:
     
     Uses: Seasonal data + market cycles + business readiness
     """
-    ai = get_ai_engine()
+    
     
     decisions_text = "\n".join(decisions)
     
@@ -228,7 +226,7 @@ def calculate_perfect_timing(decisions: list) -> dict:
     """
     
     try:
-        timing = ai.generate(prompt)
+        timing = generate_ai_content(prompt)
         
         return {
             'success': True,
@@ -256,7 +254,7 @@ def predict_market_future(market_data: dict) -> dict:
     - Emerging competitors
     - Macro trends affecting market
     """
-    ai = get_ai_engine()
+    
     
     prompt = f"""
     You are MARKET CONSCIOUSNESS - you see 6 months into the future.
@@ -300,7 +298,7 @@ def predict_market_future(market_data: dict) -> dict:
     """
     
     try:
-        prediction = ai.generate(prompt)
+        prediction = generate_ai_content(prompt)
         
         return {
             'success': True,
@@ -330,7 +328,7 @@ def map_customer_soul(customer_behavior: dict) -> dict:
     - Lifetime value prediction
     - Churn before it happens
     """
-    ai = get_ai_engine()
+    
     
     prompt = f"""
     You are CUSTOMER SOUL MAPPER - you understand customers at the deepest level.
@@ -384,7 +382,7 @@ def map_customer_soul(customer_behavior: dict) -> dict:
     """
     
     try:
-        soul_map = ai.generate(prompt)
+        soul_map = generate_ai_content(prompt)
         
         return {
             'success': True,
