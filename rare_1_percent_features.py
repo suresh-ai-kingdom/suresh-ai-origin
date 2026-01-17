@@ -186,7 +186,11 @@ def calculate_perfect_timing(decisions: list) -> dict:
     """
     
     
-    decisions_text = "\n".join(decisions)
+    decisions_text = "\n".join([
+        f"Decision: {d.get('decision', d) if isinstance(d, dict) else d}" +
+        (f"\nContext: {d.get('context', '')}" if isinstance(d, dict) and 'context' in d else "")
+        for d in decisions
+    ])
     
     prompt = f"""
     You are PERFECT TIMING ENGINE - you know the exact moment for everything.
