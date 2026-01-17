@@ -649,7 +649,6 @@ def checkout_page():
 # ============================================================================
 
 @app.route("/api/rare/destiny-blueprint", methods=["POST"])
-@rate_limit_feature('rare_destiny')
 def destiny_blueprint():
     """
     Generate EXACT 24-month path to ₹1 crore revenue.
@@ -665,7 +664,6 @@ def destiny_blueprint():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/consciousness", methods=["POST"])
-@rate_limit_feature('rare_consciousness')
 def universal_consciousness():
     """
     UNIVERSAL BUSINESS CONSCIOUSNESS - Works for ANY business.
@@ -681,7 +679,6 @@ def universal_consciousness():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/perfect-timing", methods=["POST"])
-@rate_limit_feature('rare_timing')
 def perfect_timing():
     """
     PERFECT TIMING ENGINE - Know exact timing for everything.
@@ -698,7 +695,6 @@ def perfect_timing():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/market-consciousness", methods=["POST"])
-@rate_limit_feature('rare_market')
 def market_consciousness():
     """
     MARKET CONSCIOUSNESS - See markets 6 months ahead.
@@ -714,7 +710,6 @@ def market_consciousness():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/customer-soul", methods=["POST"])
-@rate_limit_feature('rare_soul')
 def customer_soul_mapping():
     """
     CUSTOMER SOUL MAPPING - Understand customers at deepest level.
@@ -730,7 +725,6 @@ def customer_soul_mapping():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/complete-blueprint", methods=["POST"])
-@rate_limit_feature('rare_complete')
 def complete_rare_blueprint():
     """
     COMPLETE RARE BLUEPRINT - All 5 features combined.
