@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rare 1% Features - SURESH AI ORIGIN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            margin-bottom: 5px;
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-style: italic;
+            color: #ffd700;
+            margin-top: 10px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease-out;
+            border-left: 5px solid;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .feature-card.destiny {
+            border-left-color: #ff6b6b;
+        }
+        
+        .feature-card.consciousness {
+            border-left-color: #4ecdc4;
+        }
+        
+        .feature-card.timing {
+            border-left-color: #ffe66d;
+        }
+        
+        .feature-card.market {
+            border-left-color: #a8e6cf;
+        }
+        
+        .feature-card.soul {
+            border-left-color: #ff8b94;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .feature-card .subtitle {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        
+        .feature-card .benefits {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .benefits li {
+            list-style: none;
+            padding: 8px 0;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        .benefits li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .free-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        
+        .complete-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 50px;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: slideUp 0.8s ease-out;
+        }
+        
+        .complete-section h2 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .complete-section p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
+        }
+        
+        .complete-features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .complete-feature-item {
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .complete-cta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .complete-cta:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stats-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-box {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .stat-label {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+        }
+        
+        .result-section {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-card {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🌟 Rare 1% Features</h1>
+            <p>God's Gift to Business Leaders</p>
+            <p class="tagline">"See the future. Know the exact answers. Build unstoppable."</p>
+        </header>
+        
+        <!-- Stats -->
+        {% if stats %}
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-number">5</div>
+                <div class="stat-label">Rare Features</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">FREE</div>
+                <div class="stat-label">For All Users</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Potential Impact</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <!-- Feature 1: Destiny Blueprint -->
+            <div class="feature-card destiny">
+                <div class="feature-icon">🎯</div>
+                <h2>Destiny Blueprint</h2>
+                <p class="subtitle">Your 24-Month Exact Revenue Path</p>
+                <p>Know your exact path to ₹1 crore. Get monthly milestones, action items, hiring plan, product roadmap, and metrics to track.</p>
+                <div class="benefits">
+                    <ul>
+                        <li>24-month exact revenue path</li>
+                        <li>Monthly milestones & checkpoints</li>
+                        <li>Action items for each month</li>
+                        <li>Hiring plan & team structure</li>
+                        <li>Product roadmap</li>
+                        <li>Key metrics & KPIs</li>
+                    </ul>
+                </div>
+                <button class="cta-button" onclick="openModal('destiny')">Generate Blueprint</button>
+                <div class="free-badge">✓ FREE</div>
+            </div>
+            
+            <!-- Feature 2: Universal Business Consciousness -->
+            <div class="feature-card consciousness">
+                <div class="feature-icon">🧠</div>
+                <h2>Business Consciousness</h2>
+                <p class="subtitle">Instant Deep Understanding of Any Business</p>
+                <p>Get instant multi-industry analysis. Works for SaaS, e-commerce, services, manufacturing, anything. Understand your business like never before.</p>
+                <div class="benefits">
+                    <ul>
+                        <li>Business model analysis</li>
+                        <li>Market position mapping</li>
+                        <li>Competitive advantages</li>
+                        <li>Revenue stream breakdown</li>
+                        <li>Scaling opportunities</li>
+                        <li>Hidden blind spots</li>
+                    </ul>
+                </div>
+                <button class="cta-button" onclick="openModal('consciousness')">Analyze Business</button>
+                <div class="free-badge">✓ FREE</div>
+            </div>
+            
+            <!-- Feature 3: Perfect Timing Engine -->
+            <div class="feature-card timing">
+                <div class="feature-icon">⏰</div>
+                <h2>Perfect Timing Engine</h2>
+                <p class="subtitle">Know EXACT Timing for Everything</p>
+                <p>Product launch? Hiring? Price change? Market entry? Get the exact optimal timing for any decision, with probability and consequences.</p>
+                <div class="benefits">
+                    <ul>
+                        <li>Product launch timing</li>
+                        <li>Campaign timing</li>
+                        <li>Hiring schedules</li>
+                        <li>Price change timing</li>
+                        <li>Market entry timing</li>
+                        <li>Success probability</li>
+                    </ul>
+                </div>
+                <button class="cta-button" onclick="openModal('timing')">Calculate Timing</button>
+                <div class="free-badge">✓ FREE</div>
+            </div>
+            
+            <!-- Feature 4: Market Consciousness -->
+            <div class="feature-card market">
+                <div class="feature-icon">📊</div>
+                <h2>Market Consciousness</h2>
+                <p class="subtitle">See the Market 6 Months Ahead</p>
+                <p>Know market trends before they happen. See winners and losers. Find opportunities and threats. Stay ahead of competition.</p>
+                <div class="benefits">
+                    <ul>
+                        <li>Trend predictions</li>
+                        <li>Market winners & losers</li>
+                        <li>Emerging opportunities</li>
+                        <li>Threats to avoid</li>
+                        <li>Timeline predictions</li>
+                        <li>Action recommendations</li>
+                    </ul>
+                </div>
+                <button class="cta-button" onclick="openModal('market')">Predict Market</button>
+                <div class="free-badge">✓ FREE</div>
+            </div>
+            
+            <!-- Feature 5: Customer Soul Mapping -->
+            <div class="feature-card soul">
+                <div class="feature-icon">💎</div>
+                <h2>Customer Soul Mapping</h2>
+                <p class="subtitle">Understand Customers at the Deepest Level</p>
+                <p>Know what customers REALLY want. Their fears, dreams, decision drivers. Get LTV prediction, churn prediction, perfect messaging.</p>
+                <div class="benefits">
+                    <ul>
+                        <li>Real customer wants</li>
+                        <li>Hidden fears & dreams</li>
+                        <li>Decision drivers</li>
+                        <li>LTV prediction</li>
+                        <li>Churn prediction</li>
+                        <li>Perfect messaging</li>
+                    </ul>
+                </div>
+                <button class="cta-button" onclick="openModal('soul')">Map Customer Soul</button>
+                <div class="free-badge">✓ FREE</div>
+            </div>
+        </div>
+        
+        <!-- Complete Blueprint Section -->
+        <div class="complete-section">
+            <h2>🔮 Complete Rare Blueprint</h2>
+            <p>Get ALL 5 features combined into ONE unified blueprint. Destiny + Consciousness + Timing + Market + Soul. Everything you need to dominate your market.</p>
+            <div class="complete-features-list">
+                <div class="complete-feature-item">✓ Destiny Blueprint</div>
+                <div class="complete-feature-item">✓ Business Consciousness</div>
+                <div class="complete-feature-item">✓ Perfect Timing</div>
+                <div class="complete-feature-item">✓ Market Predictions</div>
+                <div class="complete-feature-item">✓ Customer Soul Map</div>
+                <div class="complete-feature-item">✓ Action Roadmap</div>
+            </div>
+            <button class="complete-cta" onclick="openModal('complete')">Generate Complete Blueprint</button>
+        </div>
+    </div>
+    
+    <!-- Modals for each feature -->
+    <div id="destinyModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('destiny')">×</button>
+            <h2>🎯 Destiny Blueprint Generator</h2>
+            <form id="destinyForm">
+                <div class="form-group">
+                    <label>Business Name</label>
+                    <input type="text" name="business_name" required placeholder="Your business name">
+                </div>
+                <div class="form-group">
+                    <label>Current Revenue (₹)</label>
+                    <input type="number" name="current_revenue" required placeholder="e.g., 1000000">
+                </div>
+                <div class="form-group">
+                    <label>Target Revenue (₹)</label>
+                    <input type="number" name="target_revenue" required placeholder="e.g., 10000000">
+                </div>
+                <div class="form-group">
+                    <label>Industry</label>
+                    <input type="text" name="industry" required placeholder="e.g., SaaS, E-commerce">
+                </div>
+                <button type="submit" class="submit-btn">Generate Blueprint</button>
+            </form>
+            <div id="destinyResult" class="result-section" style="display:none;"></div>
+        </div>
+    </div>
+    
+    <div id="consciousnessModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('consciousness')">×</button>
+            <h2>🧠 Business Consciousness Analyzer</h2>
+            <form id="consciousnessForm">
+                <div class="form-group">
+                    <label>Business Type</label>
+                    <input type="text" name="business_type" required placeholder="e.g., SaaS, E-commerce, Services">
+                </div>
+                <div class="form-group">
+                    <label>Current Position</label>
+                    <textarea name="current_position" required placeholder="Describe your current market position..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Main Challenge</label>
+                    <textarea name="main_challenge" required placeholder="What's your biggest challenge right now..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Analyze Business</button>
+            </form>
+            <div id="consciousnessResult" class="result-section" style="display:none;"></div>
+        </div>
+    </div>
+    
+    <div id="timingModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('timing')">×</button>
+            <h2>⏰ Perfect Timing Calculator</h2>
+            <form id="timingForm">
+                <div class="form-group">
+                    <label>Decision to Make</label>
+                    <textarea name="decision" required placeholder="e.g., Launch new product, Hire sales team, Expand to new market..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Current Context</label>
+                    <textarea name="context" required placeholder="Describe your current situation and constraints..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Calculate Timing</button>
+            </form>
+            <div id="timingResult" class="result-section" style="display:none;"></div>
+        </div>
+    </div>
+    
+    <div id="marketModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('market')">×</button>
+            <h2>📊 Market Consciousness Predictor</h2>
+            <form id="marketForm">
+                <div class="form-group">
+                    <label>Your Market/Industry</label>
+                    <input type="text" name="market" required placeholder="e.g., AI/ML, E-commerce, FinTech">
+                </div>
+                <div class="form-group">
+                    <label>Key Players</label>
+                    <textarea name="competitors" required placeholder="List your main competitors..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Your Position</label>
+                    <textarea name="position" required placeholder="Where do you stand vs competition..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Predict Market</button>
+            </form>
+            <div id="marketResult" class="result-section" style="display:none;"></div>
+        </div>
+    </div>
+    
+    <div id="soulModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('soul')">×</button>
+            <h2>💎 Customer Soul Mapper</h2>
+            <form id="soulForm">
+                <div class="form-group">
+                    <label>Your Product/Service</label>
+                    <input type="text" name="product" required placeholder="What do you sell...">
+                </div>
+                <div class="form-group">
+                    <label>Customer Behavior Patterns</label>
+                    <textarea name="behavior" required placeholder="How do customers currently behave with your product..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Customer Pain Points</label>
+                    <textarea name="pain_points" required placeholder="What problems are they trying to solve..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Map Customer Soul</button>
+            </form>
+            <div id="soulResult" class="result-section" style="display:none;"></div>
+        </div>
+    </div>
+    
+    <div id="completeModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('complete')">×</button>
+            <h2>🔮 Complete Rare Blueprint</h2>
+            <form id="completeForm">
+                <div class="form-group">
+                    <label>Business Name</label>
+                    <input type="text" name="business_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Current Situation (detailed)</label>
+                    <textarea name="current_situation" required placeholder="Describe your business, market position, challenges, goals..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>What You Want to Know</label>
+                    <textarea name="questions" required placeholder="What specific things do you want clarity on..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Generate Complete Blueprint</button>
+            </form>
+            <div id="completeResult" class="result-section" style="display:none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        function openModal(feature) {
+            document.getElementById(feature + 'Modal').classList.add('active');
+        }
+        
+        function closeModal(feature) {
+            document.getElementById(feature + 'Modal').classList.remove('active');
+            document.getElementById(feature + 'Result').style.display = 'none';
+        }
+        
+        // Form submissions
+        document.getElementById('destinyForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            try {
+                const response = await fetch('/api/rare/destiny-blueprint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResult('destiny', result);
+            } catch (err) {
+                showResult('destiny', { error: err.message });
+            }
+        });
+        
+        document.getElementById('consciousnessForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            try {
+                const response = await fetch('/api/rare/consciousness', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResult('consciousness', result);
+            } catch (err) {
+                showResult('consciousness', { error: err.message });
+            }
+        });
+        
+        document.getElementById('timingForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = Object.fromEntries(new FormData(e.target));
+            const data = { decisions: [formData] };
+            try {
+                const response = await fetch('/api/rare/perfect-timing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResult('timing', result);
+            } catch (err) {
+                showResult('timing', { error: err.message });
+            }
+        });
+        
+        document.getElementById('marketForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            try {
+                const response = await fetch('/api/rare/market-consciousness', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResult('market', result);
+            } catch (err) {
+                showResult('market', { error: err.message });
+            }
+        });
+        
+        document.getElementById('soulForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            try {
+                const response = await fetch('/api/rare/customer-soul', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResult('soul', result);
+            } catch (err) {
+                showResult('soul', { error: err.message });
+            }
+        });
+        
+        document.getElementById('completeForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            try {
+                const response = await fetch('/api/rare/complete-blueprint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResult('complete', result);
+            } catch (err) {
+                showResult('complete', { error: err.message });
+            }
+        });
+        
+        function showResult(feature, result) {
+            const resultDiv = document.getElementById(feature + 'Result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+        }
+        
+        // Close modal on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

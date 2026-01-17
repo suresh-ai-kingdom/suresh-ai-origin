@@ -644,6 +644,122 @@ def checkout_page():
     """Checkout page with Razorpay integration."""
     return render_template("checkout.html")
 
+# ============================================================================
+# RARE 1% FEATURES - GOD'S GIFT TO THE WORLD (ALL FREE)
+# ============================================================================
+
+@app.route("/api/rare/destiny-blueprint", methods=["POST"])
+@rate_limit_feature('rare_destiny')
+def destiny_blueprint():
+    """
+    Generate EXACT 24-month path to ₹1 crore revenue.
+    FREE for all users.
+    """
+    from rare_1_percent_features import generate_destiny_blueprint
+    try:
+        data = request.json
+        result = generate_destiny_blueprint(data)
+        return jsonify(result), 200
+    except Exception as e:
+        logging.exception(f"Destiny blueprint error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route("/api/rare/consciousness", methods=["POST"])
+@rate_limit_feature('rare_consciousness')
+def universal_consciousness():
+    """
+    UNIVERSAL BUSINESS CONSCIOUSNESS - Works for ANY business.
+    FREE for all users.
+    """
+    from rare_1_percent_features import analyze_universal_business
+    try:
+        data = request.json
+        result = analyze_universal_business(data)
+        return jsonify(result), 200
+    except Exception as e:
+        logging.exception(f"Consciousness error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route("/api/rare/perfect-timing", methods=["POST"])
+@rate_limit_feature('rare_timing')
+def perfect_timing():
+    """
+    PERFECT TIMING ENGINE - Know exact timing for everything.
+    FREE for all users.
+    """
+    from rare_1_percent_features import calculate_perfect_timing
+    try:
+        data = request.json
+        decisions = data.get('decisions', [])
+        result = calculate_perfect_timing(decisions)
+        return jsonify(result), 200
+    except Exception as e:
+        logging.exception(f"Timing error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route("/api/rare/market-consciousness", methods=["POST"])
+@rate_limit_feature('rare_market')
+def market_consciousness():
+    """
+    MARKET CONSCIOUSNESS - See markets 6 months ahead.
+    FREE for all users.
+    """
+    from rare_1_percent_features import predict_market_future
+    try:
+        data = request.json
+        result = predict_market_future(data)
+        return jsonify(result), 200
+    except Exception as e:
+        logging.exception(f"Market consciousness error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route("/api/rare/customer-soul", methods=["POST"])
+@rate_limit_feature('rare_soul')
+def customer_soul_mapping():
+    """
+    CUSTOMER SOUL MAPPING - Understand customers at deepest level.
+    FREE for all users.
+    """
+    from rare_1_percent_features import map_customer_soul
+    try:
+        data = request.json
+        result = map_customer_soul(data)
+        return jsonify(result), 200
+    except Exception as e:
+        logging.exception(f"Soul mapping error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route("/api/rare/complete-blueprint", methods=["POST"])
+@rate_limit_feature('rare_complete')
+def complete_rare_blueprint():
+    """
+    COMPLETE RARE BLUEPRINT - All 5 features combined.
+    DESTINY + CONSCIOUSNESS + TIMING + MARKET + SOUL
+    FREE for all users. This is GOD'S GIFT.
+    """
+    from rare_1_percent_features import generate_complete_rare_blueprint
+    try:
+        data = request.json
+        result = generate_complete_rare_blueprint(data)
+        return jsonify(result), 200
+    except Exception as e:
+        logging.exception(f"Complete blueprint error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route("/rare-features")
+def rare_features_dashboard():
+    """Dashboard showcasing all 5 rare features."""
+    from rare_1_percent_features import get_rare_features_stats
+    stats = get_rare_features_stats()
+    return render_template("rare_features_dashboard.html", stats=stats)
+
+@app.route("/api/rare/stats")
+def rare_features_stats():
+    """Get stats on rare features usage and availability."""
+    from rare_1_percent_features import get_rare_features_stats
+    stats = get_rare_features_stats()
+    return jsonify(stats), 200
+
 @app.route("/api/create-order", methods=["POST"])
 @rate_limit_feature('create_order')
 def create_order_endpoint():
