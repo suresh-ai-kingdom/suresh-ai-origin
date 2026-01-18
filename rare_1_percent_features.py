@@ -185,12 +185,34 @@ def calculate_perfect_timing(decisions: list) -> dict:
     Uses: Seasonal data + market cycles + business readiness
     """
     
-    
-    decisions_text = "\n".join([
-        f"Decision: {d.get('decision', d) if isinstance(d, dict) else d}" +
-        (f"\nContext: {d.get('context', '')}" if isinstance(d, dict) and 'context' in d else "")
-        for d in decisions
-    ])
+    # Normalize decisions to a readable text block regardless of input shape
+    # Supports list of dicts, list of strings, single dict, single string
+    try:
+        if isinstance(decisions, dict):
+            decisions = [decisions]
+        elif not isinstance(decisions, list):
+            decisions = [str(decisions)]
+
+        normalized: list[str] = []
+        for d in decisions:
+            if isinstance(d, dict):
+                decision_str = str(d.get('decision', '') or '').strip()
+                context_str = str(d.get('context', '') or '').strip()
+                parts = []
+                if decision_str:
+                    parts.append(f"Decision: {decision_str}")
+                if context_str:
+                    parts.append(f"Context: {context_str}")
+                if not parts:
+                    # Fallback to JSON representation if keys missing
+                    parts.append(f"Decision: {json.dumps(d, ensure_ascii=False)}")
+                normalized.append("\n".join(parts))
+            else:
+                normalized.append(f"Decision: {str(d)}")
+        decisions_text = "\n".join(normalized)
+    except Exception:
+        # Absolute fallback to avoid runtime failure
+        decisions_text = json.dumps(decisions, ensure_ascii=False)
     
     prompt = f"""
     You are PERFECT TIMING ENGINE - you know the exact moment for everything.
