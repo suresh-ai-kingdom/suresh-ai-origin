@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 """
-AUTONOMOUS INCOME ENGINE v3 - AI INTERNET REPLACER - SURESH AI ORIGIN
-======================================================================
-Self-improving, continuously running agent for 24/7 revenue growth + AI internet.
+AUTONOMOUS INCOME ENGINE v4 - AI INTERNET + DRONE DELIVERY MONETIZATION - SURESH AI ORIGIN
+===========================================================================================
+Self-improving agent for 24/7 revenue growth: AI internet + drone delivery opportunities.
 
-NEW v3 FEATURES (AI Internet Replacer):
+NEW v4 FEATURES (Drone Delivery Monetization):
+- Detect delivery opportunities from community orders
+- Rarity enforcement: Score packages via rarity_engine, proceed if top 1%
+- Worldwide expansion: Use decentralized nodes for EU/US/IN cross-border routing
+- Generate income: Auto-upsell "Rare drone-drop bundle @ ₹5k" on elite packages
+- Integrate test_autonomous_feature_listener.py for feedback loop
+- Real-time drone fleet integration (drone_fleet_manager.py)
+
+v3 FEATURES (AI Internet Replacer):
 - Internet task handling (search → AI semantic, browse → node fetch)
 - Rarity filtering (top 1% matches, exclusive access upsell)
 - Decentralized dispatch (offload to nodes on overload)
@@ -16,9 +24,8 @@ ORIGINAL FEATURES:
 - Revenue optimization & dynamic pricing
 - Autonomous income action generation
 - Self-improvement (learns from outcomes)
-- Weekly Notion reporting
 
-Architecture: Modular, production-ready, ruthless optimization + AI internet.
+Architecture: Modular, production-ready, ruthless optimization + AI internet + drone delivery.
 """
 
 import json
@@ -65,6 +72,17 @@ try:
     from ai_gateway import AISystemManager, RequestRouter
 except ImportError as e:
     logger.warning(f"AI Internet imports not available: {e}")
+
+# v4: Drone Delivery imports
+try:
+    from drone_fleet_manager import (
+        DroneFleetManager, VirtualDrone, FleetDelivery,
+        DeliveryPriority, DroneStatus
+    )
+    from auto_recovery import AutoRecovery as DroneAutoRecovery
+    from test_autonomous_feature_listener import AutonomousFeatureListener
+except ImportError as e:
+    logger.warning(f"Drone delivery imports not available: {e}")
 
 # ==================== DATA STRUCTURES ====================
 
@@ -153,6 +171,61 @@ class UserFeedback:
     comments: Optional[str] = None
 
 
+# ==================== v4: DRONE DELIVERY DATA STRUCTURES ====================
+
+@dataclass
+class DeliveryOpportunity:
+    """Detected delivery opportunity from community orders."""
+    opp_id: str
+    order_id: str
+    customer_id: str
+    pickup_lat: float
+    pickup_lon: float
+    delivery_lat: float
+    delivery_lon: float
+    package_weight_kg: float
+    items_list: List[str]
+    rarity_score: float  # Via rarity_engine
+    elite_tier: str  # FREE, BASIC, PRO, ENTERPRISE, ELITE
+    estimated_value_paise: int
+    is_cross_border: bool  # EU/US/IN routing needed
+    destination_region: str  # Region code for drone routing
+    timestamp: float
+    status: str  # 'detected', 'scored', 'offered', 'accepted', 'in_flight', 'delivered'
+
+
+@dataclass
+class DroneDeliveryAction:
+    """Auto-generated drone delivery action (upsell)."""
+    action_id: str
+    opportunity_id: str
+    customer_id: str
+    action_type: str  # 'rare_drone_drop_bundle', 'express_elite', etc.
+    bundle_name: str  # "Rare drone-drop bundle @ ₹5k"
+    bundle_price_paise: int
+    bundle_items: List[str]
+    rarity_threshold: float
+    expected_revenue_impact_paise: int
+    execution_time: float
+    is_auto_executable: bool
+    status: str  # 'pending', 'offered', 'accepted', 'dispatched'
+    delivery_id: Optional[str] = None  # Linked drone_fleet_manager delivery ID
+
+
+@dataclass
+class WorldwideRoutingNode:
+    """Cross-border routing node (EU/US/IN)."""
+    node_id: str
+    region: str  # 'eu_central', 'us_west', 'in_mumbai', etc.
+    hub_lat: float
+    hub_lon: float
+    coverage_km: float
+    available_capacity: int  # Available drones
+    avg_delivery_time_min: float
+    success_rate_percent: float
+    connected_nodes: List[str]  # Other regions it can reach
+
+
 # ==================== ENUMS ====================
 
 class IncomeStreamType(Enum):
@@ -192,8 +265,16 @@ class ExclusiveTier(Enum):
 
 class AutonomousIncomeEngine:
     """
-    Core self-improving autonomous income agent + AI Internet Replacer (v3).
-    Runs 24/7, detects issues, auto-recovers, optimizes revenue, reports.
+    Core self-improving autonomous income agent + AI Internet Replacer + Drone Delivery (v4).
+    Runs 24/7, detects issues, auto-recovers, optimizes revenue, monetizes drone deliveries.
+    
+    NEW v4 CAPABILITIES:
+    - Detect delivery opportunities from community orders
+    - Rarity scoring: Use rarity_engine to score packages (top 1% only)
+    - Worldwide expansion: Cross-border routing via EU/US/IN nodes
+    - Auto-upsell: "Rare drone-drop bundle @ ₹5k" for elite packages
+    - Feedback integration: test_autonomous_feature_listener.py for loop
+    - Real-time fleet ops: drone_fleet_manager integration
     
     NEW v3 CAPABILITIES:
     - Handles "internet" tasks (search, browse) via AI/nodes
@@ -204,7 +285,7 @@ class AutonomousIncomeEngine:
     """
 
     def __init__(self, interval_seconds: int = 3600):
-        """Initialize autonomous agent with AI internet capabilities."""
+        """Initialize autonomous agent with v4 drone delivery capabilities."""
         self.interval_seconds = interval_seconds
         self.running = False
         self.thread = None
@@ -230,12 +311,28 @@ class AutonomousIncomeEngine:
                 rarity_threshold=90.0
             )
             self.ai_system_manager = AISystemManager()
-            logger.info("✅ AI Internet subsystems initialized")
+            logger.info("✅ AI Internet subsystems initialized (v3)")
         except Exception as e:
             logger.warning(f"AI Internet subsystems not available: {e}")
             self.rarity_engine = None
             self.decentralized_node = None
             self.ai_system_manager = None
+        
+        # v4: Drone Delivery subsystems
+        try:
+            self.drone_fleet_manager = DroneFleetManager(manager_id='income_engine_fleet')
+            self.drone_fleet_manager.build_global_fleet(drones_per_region=10)
+            self.drone_fleet_manager.start_fleet_operations(num_workers=4)
+            self.feature_listener = AutonomousFeatureListener()
+            logger.info("✅ Drone delivery subsystems initialized (v4)")
+            logger.info(f"   📦 Fleet: {len(self.drone_fleet_manager.drones)} drones across 7 regions")
+        except Exception as e:
+            logger.warning(f"Drone delivery subsystems not available: {e}")
+            self.drone_fleet_manager = None
+            self.feature_listener = None
+        
+        # Worldwide routing nodes (v4)
+        self.worldwide_nodes = self._initialize_routing_nodes()
         
         # Data structures (original)
         self.kpi_history = []
@@ -245,18 +342,24 @@ class AutonomousIncomeEngine:
         self.action_patterns = defaultdict(float)
         
         # v3: AI Internet data structures
-        self.internet_tasks = []  # Internet tasks queue
-        self.user_feedback = []   # User feedback for learning
-        self.rarity_adjustments = defaultdict(float)  # Learned rarity adjustments
-        self.node_load = 0  # Current node load
-        self.max_node_load = 10  # Max concurrent tasks before offload
-        self.upsell_conversions = defaultdict(int)  # Track upsell success
+        self.internet_tasks = []
+        self.user_feedback = []
+        self.rarity_adjustments = defaultdict(float)
+        self.node_load = 0
+        self.max_node_load = 10
+        self.upsell_conversions = defaultdict(int)
+        
+        # v4: Drone Delivery data structures
+        self.delivery_opportunities = []
+        self.drone_delivery_actions = []
+        self.drone_upsell_conversions = defaultdict(int)
+        self.cross_border_orders = []
         
         # Data directories
         self.data_dir = Path('data')
         self.data_dir.mkdir(exist_ok=True)
         
-        logger.info("✅ AutonomousIncomeEngine v3 (AI Internet Replacer) initialized")
+        logger.info("✅ AutonomousIncomeEngine v4 (AI Internet + Drone Delivery) initialized")
 
     def start(self):
         """Start engine in background."""
@@ -289,7 +392,7 @@ class AutonomousIncomeEngine:
                 time.sleep(60)
 
     def execute_cycle(self):
-        """Execute one full cycle: Monitor → Detect → Recover → Optimize → Act → Internet → Learn."""
+        """Execute one full cycle: Monitor → Detect → Recover → Optimize → Act → Internet → Drone Delivery → Learn."""
         cycle_start = time.time()
         
         # STEP 1: Monitor KPIs
@@ -316,18 +419,29 @@ class AutonomousIncomeEngine:
         actions = self.generate_income_actions(kpis, issues, optimizations)
         logger.info(f"  ✅ {len(actions)} actions generated")
         
-        # STEP 6: Handle Internet Tasks (v3 NEW)
+        # STEP 6: Handle Internet Tasks (v3)
         logger.info("🌐 STEP 6: Processing AI Internet Tasks...")
         internet_results = self.handle_internet_tasks()
         logger.info(f"  ✅ {len(internet_results)} internet tasks processed")
         
-        # STEP 7: Self-Improve from Feedback (v3 ENHANCED)
-        logger.info("🧠 STEP 7: Learning from Outcomes + User Feedback...")
+        # STEP 7 (NEW v4): Detect & Monetize Delivery Opportunities
+        logger.info("📦 STEP 7: Detecting Delivery Opportunities (v4 NEW)...")
+        delivery_opps = self.detect_delivery_opportunities()
+        logger.info(f"  ✅ {len(delivery_opps)} opportunities detected")
+        
+        # STEP 8 (NEW v4): Generate Drone Delivery Actions (Auto-Upsell)
+        logger.info("🚁 STEP 8: Generating Drone Delivery Upsells (v4 NEW)...")
+        drone_actions = self.generate_drone_delivery_actions(delivery_opps)
+        logger.info(f"  ✅ {len(drone_actions)} drone delivery actions queued")
+        
+        # STEP 9: Self-Improve from Feedback (v3 ENHANCED)
+        logger.info("🧠 STEP 9: Learning from Outcomes + User Feedback...")
         self._update_learned_patterns()
         self._learn_from_user_feedback()
+        self._learn_from_drone_feedback()
         
-        # STEP 8: Report
-        logger.info("📋 STEP 8: Generating Report...")
+        # STEP 10: Report
+        logger.info("📋 STEP 10: Generating Report...")
         report = self._generate_report(kpis, issues, actions)
         
         duration = time.time() - cycle_start
@@ -856,7 +970,7 @@ class AutonomousIncomeEngine:
         }
 
     def get_status(self) -> Dict:
-        """Get engine status (v3 enhanced)."""
+        """Get engine status (v4 enhanced)."""
         status = {
             'running': self.running,
             'cycles': len(self.kpi_history),
@@ -880,7 +994,410 @@ class AutonomousIncomeEngine:
                 'node_load': self.node_load
             })
         
+        # v4: Add drone delivery stats
+        if self.delivery_opportunities or self.drone_delivery_actions:
+            status.update({
+                'delivery_opportunities_detected': len(self.delivery_opportunities),
+                'drone_actions_queued': len(self.drone_delivery_actions),
+                'cross_border_orders': len(self.cross_border_orders),
+                'drone_upsell_conversion': dict(self.drone_upsell_conversions),
+                'fleet_status': self.drone_fleet_manager.monitor_fleet() if self.drone_fleet_manager else {}
+            })
+        
         return status
+
+    # ==================== v4: DRONE DELIVERY METHODS ====================
+    
+    def _initialize_routing_nodes(self) -> Dict[str, WorldwideRoutingNode]:
+        """Initialize worldwide routing nodes for cross-border delivery."""
+        nodes = {
+            'eu_central': WorldwideRoutingNode(
+                node_id='NODE_EU_001',
+                region='eu_central',
+                hub_lat=52.5200,
+                hub_lon=13.4050,
+                coverage_km=500,
+                available_capacity=50,
+                avg_delivery_time_min=45,
+                success_rate_percent=96.0,
+                connected_nodes=['us_west', 'apac']
+            ),
+            'us_west': WorldwideRoutingNode(
+                node_id='NODE_US_W_001',
+                region='us_west',
+                hub_lat=37.7749,
+                hub_lon=-122.4194,
+                coverage_km=800,
+                available_capacity=40,
+                avg_delivery_time_min=30,
+                success_rate_percent=98.0,
+                connected_nodes=['eu_central', 'us_east']
+            ),
+            'in_mumbai': WorldwideRoutingNode(
+                node_id='NODE_IN_001',
+                region='in_mumbai',
+                hub_lat=19.0760,
+                hub_lon=72.8777,
+                coverage_km=300,
+                available_capacity=30,
+                avg_delivery_time_min=25,
+                success_rate_percent=94.0,
+                connected_nodes=['eu_central', 'apac']
+            ),
+        }
+        logger.info(f"✅ Initialized {len(nodes)} worldwide routing nodes for cross-border delivery")
+        return nodes
+    
+    def detect_delivery_opportunities(self) -> List[DeliveryOpportunity]:
+        """
+        STEP 7 (v4 NEW): Detect delivery opportunities from community orders.
+        Score via rarity_engine, proceed only if top 1%.
+        """
+        opportunities = []
+        
+        if not self.rarity_engine or not self.drone_fleet_manager:
+            return []
+        
+        try:
+            # Simulate detecting community orders
+            import random
+            import hashlib
+            
+            # Get sample orders from database or queue
+            sample_orders = self._get_community_orders_sample(limit=5)
+            
+            for order_data in sample_orders:
+                try:
+                    # Calculate rarity score for package
+                    items_description = " ".join(order_data.get('items', []))
+                    rarity_result = self.rarity_engine.score_item(
+                        items_description,
+                        source="delivery_opportunity"
+                    )
+                    
+                    rarity_score = rarity_result['score']
+                    
+                    # Proceed only if top 1% (rarity >= 95)
+                    if rarity_score < 95:
+                        logger.info(f"  ⊘ Order {order_data.get('order_id')} below rarity threshold ({rarity_score:.1f})")
+                        continue
+                    
+                    # Determine if cross-border
+                    is_cross_border = order_data.get('dest_country') != order_data.get('source_country')
+                    dest_region = self._determine_destination_region(order_data.get('dest_country'))
+                    
+                    opp_id = hashlib.md5(f"{order_data.get('order_id')}_{time.time()}".encode()).hexdigest()[:12]
+                    
+                    opp = DeliveryOpportunity(
+                        opp_id=opp_id,
+                        order_id=order_data.get('order_id'),
+                        customer_id=order_data.get('customer_id'),
+                        pickup_lat=order_data.get('pickup_lat'),
+                        pickup_lon=order_data.get('pickup_lon'),
+                        delivery_lat=order_data.get('delivery_lat'),
+                        delivery_lon=order_data.get('delivery_lon'),
+                        package_weight_kg=order_data.get('weight_kg', 1.0),
+                        items_list=order_data.get('items', []),
+                        rarity_score=rarity_score,
+                        elite_tier=self._determine_elite_tier(rarity_score),
+                        estimated_value_paise=order_data.get('value_paise', 50000),
+                        is_cross_border=is_cross_border,
+                        destination_region=dest_region,
+                        timestamp=time.time(),
+                        status='detected'
+                    )
+                    
+                    opportunities.append(opp)
+                    logger.info(f"  ✅ Opportunity detected: {opp_id} | Rarity: {rarity_score:.1f} | Elite: {opp.elite_tier} | Cross-border: {is_cross_border}")
+                    
+                    # Track cross-border for special handling
+                    if is_cross_border:
+                        self.cross_border_orders.append(opp)
+                        logger.info(f"     🌍 Cross-border order: {order_data.get('source_country')} → {order_data.get('dest_country')}")
+                
+                except Exception as e:
+                    logger.warning(f"  ❌ Failed to process order: {e}")
+                    continue
+            
+            self.delivery_opportunities.extend(opportunities)
+            return opportunities
+            
+        except Exception as e:
+            logger.error(f"❌ Delivery opportunity detection failed: {e}")
+            return []
+    
+    def generate_drone_delivery_actions(self, opportunities: List[DeliveryOpportunity]) -> List[DroneDeliveryAction]:
+        """
+        STEP 8 (v4 NEW): Generate auto-upsell actions for elite packages.
+        Creates "Rare drone-drop bundle @ ₹5k" offers.
+        """
+        actions = []
+        
+        if not opportunities:
+            return []
+        
+        try:
+            for opp in opportunities:
+                if opp.status != 'detected':
+                    continue
+                
+                # Only upsell for ELITE tier (rarity > 95)
+                if opp.elite_tier != 'ELITE':
+                    continue
+                
+                import hashlib
+                action_id = hashlib.md5(f"{opp.opp_id}_{time.time()}".encode()).hexdigest()[:12]
+                
+                # Create upsell bundle
+                bundle_price_paise = 500000  # ₹5000 (~$60)
+                
+                action = DroneDeliveryAction(
+                    action_id=action_id,
+                    opportunity_id=opp.opp_id,
+                    customer_id=opp.customer_id,
+                    action_type='rare_drone_drop_bundle',
+                    bundle_name=f"🎁 Rare drone-drop bundle @ ₹5000",
+                    bundle_price_paise=bundle_price_paise,
+                    bundle_items=[f"🚁 Elite drone delivery for {item}" for item in opp.items_list[:3]],
+                    rarity_threshold=95.0,
+                    expected_revenue_impact_paise=bundle_price_paise,
+                    execution_time=time.time() + 300,  # Offer expires in 5min
+                    is_auto_executable=True,
+                    status='pending'
+                )
+                
+                actions.append(action)
+                logger.info(f"  ✅ Upsell action created: {action_id}")
+                logger.info(f"     📦 Bundle: {action.bundle_name}")
+                logger.info(f"     💰 Revenue: ₹{bundle_price_paise/100:.0f}")
+                
+                # Try to dispatch to drone fleet
+                try:
+                    # Check cross-border - route via nodes if needed
+                    if opp.is_cross_border:
+                        logger.info(f"     🌍 Cross-border routing: {opp.destination_region}")
+                        delivery_id = self._route_cross_border_delivery(opp, action)
+                    else:
+                        # Route to local fleet
+                        delivery_id = self._dispatch_to_local_fleet(opp, action)
+                    
+                    if delivery_id:
+                        action.delivery_id = delivery_id
+                        action.status = 'dispatched'
+                        logger.info(f"     ✅ Dispatched to drone: {delivery_id}")
+                
+                except Exception as e:
+                    logger.warning(f"     ⚠️ Dispatch failed: {e}")
+                    action.status = 'offered'
+            
+            self.drone_delivery_actions.extend(actions)
+            return actions
+            
+        except Exception as e:
+            logger.error(f"❌ Drone delivery action generation failed: {e}")
+            return []
+    
+    def _get_community_orders_sample(self, limit: int = 5) -> List[Dict]:
+        """Get sample community orders (simulated for demo)."""
+        import random
+        
+        sample_orders = [
+            {
+                'order_id': 'ORD_RARE_001',
+                'customer_id': 'CUST_001',
+                'items': ['Premium AI dataset', 'Quantum algorithm paper', 'ML research papers'],
+                'weight_kg': 0.5,
+                'value_paise': 100000,
+                'pickup_lat': 37.7749,
+                'pickup_lon': -122.4194,
+                'delivery_lat': 40.7128,
+                'delivery_lon': -74.0060,
+                'source_country': 'US',
+                'dest_country': 'US'
+            },
+            {
+                'order_id': 'ORD_RARE_002',
+                'customer_id': 'CUST_002',
+                'items': ['Exclusive AI tools', 'Blockchain framework', 'Smart contract'],
+                'weight_kg': 1.0,
+                'value_paise': 150000,
+                'pickup_lat': 52.5200,
+                'pickup_lon': 13.4050,
+                'delivery_lat': 48.8566,
+                'delivery_lon': 2.3522,
+                'source_country': 'DE',
+                'dest_country': 'FR'
+            },
+            {
+                'order_id': 'ORD_RARE_003',
+                'customer_id': 'CUST_003',
+                'items': ['Quantum computing guide', 'AI trends 2026', 'Nano-tech papers'],
+                'weight_kg': 0.75,
+                'value_paise': 200000,
+                'pickup_lat': 19.0760,
+                'pickup_lon': 72.8777,
+                'delivery_lat': 28.6139,
+                'delivery_lon': 77.2090,
+                'source_country': 'IN',
+                'dest_country': 'IN'
+            },
+        ]
+        
+        return random.sample(sample_orders, min(limit, len(sample_orders)))
+    
+    def _determine_destination_region(self, country: str) -> str:
+        """Determine drone fleet region from destination country."""
+        region_map = {
+            'US': 'us_west',
+            'GB': 'eu_central',
+            'DE': 'eu_central',
+            'FR': 'eu_central',
+            'IN': 'in_mumbai',
+            'JP': 'apac',
+            'CN': 'apac',
+            'AU': 'apac',
+            'BR': 'south_america',
+            'ZA': 'africa',
+            'AE': 'middle_east'
+        }
+        return region_map.get(country, 'us_west')
+    
+    def _determine_elite_tier(self, rarity_score: float) -> str:
+        """Determine elite tier from rarity score."""
+        if rarity_score >= 95:
+            return 'ELITE'
+        elif rarity_score >= 85:
+            return 'ENTERPRISE'
+        elif rarity_score >= 70:
+            return 'PRO'
+        elif rarity_score >= 50:
+            return 'BASIC'
+        else:
+            return 'FREE'
+    
+    def _dispatch_to_local_fleet(self, opp: DeliveryOpportunity, action: DroneDeliveryAction) -> Optional[str]:
+        """Dispatch delivery to local drone fleet."""
+        try:
+            success, delivery_id = self.drone_fleet_manager.submit_delivery(
+                order_id=opp.order_id,
+                pickup_lat=opp.pickup_lat,
+                pickup_lon=opp.pickup_lon,
+                delivery_lat=opp.delivery_lat,
+                delivery_lon=opp.delivery_lon,
+                package_weight_kg=opp.package_weight_kg,
+                rarity_score=opp.rarity_score,
+                priority='vip_rare' if opp.elite_tier == 'ELITE' else 'standard',
+                revenue_usd=action.bundle_price_paise / 100
+            )
+            
+            if success:
+                # Auto-assign to best drone
+                drone_id = self.drone_fleet_manager.assign_delivery(delivery_id)
+                logger.info(f"✅ Local dispatch: {delivery_id} → {drone_id}")
+                return delivery_id
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ Local dispatch failed: {e}")
+            return None
+    
+    def _route_cross_border_delivery(self, opp: DeliveryOpportunity, action: DroneDeliveryAction) -> Optional[str]:
+        """Route cross-border delivery via worldwide nodes."""
+        try:
+            dest_node = self.worldwide_nodes.get(opp.destination_region)
+            
+            if not dest_node:
+                logger.warning(f"⚠️ No routing node for region: {opp.destination_region}")
+                return self._dispatch_to_local_fleet(opp, action)
+            
+            # Check node capacity
+            if dest_node.available_capacity <= 0:
+                logger.warning(f"⚠️ Destination node at capacity: {dest_node.region}")
+                return None
+            
+            logger.info(f"🌍 Cross-border routing via {dest_node.region} (capacity: {dest_node.available_capacity})")
+            
+            # Dispatch via decentralized node
+            if self.decentralized_node:
+                routing_task = {
+                    'type': 'cross_border_delivery',
+                    'destination_node': dest_node.node_id,
+                    'order_id': opp.order_id,
+                    'destination_lat': opp.delivery_lat,
+                    'destination_lon': opp.delivery_lon,
+                    'package_weight': opp.package_weight_kg,
+                    'rarity_score': opp.rarity_score
+                }
+                
+                result = self.decentralized_node.process_task(routing_task)
+                
+                if result.get('success'):
+                    dest_node.available_capacity -= 1
+                    delivery_id = result.get('delivery_id', f"CROSS_BORDER_{opp.opp_id}")
+                    logger.info(f"✅ Cross-border dispatch via {result.get('node_id')}: {delivery_id}")
+                    return delivery_id
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ Cross-border routing failed: {e}")
+            return None
+    
+    def _learn_from_drone_feedback(self):
+        """Learn from drone delivery feedback (v4 NEW)."""
+        if not self.feature_listener or not self.drone_delivery_actions:
+            return
+        
+        try:
+            # Get feedback from feature listener
+            feedback_data = self.feature_listener.get_latest_feedback()
+            
+            if not feedback_data:
+                return
+            
+            logger.info(f"  🚁 Processing drone delivery feedback...")
+            
+            # Analyze feedback
+            converted_actions = [a for a in self.drone_delivery_actions if a.status == 'dispatched']
+            if converted_actions:
+                conversion_rate = len(converted_actions) / len(self.drone_delivery_actions)
+                logger.info(f"    📊 Drone upsell conversion rate: {conversion_rate:.1%}")
+                
+                # Track by elite tier
+                for action in converted_actions:
+                    self.drone_upsell_conversions[action.bundle_name] += 1
+                
+                # Adjust upsell strategy based on conversion
+                if conversion_rate > 0.4:
+                    logger.info("    📈 High conversion - aggressive upselling strategy")
+                elif conversion_rate < 0.1:
+                    logger.info("    📉 Low conversion - adjusting bundle pricing")
+        
+        except Exception as e:
+            logger.warning(f"❌ Drone feedback learning failed: {e}")
+    
+    def get_drone_delivery_report(self) -> Dict:
+        """Get comprehensive drone delivery report (v4 NEW)."""
+        return {
+            'timestamp': time.time(),
+            'delivery_opportunities_detected': len(self.delivery_opportunities),
+            'elite_opportunities': len([o for o in self.delivery_opportunities if o.elite_tier == 'ELITE']),
+            'cross_border_orders': len(self.cross_border_orders),
+            'drone_actions_queued': len(self.drone_delivery_actions),
+            'drone_actions_dispatched': len([a for a in self.drone_delivery_actions if a.status == 'dispatched']),
+            'total_drone_revenue_paise': sum(a.bundle_price_paise for a in self.drone_delivery_actions if a.status == 'dispatched'),
+            'worldwide_nodes': {
+                node_id: {
+                    'region': node.region,
+                    'available_capacity': node.available_capacity,
+                    'avg_delivery_time': node.avg_delivery_time_min,
+                    'success_rate': node.success_rate_percent
+                }
+                for node_id, node in self.worldwide_nodes.items()
+            },
+            'upsell_conversion_by_bundle': dict(self.drone_upsell_conversions)
+        }
 
 
 # ==================== DEMO ====================

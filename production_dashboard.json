@@ -1,0 +1,94 @@
+{
+  "fleet_manager": "test_fleet_01",
+  "last_updated": "2026-01-19T03:49:04.326124",
+  "monitoring": {
+    "manager_id": "test_fleet_01",
+    "timestamp": "2026-01-19T03:49:04.326124",
+    "fleet": {
+      "total_drones": 21,
+      "status_distribution": {
+        "idle": 21
+      },
+      "average_battery_percent": 100.0,
+      "average_reliability_score": 1.0
+    },
+    "deliveries": {
+      "pending": 0,
+      "active": 0,
+      "completed": 0,
+      "failed": 0
+    },
+    "statistics": {
+      "total_assigned": 0,
+      "total_completed": 0,
+      "total_failed": 0,
+      "success_rate": 0.0,
+      "total_distance_km": 0.0,
+      "total_revenue_usd": 0.0,
+      "rare_orders_completed": 0
+    },
+    "regions": {
+      "us_west": {
+        "drones_active": 3,
+        "drones_total": 3
+      },
+      "us_east": {
+        "drones_active": 3,
+        "drones_total": 3
+      },
+      "eu_central": {
+        "drones_active": 3,
+        "drones_total": 3
+      },
+      "apac": {
+        "drones_active": 3,
+        "drones_total": 3
+      },
+      "middle_east": {
+        "drones_active": 3,
+        "drones_total": 3
+      },
+      "africa": {
+        "drones_active": 3,
+        "drones_total": 3
+      },
+      "south_america": {
+        "drones_active": 3,
+        "drones_total": 3
+      }
+    }
+  },
+  "top_performers": [
+    {
+      "drone_id": "drone_us_west_a68d95",
+      "successful_deliveries": 0,
+      "reliability_score": 1.0,
+      "total_distance_km": 0.0
+    },
+    {
+      "drone_id": "drone_us_west_0844f5",
+      "successful_deliveries": 0,
+      "reliability_score": 1.0,
+      "total_distance_km": 0.0
+    },
+    {
+      "drone_id": "drone_us_west_2d3606",
+      "successful_deliveries": 0,
+      "reliability_score": 1.0,
+      "total_distance_km": 0.0
+    },
+    {
+      "drone_id": "drone_us_east_b64f3c",
+      "successful_deliveries": 0,
+      "reliability_score": 1.0,
+      "total_distance_km": 0.0
+    },
+    {
+      "drone_id": "drone_us_east_38e7f3",
+      "successful_deliveries": 0,
+      "reliability_score": 1.0,
+      "total_distance_km": 0.0
+    }
+  ],
+  "alerts": []
+}

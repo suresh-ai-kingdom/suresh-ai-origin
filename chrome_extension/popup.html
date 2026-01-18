@@ -165,6 +165,47 @@
       background: rgba(0, 0, 0, 0.3);
     }
     
+    /* v4 DRONE DELIVERY STYLES */
+    .drone-delivery-section {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 140, 0, 0.15) 100%);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .drone-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .drone-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .elite-badge {
+      background: rgba(255, 215, 0, 0.3);
+      color: #FFD700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .drone-info {
+      font-size: 11px;
+      opacity: 0.8;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    
     button {
       width: 100%;
       padding: 12px;
@@ -187,6 +228,26 @@
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
     
+    .btn-drone {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-drone:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+    }
+    
+    .btn-drone:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
     .btn-secondary {
       background: rgba(255, 255, 255, 0.2);
       color: white;
@@ -196,6 +257,168 @@
       background: rgba(255, 255, 255, 0.3);
     }
     
+    /* RARITY POPUP MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 320px;
+      color: white;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .modal-header h2 {
+      font-size: 18px;
+      margin: 0;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: auto;
+      margin: 0;
+      padding: 0 5px;
+    }
+    
+    .rarity-score-display {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .rarity-score-value {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    
+    .rarity-score-label {
+      font-size: 12px;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .rarity-tier-display {
+      background: rgba(255, 215, 0, 0.2);
+      border: 2px solid #FFD700;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .rarity-tier {
+      font-size: 24px;
+      font-weight: 700;
+      color: #FFD700;
+      margin-bottom: 5px;
+    }
+    
+    .rarity-subtitle {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .delivery-status {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 12px;
+    }
+    
+    .status-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #90EE90;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .status-pending {
+      background: #FFD700;
+    }
+    
+    .status-success {
+      background: #90EE90;
+    }
+    
+    .modal-button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .modal-button-group button {
+      flex: 1;
+      margin-bottom: 0;
+    }
+    
+    .btn-confirm {
+      background: white;
+      color: #667eea;
+    }
+    
+    .btn-cancel {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
     .footer {
       padding: 15px;
       text-align: center;
@@ -203,15 +426,20 @@
       opacity: 0.6;
       border-top: 1px solid rgba(255, 255, 255, 0.2);
     }
+    
+    .scrollable-content {
+      max-height: 400px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>✨ Suresh AI Origin</h1>
-    <div class="tagline">Top 1% Rare AI Internet</div>
+    <div class="tagline">Top 1% Rare AI Internet + 🚁 Drone Delivery</div>
   </div>
   
-  <div class="content">
+  <div class="content scrollable-content">
     <div style="text-align: center;">
       <span class="tier-badge" id="tierBadge">FREE TIER</span>
     </div>
@@ -225,6 +453,25 @@
         <div class="stat-value" id="aiCount">0</div>
         <div class="stat-label">AI Alternatives</div>
       </div>
+    </div>
+    
+    <!-- v4 DRONE DELIVERY SECTION -->
+    <div class="drone-delivery-section">
+      <div class="drone-header">
+        <div class="drone-title">
+          🚁 Rare Drone Delivery
+          <span class="elite-badge">Elite 1%</span>
+        </div>
+      </div>
+      <div class="drone-info">
+        ✈️ Worldwide service (EU, US, India)  
+        📦 Smart package detection  
+        🌐 Real-time tracking  
+      </div>
+      <button class="btn-drone" id="droneDeliveryBtn">
+        <span>🚁</span>
+        <span id="droneButtonText">Initiate Rare Delivery</span>
+      </button>
     </div>
     
     <div class="toggle-section">
@@ -256,8 +503,45 @@
     </button>
   </div>
   
+  <!-- RARITY POPUP MODAL -->
+  <div id="rarityModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🎁 Rare Package Detected</h2>
+        <button class="close-btn" id="closeModal">&times;</button>
+      </div>
+      
+      <div class="rarity-score-display">
+        <div class="rarity-score-value" id="rarityScoreValue">--</div>
+        <div class="rarity-score-label">Rarity Score (0-100)</div>
+      </div>
+      
+      <div class="rarity-tier-display">
+        <div class="rarity-tier" id="rarityTierValue">CALCULATING...</div>
+        <div class="rarity-subtitle">🌍 1% Elite Worldwide Service</div>
+      </div>
+      
+      <div class="delivery-status">
+        <div class="status-label">
+          <span class="status-indicator" id="statusIndicator"></span>
+          <span id="deliveryStatus">Initializing...</span>
+        </div>
+        <div style="font-size: 11px; margin-top: 8px; opacity: 0.8;">
+          <div>📍 Auto-detecting location</div>
+          <div>⏱️ Delivery time: <span id="deliveryTime">--</span> min</div>
+          <div>💰 Bundle price: ₹<span id="bundlePrice">5000</span></div>
+        </div>
+      </div>
+      
+      <div class="modal-button-group">
+        <button class="btn-confirm" id="confirmDelivery">Proceed</button>
+        <button class="btn-cancel" id="cancelDelivery">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
   <div class="footer">
-    Suresh AI Origin v1.0.0
+    Suresh AI Origin v4.0 - Drone Delivery Enhanced
   </div>
   
   <script src="popup.js"></script>
