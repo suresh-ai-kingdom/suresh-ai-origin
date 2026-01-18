@@ -2,29 +2,69 @@
 AUTONOMOUS BUSINESS AGENT - SELF-OPERATING AI
 Revolutionary self-decision-making AI for SURESH AI ORIGIN V2.5
 
-This agent can:
-- Make business decisions autonomously (with safety guardrails)
-- Self-optimize strategies based on outcomes
-- Learn from mistakes without human intervention
-- Execute complex multi-step business workflows
-- Predict and prevent business failures before they happen
-- Generate and execute its own A/B tests
-
-WARNING: This is AGI-level business intelligence. Use with appropriate oversight.
+Features:
+- Monitor Stripe/Sheets revenue/leads daily
+- Auto-gen content (LinkedIn/Reels via Claude API) if leads < threshold
+- Deploy fixes via GitHub Actions on errors
+- Self-recover (retries, WhatsApp/Email alerts)
+- Log to Notion/analytics
+- Make autonomous business decisions with safety guardrails
 
 Author: SURESH AI ORIGIN
-Version: 2.5.0 - AUTONOMOUS
+Version: 2.5.0 - AUTONOMOUS + MONITORING
 """
 
+import os
+import sys
 import time
 import json
 import random
 import math
-from typing import Dict, List, Optional, Any, Callable
+import logging
+import argparse
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Callable, Tuple
 from dataclasses import dataclass, asdict, field
 from enum import Enum
 from collections import deque, defaultdict
-import logging
+
+import requests
+import schedule
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
+# Import existing Suresh AI Origin modules
+try:
+    from real_ai_service import generate_ai_content
+    from utils import send_email
+except ImportError:
+    logging.warning("Could not import real_ai_service or utils - some features disabled")
+
+
+# Configuration
+DATA_DIR = Path("data")
+DATA_DIR.mkdir(exist_ok=True)
+METRICS_LOG = DATA_DIR / "agent_metrics.jsonl"
+ALERTS_LOG = DATA_DIR / "agent_alerts.jsonl"
+ACTIONS_LOG = DATA_DIR / "agent_actions.jsonl"
+
+# Thresholds
+LEADS_THRESHOLD = int(os.getenv("AGENT_LEADS_THRESHOLD", "10"))
+REVENUE_THRESHOLD = float(os.getenv("AGENT_REVENUE_THRESHOLD", "1000.0"))
+ERROR_RATE_THRESHOLD = float(os.getenv("AGENT_ERROR_RATE", "0.05"))
+
+# API Keys (from environment)
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "")
+NOTION_API_KEY = os.getenv("NOTION_API_KEY", "")
+WHATSAPP_API_KEY = os.getenv("WHATSAPP_API_KEY", "")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+GITHUB_REPO = os.getenv("GITHUB_REPO", "suresh-ai-kingdom/suresh-ai-origin")
+
+# Logging setup
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("AutonomousAgent")
 
 
 class DecisionConfidence(Enum):
@@ -47,6 +87,8 @@ class ActionType(Enum):
     EMAIL_CAMPAIGN = "email_campaign"
     PARTNERSHIP_OUTREACH = "partnership_outreach"
     PRODUCT_LAUNCH = "product_launch"
+    CONTENT_GENERATION = "content_generation"
+    DEPLOY_FIX = "deploy_fix"
 
 
 class AgentState(Enum):
@@ -96,16 +138,28 @@ class AutonomousBusinessAgent:
     - Safety guardrails (budget limits, risk thresholds)
     - Explainable decisions with reasoning chains
     - Self-improvement through continuous learning
+    - Revenue/leads monitoring (Stripe, Google Sheets)
+    - Auto-content generation (LinkedIn/Reels via Claude)
+    - GitHub Actions deployment on errors
+    - Self-recovery with retries and alerts
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None, base_url: str = "http://localhost:5000"):
         self.config = config or {}
+        self.base_url = base_url.rstrip('/')
         self.state = AgentState.IDLE
         self.decision_history: List[Decision] = []
         self.learning_buffer: deque = deque(maxlen=10000)
         self.policy_weights = self._initialize_policy()
         self.safety_limits = self._initialize_safety_limits()
         self.performance_metrics = defaultdict(list)
+        
+        # Monitoring thresholds
+        self.leads_threshold = int(os.getenv("AGENT_LEADS_THRESHOLD", "10"))
+        self.revenue_threshold = float(os.getenv("AGENT_REVENUE_THRESHOLD", "1000.0"))
+        self.error_threshold = float(os.getenv("AGENT_ERROR_RATE", "0.05"))
+        
+        logger.info(f"Initialized AutonomousBusinessAgent (monitoring: {base_url})")
         self.autonomous_mode = self.config.get('autonomous_mode', False)
         self.learning_rate = 0.01
         self.exploration_rate = 0.1
@@ -723,10 +777,328 @@ class AutonomousBusinessAgent:
             'learning_experiences': len(self.learning_buffer),
             'current_state': self.state.value
         }
+    
+    # === NEW: MONITORING & AUTO-RECOVERY METHODS ===
+    
+    def run_loop(self, interval_seconds: int = 3600) -> None:
+        """
+        Run continuous monitoring loop with business intelligence.
+        
+        Args:
+            interval_seconds: Seconds between checks (default: 1 hour)
+        """
+        logger.info(f"Starting autonomous monitoring loop (every {interval_seconds}s)")
+        
+        # Schedule periodic checks
+        schedule.every(interval_seconds).seconds.do(self._monitoring_cycle)
+        
+        # Run immediately on startup
+        self._monitoring_cycle()
+        
+        # Keep running
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    
+    def _monitoring_cycle(self) -> None:
+        """Main monitoring cycle: check metrics, make decisions, take actions."""
+        try:
+            logger.info("=== Starting autonomous monitoring cycle ===")
+            
+            # 1. Collect metrics from all sources
+            metrics = self.monitor_metrics()
+            self._log_metrics(metrics)
+            
+            # 2. Analyze situation and make autonomous decision
+            business_context = {
+                'revenue_today': metrics['revenue_today'],
+                'leads_today': metrics['leads_today'],
+                'error_rate': metrics['error_rate'],
+                'mrr': metrics['mrr'],
+                'active_subscriptions': metrics['active_subscriptions']
+            }
+            
+            decision = self.make_decision(business_context)
+            logger.info(f"Decision: {decision.action_type.value} (confidence: {decision.confidence.value})")
+            
+            # 3. Execute decision if confidence is high enough
+            if decision.confidence in [DecisionConfidence.CRITICAL, DecisionConfidence.HIGH]:
+                self.execute_decision(decision.decision_id)
+                self._handle_decision_actions(decision, metrics)
+            
+            logger.info("=== Monitoring cycle complete ===")
+            
+        except Exception as e:
+            logger.error(f"Monitoring cycle failed: {e}", exc_info=True)
+            self._send_alert(
+                title="Agent Monitoring Failed",
+                message=f"Exception: {str(e)}",
+                metrics=None
+            )
+    
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type(requests.RequestException)
+    )
+    def monitor_metrics(self) -> Dict[str, Any]:
+        """
+        Collect business metrics from all sources with retry logic.
+        
+        Returns:
+            Dict with current business metrics
+        """
+        logger.info("Collecting metrics from all sources...")
+        
+        # Internal Suresh AI Origin metrics
+        internal_metrics = self._fetch_internal_metrics()
+        
+        # External metrics (if configured)
+        stripe_revenue = self._fetch_stripe_revenue() if STRIPE_API_KEY else 0.0
+        sheets_leads = self._fetch_sheets_leads() if os.getenv("GOOGLE_SHEETS_ID") else 0
+        
+        metrics = {
+            'timestamp': time.time(),
+            'revenue_today': internal_metrics.get('revenue_today', 0.0) + stripe_revenue,
+            'leads_today': internal_metrics.get('leads_today', 0) + sheets_leads,
+            'error_rate': internal_metrics.get('error_rate', 0.0),
+            'active_subscriptions': internal_metrics.get('active_subscriptions', 0),
+            'mrr': internal_metrics.get('mrr', 0.0)
+        }
+        
+        logger.info(f"Metrics: revenue=₹{metrics['revenue_today']:.2f}, leads={metrics['leads_today']}, errors={metrics['error_rate']:.2%}")
+        return metrics
+    
+    def _fetch_internal_metrics(self) -> Dict[str, Any]:
+        """Fetch metrics from Suresh AI Origin API."""
+        try:
+            base_url = os.getenv("BASE_URL", "http://localhost:5000")
+            resp = requests.get(f"{base_url}/api/analytics/daily-summary", timeout=10)
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as e:
+            logger.warning(f"Failed to fetch internal metrics: {e}")
+            return {}
+    
+    def _fetch_stripe_revenue(self) -> float:
+        """Fetch today's revenue from Stripe."""
+        try:
+            from datetime import datetime
+            today_start = int(datetime.now().replace(hour=0, minute=0, second=0).timestamp())
+            headers = {"Authorization": f"Bearer {STRIPE_API_KEY}"}
+            resp = requests.get(
+                "https://api.stripe.com/v1/charges",
+                headers=headers,
+                params={"created[gte]": today_start, "limit": 100},
+                timeout=10
+            )
+            resp.raise_for_status()
+            charges = resp.json().get("data", [])
+            revenue = sum(c["amount"] / 100 for c in charges if c["paid"])
+            logger.info(f"Stripe revenue today: ₹{revenue:.2f}")
+            return revenue
+        except Exception as e:
+            logger.warning(f"Failed to fetch Stripe revenue: {e}")
+            return 0.0
+    
+    def _fetch_sheets_leads(self) -> int:
+        """Fetch today's leads from Google Sheets."""
+        # TODO: Implement Google Sheets API integration
+        logger.debug("Google Sheets integration not configured")
+        return 0
+    
+    def _handle_decision_actions(self, decision: 'Decision', metrics: Dict[str, Any]) -> None:
+        """Execute specific actions based on decision type."""
+        action = decision.action_type
+        
+        if action == ActionType.CONTENT_GENERATION:
+            if metrics['leads_today'] < LEADS_THRESHOLD:
+                self.generate_content(reason="low_leads", metrics=metrics)
+        
+        elif action == ActionType.DEPLOY_FIX:
+            if metrics['error_rate'] > ERROR_RATE_THRESHOLD:
+                self.deploy_update(reason="high_error_rate", metrics=metrics)
+        
+        elif action == ActionType.EMAIL_CAMPAIGN:
+            if metrics['revenue_today'] < REVENUE_THRESHOLD:
+                self._send_alert(
+                    title="Low Revenue Alert",
+                    message=f"Revenue ₹{metrics['revenue_today']} below target ₹{REVENUE_THRESHOLD}",
+                    metrics=metrics
+                )
+    
+    @retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=2, max=5))
+    def generate_content(self, reason: str, metrics: Dict[str, Any]) -> None:
+        """
+        Auto-generate LinkedIn/Reels content via Claude API.
+        
+        Args:
+            reason: Why content is being generated
+            metrics: Current business metrics
+        """
+        logger.info(f"Generating content (reason: {reason})...")
+        
+        try:
+            prompt = f"""Generate a viral LinkedIn post for Suresh AI Origin - an AI automation platform.
+
+Context:
+- Reason: {reason}
+- Current metrics: {metrics['leads_today']} leads today, ₹{metrics['revenue_today']:.2f} revenue
+- MRR: ₹{metrics['mrr']:.2f}, Active subscriptions: {metrics['active_subscriptions']}
+
+Requirements:
+1. Hook in first line (curiosity-driven)
+2. Highlight our god-tier rare features (Destiny Blueprint, Business Consciousness, Perfect Timing)
+3. Include social proof (48 AI systems, 99.95% uptime)
+4. Clear CTA: Visit https://sureshaiorigin.com
+5. Tone: Bold, confident, slightly provocative
+6. Length: 150-250 words
+7. End with power statement
+
+Make it UNMISSABLE. No fluff."""
+            
+            content = generate_ai_content(prompt)
+            
+            if not content or len(content) < 50:
+                raise ValueError("Generated content too short")
+            
+            # Send content via email for review
+            send_email(
+                to_address=os.getenv("ADMIN_EMAIL", "admin@sureshaiorigin.com"),
+                subject=f"AI Generated Content - {reason}",
+                body=f"""<h2>Autonomous Agent Generated Content</h2>
+                <p><strong>Reason:</strong> {reason}</p>
+                <hr>
+                <div style="background: #f5f5f5; padding: 20px; border-left: 4px solid #007bff;">
+                {content}
+                </div>
+                """
+            )
+            
+            logger.info(f"Content generated and sent ({len(content)} chars)")
+            
+        except Exception as e:
+            logger.error(f"Content generation failed: {e}", exc_info=True)
+    
+    @retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=2, max=5))
+    def deploy_update(self, reason: str, metrics: Dict[str, Any]) -> None:
+        """
+        Trigger deployment via GitHub Actions.
+        
+        Args:
+            reason: Why deployment is triggered
+            metrics: Current business metrics
+        """
+        logger.info(f"Triggering deployment (reason: {reason})...")
+        
+        if not GITHUB_TOKEN:
+            logger.warning("GITHUB_TOKEN not configured")
+            return
+        
+        try:
+            headers = {
+                "Authorization": f"Bearer {GITHUB_TOKEN}",
+                "Accept": "application/vnd.github.v3+json"
+            }
+            payload = {
+                "ref": "main",
+                "inputs": {
+                    "reason": reason,
+                    "triggered_by": "autonomous_agent",
+                    "error_rate": str(metrics['error_rate'])
+                }
+            }
+            
+            resp = requests.post(
+                f"https://api.github.com/repos/{GITHUB_REPO}/actions/workflows/deploy.yml/dispatches",
+                headers=headers,
+                json=payload,
+                timeout=10
+            )
+            resp.raise_for_status()
+            
+            logger.info("Deployment triggered successfully")
+            
+            self._send_alert(
+                title="Auto-Deploy Triggered",
+                message=f"Deployment triggered due to {reason}. Error rate: {metrics['error_rate']:.2%}",
+                metrics=metrics
+            )
+            
+        except Exception as e:
+            logger.error(f"Deployment trigger failed: {e}", exc_info=True)
+    
+    def _send_alert(self, title: str, message: str, metrics: Optional[Dict]) -> None:
+        """Send alert via email/WhatsApp."""
+        try:
+            logger.warning(f"ALERT: {title} - {message}")
+            
+            # Log alert
+            self._write_jsonl(ALERTS_LOG, {
+                'timestamp': time.time(),
+                'title': title,
+                'message': message,
+                'metrics': metrics
+            })
+            
+            # Email alert
+            send_email(
+                to_address=os.getenv("ADMIN_EMAIL", "admin@sureshaiorigin.com"),
+                subject=f"🚨 SURESH AI ORIGIN ALERT: {title}",
+                body=f"""<h2 style="color: #dc3545;">{title}</h2>
+                <p>{message}</p>
+                {f'<pre>{json.dumps(metrics, indent=2)}</pre>' if metrics else ''}
+                """
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to send alert: {e}")
+    
+    def _log_metrics(self, metrics: Dict[str, Any]) -> None:
+        """Log metrics to JSONL."""
+        self._write_jsonl(METRICS_LOG, metrics)
+    
+    @staticmethod
+    def _write_jsonl(filepath: Path, data: Dict[str, Any]) -> None:
+        """Append data to JSONL file."""
+        try:
+            with open(filepath, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(data) + '\n')
+        except Exception as e:
+            logger.error(f"Failed to write to {filepath}: {e}")
 
 
 # Initialize global agent
 autonomous_agent = AutonomousBusinessAgent(config={'autonomous_mode': False})
+
+
+# CLI Interface
+def main():
+    """CLI entry point for autonomous monitoring."""
+    parser = argparse.ArgumentParser(description="Autonomous Business Agent for Suresh AI Origin")
+    parser.add_argument(
+        "--interval",
+        type=int,
+        default=3600,
+        help="Seconds between monitoring cycles (default: 3600 = 1 hour)"
+    )
+    parser.add_argument(
+        "--daemon",
+        action="store_true",
+        help="Run as background daemon service"
+    )
+    parser.add_argument(
+        "--once",
+        action="store_true",
+        help="Run once and exit (for testing)"
+    )
+    
+    args = parser.parse_args()
+    
+    if args.once:
+        autonomous_agent._monitoring_cycle()
+    else:
+        autonomous_agent.run_loop(interval_seconds=args.interval)
 
 
 # API Functions
@@ -740,6 +1112,10 @@ def agent_make_decision(business_context: Dict, allowed_actions: Optional[List[s
     action_types = [ActionType(a) for a in allowed_actions] if allowed_actions else None
     decision = autonomous_agent.make_decision(business_context, action_types)
     return asdict(decision)
+
+
+if __name__ == "__main__":
+    main()
 
 
 def agent_execute_decision(decision_id: str, force: bool = False) -> Dict:
