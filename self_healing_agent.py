@@ -1,13 +1,17 @@
 """
-Self-healing agent for Suresh AI Origin.
+Self-healing autonomous agent for SURESH AI ORIGIN platform health.
 
-Periodically probes critical endpoints and records health.
-If failures exceed threshold, performs recovery actions:
-- writes an alert to `data/alerts.jsonl`
-- optional email (stubbed)
+Features:
+  - Probes key endpoints (rare features, webhooks) every N seconds
+  - Logs to `data/health_log.jsonl` with timestamp, endpoint, status, latency
+  - Simple recovery: backoff + retry, alert on repeated failures
+  - CLI: python self_healing_agent.py --base https://sureshaiorigin.com --interval 60
 
-Run:
-    python -m self_healing_agent --base https://sureshaiorigin.com --interval 60
+Run locally:
+    python self_healing_agent.py --base http://localhost:5000 --interval 30
+
+Production (Render):
+    python self_healing_agent.py --base https://sureshaiorigin.com --interval 60
 """
 
 from __future__ import annotations
@@ -17,37 +21,102 @@ import json
 import os
 import time
 import logging
-from typing import List
+import threading
+from typing import Dict, List, Optional
 
-import requests
+try:
+    import requests
+except ImportError:
+    requests = None
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
 logger = logging.getLogger(__name__)
 
+HEALTH_LOG_FILE = os.path.join(os.getcwd(), "data", "health_log.jsonl")
 ALERTS_FILE = os.path.join(os.getcwd(), "data", "alerts.jsonl")
 
 
-def write_alert(kind: str, info: dict) -> None:
-    os.makedirs(os.path.dirname(ALERTS_FILE), exist_ok=True)
-    rec = {"ts": int(time.time() * 1000), "kind": kind, **info}
-    with open(ALERTS_FILE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(rec) + "\n")
 
 
-def probe_endpoints(base_url: str) -> dict:
-    endpoints: List[str] = [
-        f"{base_url}/api/rare/stats",
-        f"{base_url}/api/rare/destiny-blueprint",
-        f"{base_url}/api/rare/consciousness",
-        f"{base_url}/api/rare/perfect-timing",
-        f"{base_url}/api/rare/market-consciousness",
-        f"{base_url}/api/rare/customer-soul",
-    ]
+def write_event(file_path: str, kind: str, info: Dict) -> None:
+    """Write JSON event to file."""
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        event = {
+            "ts": int(time.time() * 1000),
+            "kind": kind,
+            **info,
+        }
+        with open(file_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except Exception as e:
+        logger.warning(f"Failed to write event to {file_path}: {e}")
+
+
+def probe_endpoint(url: str, method: str = "GET", timeout: int = 10) -> Dict:
+    """Probe a single endpoint."""
+    if not requests:
+        logger.error("requests not installed; skipping probe")
+        return {"success": False, "error": "requests not installed"}
+
+    start = time.time()
+    try:
+        if method == "GET":
+            resp = requests.get(url, timeout=timeout)
+        elif method == "POST":
+            resp = requests.post(url, json={"test": True}, timeout=timeout)
+        else:
+            return {"success": False, "error": f"unknown method {method}"}
+
+        latency_ms = int((time.time() - start) * 1000)
+        return {
+            "success": 200 <= resp.status_code < 300,
+            "status_code": resp.status_code,
+            "latency_ms": latency_ms,
+            "error": None,
+        }
+    except Exception as e:
+        latency_ms = int((time.time() - start) * 1000)
+        return {
+            "success": False,
+            "status_code": None,
+            "latency_ms": latency_ms,
+            "error": str(e),
+        }
+
+
+def probe_endpoints(base_url: str) -> Dict[str, Dict]:
+    """Probe all critical rare feature endpoints."""
+    endpoints = {
+        "rare_stats": f"{base_url}/api/rare/stats",
+        "rare_destiny": f"{base_url}/api/rare/destiny-blueprint",
+        "rare_consciousness": f"{base_url}/api/rare/consciousness",
+        "rare_timing": f"{base_url}/api/rare/perfect-timing",
+        "rare_market": f"{base_url}/api/rare/market-consciousness",
+        "rare_soul": f"{base_url}/api/rare/customer-soul",
+        "webhook_make": f"{base_url}/hooks/make",
+        "webhook_zapier": f"{base_url}/hooks/zapier",
+    }
+
     results = {}
-    for url in endpoints:
-        try:
-            # GET for stats, POST with minimal bodies otherwise
-            if url.endswith("/stats"):
+    for name, url in endpoints.items():
+        method = "GET" if "stats" in name else "POST"
+        probe = probe_endpoint(url, method=method)
+        results[name] = probe
+        write_event(
+            HEALTH_LOG_FILE,
+            "probe",
+            {
+                "endpoint": name,
+                "url": url,
+                **probe,
+            },
+        )
+
+    return results
                 r = requests.get(url, timeout=15)
             else:
                 r = requests.post(url, json={"probe": True}, timeout=20)
