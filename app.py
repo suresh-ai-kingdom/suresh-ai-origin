@@ -648,7 +648,10 @@ def checkout_page():
 # RARE 1% FEATURES - GOD'S GIFT TO THE WORLD (ALL FREE)
 # ============================================================================
 
+from observability import track_api_usage
+
 @app.route("/api/rare/destiny-blueprint", methods=["POST"])
+@track_api_usage('rare_destiny')
 def destiny_blueprint():
     """
     Generate EXACT 24-month path to ₹1 crore revenue.
@@ -664,6 +667,7 @@ def destiny_blueprint():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/consciousness", methods=["POST"])
+@track_api_usage('rare_consciousness')
 def universal_consciousness():
     """
     UNIVERSAL BUSINESS CONSCIOUSNESS - Works for ANY business.
@@ -679,6 +683,7 @@ def universal_consciousness():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/perfect-timing", methods=["POST"])
+@track_api_usage('rare_timing')
 def perfect_timing():
     """
     PERFECT TIMING ENGINE - Know exact timing for everything.
@@ -695,6 +700,7 @@ def perfect_timing():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/market-consciousness", methods=["POST"])
+@track_api_usage('rare_market')
 def market_consciousness():
     """
     MARKET CONSCIOUSNESS - See markets 6 months ahead.
@@ -710,6 +716,7 @@ def market_consciousness():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/customer-soul", methods=["POST"])
+@track_api_usage('rare_soul')
 def customer_soul_mapping():
     """
     CUSTOMER SOUL MAPPING - Understand customers at deepest level.
@@ -725,6 +732,7 @@ def customer_soul_mapping():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route("/api/rare/complete-blueprint", methods=["POST"])
+@track_api_usage('rare_complete')
 def complete_rare_blueprint():
     """
     COMPLETE RARE BLUEPRINT - All 5 features combined.
@@ -753,6 +761,14 @@ def rare_features_stats():
     from rare_1_percent_features import get_rare_features_stats
     stats = get_rare_features_stats()
     return jsonify(stats), 200
+
+# Register no-code webhook blueprint
+try:
+    from integrations.no_code_webhooks import bp as webhooks_bp
+    app.register_blueprint(webhooks_bp)
+    logger.info("No-code webhooks blueprint registered")
+except Exception as bp_err:
+    logger.warning("Webhooks blueprint not registered: %s", bp_err)
 
 @app.route("/api/create-order", methods=["POST"])
 @rate_limit_feature('create_order')
