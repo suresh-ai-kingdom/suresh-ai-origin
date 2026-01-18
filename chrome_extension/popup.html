@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suresh AI Origin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 350px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .header h1 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+    
+    .header .tagline {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .content {
+      padding: 20px;
+    }
+    
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 11px;
+      opacity: 0.8;
+    }
+    
+    .toggle-section {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .toggle-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+    
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.3);
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+    
+    .tier-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+    
+    .referral-section {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .referral-code {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 700;
+      margin: 10px 0;
+      user-select: all;
+      cursor: pointer;
+    }
+    
+    .referral-code:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+    }
+    
+    .btn-primary {
+      background: white;
+      color: #667eea;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .footer {
+      padding: 15px;
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.6;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>✨ Suresh AI Origin</h1>
+    <div class="tagline">Top 1% Rare AI Internet</div>
+  </div>
+  
+  <div class="content">
+    <div style="text-align: center;">
+      <span class="tier-badge" id="tierBadge">FREE TIER</span>
+    </div>
+    
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="blockedCount">0</div>
+        <div class="stat-label">Sites Blocked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="aiCount">0</div>
+        <div class="stat-label">AI Alternatives</div>
+      </div>
+    </div>
+    
+    <div class="toggle-section">
+      <div class="toggle-row">
+        <span class="toggle-label">🚫 Rarity Mode</span>
+        <label class="toggle">
+          <input type="checkbox" id="rarityToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <div class="referral-section">
+      <div style="font-size: 12px; margin-bottom: 5px; opacity: 0.8;">Your Referral Code:</div>
+      <div class="referral-code" id="referralCode" title="Click to copy">
+        LOADING...
+      </div>
+      <div style="font-size: 11px; opacity: 0.7; text-align: center;">
+        Share to earn free PRO access!
+      </div>
+    </div>
+    
+    <button class="btn-primary" id="upgradeBtn">
+      ⭐ Upgrade Tier
+    </button>
+    
+    <button class="btn-secondary" id="dashboardBtn">
+      📊 Open Dashboard
+    </button>
+  </div>
+  
+  <div class="footer">
+    Suresh AI Origin v1.0.0
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
