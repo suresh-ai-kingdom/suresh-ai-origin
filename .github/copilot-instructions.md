@@ -4,14 +4,53 @@
 
 ## Architecture at a Glance
 
-**Flask-based AI Business Automation Platform**: 19 feature engines (subscriptions, recommendations, recovery, predictive analytics, etc.)  SQLAlchemy ORM (30+ models)  SQLite (Alembic) on Render.
+**Flask-based AI Business Automation Platform**: 19+ feature engines (subscriptions, recommendations, recovery, predictive analytics, etc.)  SQLAlchemy ORM (30+ models)  SQLite (Alembic) on Render.
 
 **Critical Production Context:**
 -  **LIVE KEYS:** Razorpay keys are LIVE (real $ flowing). Keys rotated 1/13/2026 after GitHub exposure.
-    **REAL AI:** Claude Opus 4.5 (default for all clients, 60 req/min quota, called via 
-eal_ai_service.py.
+-  **REAL AI:** Gemini 2.5 Flash in production (60 req/min quota). Code defaults to Claude Opus 4.5 but production uses Gemini via `real_ai_service.py`.
 -  **SECRETS:** Never commit .env with real keys. Use Render environment only.
 - **Webhook Flow:** Payment  `/webhook` handler  Order marked paid  Email  Download link.
+
+## Project Structure
+
+```
+.
+├── app.py                    # Main Flask app (7,342L): routes, webhooks, admin UI
+├── models.py                 # SQLAlchemy ORM (659L): 30+ models
+├── utils.py                  # Core helpers (197L): DB, email, order management
+├── real_ai_service.py        # Unified AI interface (304L)
+├── entitlements.py           # Feature flags & rate limiting (239L)
+├── executive_dashboard.py    # Metrics aggregation (354L)
+│
+├── Feature Engines (276 Python files total)
+│   ├── subscriptions.py      # Recurring revenue management
+│   ├── recommendations.py    # ML-based suggestions
+│   ├── recovery.py           # Abandoned cart recovery
+│   ├── predictive_analytics.py
+│   ├── ai_generator.py       # AI content generation
+│   ├── analytics.py          # Usage analytics
+│   └── ... (19+ more engines)
+│
+├── scripts/                  # Operational scripts
+│   ├── seed_demo.py          # Database seeding
+│   ├── backup_db.py          # Database backups
+│   └── ...
+│
+├── tests/                    # 415+ tests in 62 files
+│   ├── conftest.py           # Pytest fixtures
+│   └── test_*.py             # Feature-specific tests
+│
+├── templates/                # Jinja2 templates
+│   ├── admin_*.html          # 48+ admin dashboards
+│   └── email_*.html          # Email templates
+│
+├── alembic/                  # Database migrations
+│   └── versions/             # Migration scripts
+│
+└── .github/
+    └── copilot-instructions.md  # This file
+```
 
 ## Developer Workflows
 
@@ -29,7 +68,7 @@ python scripts/backup_db.py create   # Create timestamped backup
 python scripts/backup_db.py restore  # Restore most recent
 
 # Tests
-pytest -q                             # Run all (365+ tests)
+pytest -q                             # Run all (415+ tests across 62 files)
 pytest tests/test_subscriptions.py -v # Single feature
 ```
 
@@ -105,9 +144,9 @@ def test_webhook(client, monkeypatch):
 | System | Integration | File | Example |
 |--------|-----------|------|---------|
 | **Razorpay** | Webhooks on `payment.captured` | `app.py` `/webhook` | Signature verification, order marking |
-| **Gemini AI** | All 19 features call unified interface | `real_ai_service.py` | `ai.generate(prompt)` |
+| **Gemini AI** | All 19+ features call unified interface | `real_ai_service.py` | `ai.generate(prompt)` |
 | **Email** | Order confirmations, recovery reminders, admin alerts | `utils.py` `send_email()` | SMTP to Outlook |
-| **Admin UI** | 16 dashboards + session auth | `app.py` `/admin/*` | Redirect to `/admin/login` if not authenticated |
+| **Admin UI** | 48+ dashboards + session auth | `app.py` `/admin/*` | Redirect to `/admin/login` if not authenticated |
 | **Stripe** (optional) | Alternative payment provider | `stripe_integration.py` | Independent webhook handler |
 
 ## Code Conventions
@@ -150,6 +189,77 @@ def test_webhook(client, monkeypatch):
 4. Add `tests/test_<feature_name>.py` with 15-25 tests
 5. Update `executive_dashboard.py` with `aggregate_<feature>_metrics()` function
 6. Document API endpoints in docstrings (auto-populates OpenAPI via `api_documentation.py`)
+
+## Common Debugging Scenarios
+
+### Database Issues
+```bash
+# Check database location
+echo $DATA_DB  # Should be set, defaults to data.db
+
+# Reset database (destructive!)
+rm data.db && PYTHONPATH=. alembic upgrade head && python scripts/seed_demo.py seed
+
+# View database schema
+sqlite3 data.db ".schema orders"
+
+# Check for locked database
+lsof data.db  # See which process is locking it
+```
+
+### Payment Webhook Debugging
+```python
+# Check webhook signature in logs
+# Look for "X-Razorpay-Signature" header verification
+
+# Manually trigger webhook test (for dev)
+curl -X POST http://localhost:5000/webhook \
+  -H "Content-Type: application/json" \
+  -H "X-Razorpay-Signature: test_signature" \
+  -d '{"event": "payment.captured", "payload": {...}}'
+
+# View recent webhooks
+sqlite3 data.db "SELECT id, event, received_at FROM webhooks ORDER BY received_at DESC LIMIT 10"
+```
+
+### AI Service Debugging
+```python
+# Test AI service directly
+from real_ai_service import RealAI
+ai = RealAI()
+result = ai.generate("Test prompt")
+print(result)
+
+# Check which provider is active
+import os
+print(f"Provider: {os.getenv('AI_PROVIDER', 'claude')}")
+print(f"Model: {os.getenv('AI_MODEL', 'claude-opus-4.5')}")
+```
+
+## Testing Patterns
+
+### Fixture Usage
+```python
+# cleanup_db fixture auto-removes TEST_* records
+def test_feature(cleanup_db):
+    result = create_test_order('TEST_ORDER_123')
+    assert result['id'] == 'TEST_ORDER_123'
+    # Cleanup happens automatically after test
+```
+
+### Mocking External Services
+```python
+def test_payment_webhook(client, monkeypatch):
+    # Mock Razorpay signature verification
+    monkeypatch.setattr(razorpay.WebhookSignature, 'verify', lambda *a, **k: True)
+    
+    # Mock email sending
+    monkeypatch.setattr('utils.send_email', lambda *a, **k: True)
+    
+    # Test webhook
+    rv = client.post('/webhook', json=payload, headers={'X-Razorpay-Signature': 'test'})
+    assert rv.status_code == 200
+```
 
 ## Security Reminders
 
