@@ -17,4 +17,6 @@ openai
 anthropic
 groq
 sentry-sdk
+matplotlib
+schedule
 

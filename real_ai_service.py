@@ -13,8 +13,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Provider detection
-AI_PROVIDER = os.getenv('AI_PROVIDER', 'demo')  # openai, claude, gemini, groq, demo
-AI_MODEL = os.getenv('AI_MODEL', 'gpt-4o-mini')
+AI_PROVIDER = os.getenv('AI_PROVIDER', 'claude')  # openai, claude, gemini, groq, demo
+AI_MODEL = os.getenv('AI_MODEL', 'claude-opus-4.5')
 
 # API Keys
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')

@@ -1,6 +1,6 @@
 # Copilot Instructions — SURESH AI ORIGIN
 
-**STATUS:**  LIVE (Jan 13, 2026) |  RAZORPAY LIVE |  GEMINI 2.5 FLASH (REAL) |  86% HEALTH
+**STATUS:**  LIVE (Jan 19, 2026) |  RAZORPAY LIVE |  GEMINI 2.5 FLASH (REAL) |  86% HEALTH
 
 ## Architecture at a Glance
 
@@ -8,7 +8,7 @@
 
 **Critical Production Context:**
 -  **LIVE KEYS:** Razorpay keys are LIVE (real $ flowing). Keys rotated 1/13/2026 after GitHub exposure.
--  **REAL AI:** Gemini 2.5 Flash (not demo). 60 req/min quota, called via 
+    **REAL AI:** Claude Opus 4.5 (default for all clients, 60 req/min quota, called via 
 eal_ai_service.py.
 -  **SECRETS:** Never commit .env with real keys. Use Render environment only.
 - **Webhook Flow:** Payment  `/webhook` handler  Order marked paid  Email  Download link.
@@ -54,9 +54,9 @@ Every feature module (`ai_generator.py`, `subscriptions.py`, etc.) follows:
 ### Key Files
 | File | Purpose |
 |------|---------|
-| `app.py` (2,500L) | Flask routes, webhooks, admin UI, session auth |
-| `models.py` (500L) | SQLAlchemy ORM (Order, Payment, Subscription, Customer, etc.) |
-| `utils.py` (300L) | `init_db()`, `save_order()`, `mark_order_paid()`, `send_email()`, `get_engine()` |
+| `app.py` (7,343L) | Flask routes, webhooks, admin UI, session auth |
+| `models.py` (660L) | SQLAlchemy ORM (Order, Payment, Subscription, Customer, etc.) |
+| `utils.py` (198L) | `init_db()`, `save_order()`, `mark_order_paid()`, `send_email()`, `get_engine()` |
 | `entitlements.py` | Feature flags, rate limiting, download tokens |
 | `real_ai_service.py` | Unified AI interface (supports Gemini/OpenAI/Claude/Groq) |
 | `executive_dashboard.py` | Aggregates metrics from all 19 features |

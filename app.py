@@ -770,6 +770,14 @@ try:
 except Exception as bp_err:
     logger.warning("Webhooks blueprint not registered: %s", bp_err)
 
+# Moon Income Engine API integration
+try:
+    from moon_income_api import moon_income_bp
+    app.register_blueprint(moon_income_bp)
+    logger.info("Moon Income blueprint registered")
+except Exception as bp_err:
+    logger.warning("Moon Income blueprint not registered: %s", bp_err)
+
 @app.route("/api/create-order", methods=["POST"])
 @rate_limit_feature('create_order')
 def create_order_endpoint():
