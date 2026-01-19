@@ -16,6 +16,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 
+from cryptography.fernet import Fernet, InvalidToken
+
 from flask import Flask, request, jsonify, session, render_template_string
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -29,6 +31,20 @@ try:
 except ImportError as e:
     logging.warning(f"Some imports unavailable: {e}. Running in demo mode.")
     IMPORTS_AVAILABLE = False
+
+try:
+    from enterprise_layer import EnterpriseLayer
+except ImportError:
+    EnterpriseLayer = None  # type: ignore
+
+try:
+    from analytics_deep_insights import AnalyticsDeepInsights
+except ImportError:
+    class AnalyticsDeepInsights:  # type: ignore
+        def track_usage(self, event: str, data: Dict[str, Any]):
+            return True
+        def log_event(self, event: str, data: Dict[str, Any]):
+            return True
 
 
 # Configure logging
@@ -69,6 +85,57 @@ class Config:
     MAX_CONCURRENT_REQUESTS = 100
     REQUEST_TIMEOUT = 300
     CACHE_TTL = 3600
+
+
+enterprise_key_env = os.getenv('ENTERPRISE_FERNET_KEY')
+_enterprise_key = enterprise_key_env.encode() if enterprise_key_env else None
+enterprise_layer = EnterpriseLayer(_enterprise_key) if EnterpriseLayer else None
+analytics_client = AnalyticsDeepInsights()
+
+
+class EnterpriseGatewayLayer:
+    def __init__(self, layer: Optional[EnterpriseLayer], analytics: Optional[AnalyticsDeepInsights]):
+        self.layer = layer
+        self.analytics = analytics
+        self.top_user_projection = 600_000_000
+
+    def auth_enterprise(self, user: Dict[str, Any], cui_payload: Dict[str, Any]) -> Dict[str, Any]:
+        vip = user.get('vip_tier')
+        allowed = vip in ['elite', 'enterprise', 'one_percent']
+        encrypted = None
+        if allowed and self.layer:
+            encrypted = self.layer.encrypt_payload({'cui': cui_payload, 'ts': time.time()})
+        return {
+            'allowed': allowed,
+            'encrypted_cui': encrypted,
+            'vip_tier': vip,
+            'projection_users': self.top_user_projection,
+        }
+
+    def layer_insights(self, query: str, signals: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if not self.layer:
+            return {'query': query, 'insights': [], 'timestamp': time.time()}
+        insights = self.layer.semantic_insights(query, signals)
+        if self.analytics:
+            self.analytics.track_usage('enterprise_layer_insights', {'query': query, 'score': insights['insights'][0]['score'] if insights.get('insights') else 0})
+        return insights
+
+    def enforce_rarity(self, vip_tier: str, rarity_score: float) -> bool:
+        if rarity_score >= 95:
+            return vip_tier in ['elite', 'enterprise', 'one_percent']
+        tier_cfg = Config.VIP_TIERS.get(vip_tier, Config.VIP_TIERS['free'])
+        threshold = tier_cfg['rarity_threshold']
+        return rarity_score >= threshold or threshold >= 85
+
+    def worldwide_deploy(self, payload: Dict[str, Any], regions: List[str]) -> Dict[str, Any]:
+        if not self.layer:
+            return {'partners': [], 'calls': []}
+        partners = self.layer.worldwide_partners(regions)
+        calls = [self.layer.partner_call(p['partner'], payload) for p in partners]
+        return {'partners': partners, 'calls': calls}
+
+
+enterprise_gateway_layer = EnterpriseGatewayLayer(enterprise_layer, analytics_client)
 
 
 # Data Models
@@ -273,10 +340,10 @@ def enforce_rate_limit(user_id: str, vip_tier: str) -> bool:
 
 def check_rarity_access(vip_tier: str, rarity_score: float) -> bool:
     """Check if user's VIP tier can access content with given rarity score."""
+    if enterprise_gateway_layer:
+        return enterprise_gateway_layer.enforce_rarity(vip_tier, rarity_score)
     tier_config = Config.VIP_TIERS.get(vip_tier, Config.VIP_TIERS['free'])
     threshold = tier_config['rarity_threshold']
-    # User can access if rarity meets or exceeds their tier threshold
-    # OR if their tier threshold is high enough (elite = 90, can access 80+)
     return threshold >= 85 or rarity_score >= threshold
 
 
@@ -683,15 +750,38 @@ def process_query():
     # Track active request
     active_requests[request_id] = ai_request
     
-    # Route request
     response = RequestRouter.route_request(ai_request)
+
+    enterprise_meta = None
+    if response.rarity_score >= 90 and enterprise_gateway_layer:
+        enterprise_meta = {
+            'auth': enterprise_gateway_layer.auth_enterprise(user_info, {'request_id': request_id, 'cui': True}),
+            'insights': enterprise_gateway_layer.layer_insights(query, data.get('signals')),
+            'deploy': enterprise_gateway_layer.worldwide_deploy(
+                {'rarity_score': response.rarity_score, 'gpus': data.get('gpus', 512)},
+                regions=data.get('regions', ['us', 'eu', 'in'])
+            ),
+        }
     
     # Save to history
     request_history.append({
         'request': asdict(ai_request),
         'response': asdict(response),
+        'enterprise': enterprise_meta,
         'timestamp': time.time()
     })
+
+    if analytics_client:
+        try:
+            analytics_client.track_usage('ai_gateway_request', {
+                'user_id': user_id,
+                'vip_tier': vip_tier,
+                'rarity_score': response.rarity_score,
+                'source': response.source,
+                'enterprise': bool(enterprise_meta),
+            })
+        except Exception as exc:
+            logger.warning(f"Analytics tracking failed: {exc}")
     
     # Remove from active
     active_requests.pop(request_id, None)
@@ -708,7 +798,8 @@ def process_query():
             'rarity_score': response.rarity_score,
             'revenue_impact': response.revenue_impact,
             'query_type': query_type,
-            'vip_tier': vip_tier
+            'vip_tier': vip_tier,
+            'enterprise': enterprise_meta
         }
     })
 
