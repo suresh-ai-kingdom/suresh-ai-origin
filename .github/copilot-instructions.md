@@ -2,6 +2,18 @@
 
 **STATUS:**  LIVE (Jan 19, 2026) |  RAZORPAY LIVE |  GEMINI 2.5 FLASH (REAL) |  86% HEALTH
 
+## Quick Reference
+
+**🚀 Start Local Dev:** `FLASK_DEBUG=1 python app.py` → http://localhost:5000  
+**🧪 Run Tests:** `pytest -q` (415+ tests) | `pytest tests/test_<feature>.py -v` (single feature)  
+**💾 Database:** `PYTHONPATH=. alembic upgrade head` → `python scripts/seed_demo.py seed`  
+**📊 Admin Panel:** http://localhost:5000/admin (login: admin/[from env])  
+**🔍 Debug Payments:** Check `/admin/webhooks` for webhook events  
+**🤖 AI Provider:** Gemini 2.5 Flash in production (set `AI_PROVIDER=gemini`)  
+
+**Key Files:** `app.py` (7,342L) • `models.py` (659L) • `utils.py` (197L) • `real_ai_service.py` (304L)  
+**Feature Pattern:** `<feature>.py` → `/api/<feature>/<action>` → `admin_<feature>.html` → `test_<feature>.py`
+
 ## Architecture at a Glance
 
 **Flask-based AI Business Automation Platform**: 19+ feature engines (subscriptions, recommendations, recovery, predictive analytics, etc.)  SQLAlchemy ORM (30+ models)  SQLite (Alembic) on Render.
@@ -168,7 +180,8 @@ def test_webhook(client, monkeypatch):
 
 **AI (Real):**
 - `GOOGLE_API_KEY` — Gemini 2.5 Flash (free, 60 req/min)
-- `AI_PROVIDER=gemini` — Gemini (not demo mode)
+- `AI_PROVIDER=gemini` — Use Gemini in production (default: claude)
+- `AI_MODEL` — Optional model override (default: claude-opus-4.5 or gemini-2.5-flash)
 
 **Email:**
 - `EMAIL_USER` — Outlook address
